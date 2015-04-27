@@ -9,8 +9,8 @@ For more information, please see Ryu et al. (2015), who describe the methods and
 
 The program allows estimating survival rates; fecundities; density dependence in survival rate; density dependence in fecundity; temporal variability in survival rate; temporal variability in fecundity.
 
-
-`MAPS-to-Models` The program creates the following
+# Program output
+`MAPS-to-Models` creates the following files:
 
 sensitivity analysis (GSA) of demographic models created via the 
 [RAMAS GIS](http://ramas.com/software.htm) Software. `demgsa` includes 
