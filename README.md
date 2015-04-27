@@ -12,6 +12,10 @@ The program allows estimating survival rates; fecundities; density dependence in
 ## Program output
 `MAPS-to-Models` creates the following files:
 
-sensitivity analysis (GSA) of demographic models created via the 
-[RAMAS GIS](http://ramas.com/software.htm) Software. `demgsa` includes 
-functions to make easier each major step of a GSA:
+(1) Population model summary: a text file that includes all the components of the population model.
+
+(2) Debug file: a text file  with error and warning messages created during the analysis.
+
+(3) Intermediate results file: a text file that contains all output and intermediate results created during the analysis.
+
+(4) MP files: input files for RAMAS Metapop and [RAMAS GIS](http://ramas.com/software.htm) Software.  Three input files are created.  One includes the best estimates of all parameters of the population model.  Two other files include the lower and upper bounds of the parameters.  These can be used with the R package `demgsa` to perform a global sensitivity analysis.
