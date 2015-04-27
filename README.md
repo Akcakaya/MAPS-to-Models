@@ -18,4 +18,4 @@ The program allows estimating survival rates; fecundities; density dependence in
 
 (3) Intermediate results file: a text file that contains all output and intermediate results created during the analysis.
 
-(4) MP files: input files for RAMAS Metapop and [RAMAS GIS](http://ramas.com/software.htm) Software.  Three input files are created.  One includes the best estimates of all parameters of the population model.  Two other files include the lower and upper bounds of the parameters.  These can be used with the R package `demgsa` [https://github.com/mlammens/demgsa](https://github.com/mlammens/demgsa) to perform a global sensitivity analysis.
+(4) MP files: input files for RAMAS Metapop and [RAMAS GIS](http://ramas.com/software.htm) Software.  Three input files are created.  One includes the best estimates of all parameters of the population model.  Two other files include the lower and upper bounds of the parameters.  These can be used with the R package `demgsa` [(see github.com/mlammens/demgsa)](https://github.com/mlammens/demgsa) to perform a global sensitivity analysis.
