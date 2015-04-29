@@ -3,7 +3,7 @@ Methods for Developing Population Models with Mark-Recapture Data from the MAPS 
 
 `MAPS-to-Models` is an R script that provides functions to analyze data from marked individuals (mark-recapture data) to develop a stage-structured, stochastic, density dependent population model.
 
-For more information, please see Ryu et al. (2015), who describe the methods and demonstrate their use with data from the MAPS (Monitoring Avian Productivity and Survivarship) program (hence "MAPS" in `MAPS-to-Models`).
+For more information, please see Ryu et al. (2015), who describe the methods and demonstrate their use with data from the MAPS (Monitoring Avian Productivity and Survivarship) program (hence the "MAPS" in `MAPS-to-Models`).
 
 The program allows estimating survival rates; fecundities; density dependence in survival rate; density dependence in fecundity; temporal variability in survival rate; temporal variability in fecundity.  Main features include (1) estimating true survival based on apparent survival estimates and population trend estimates (e.g., from Breeding Bird Survey); (2) fecundity as an unbiased estimate of juvenile:adult ratio by using the relative capture probabilities of juveniles and adults; (3) estimating density dependence in survival and fecundity; (4) estimating natural temporal variability in survival and fecundity (excluding sampling variability); (5) creating ready-to-run demographic model files; (6) incorporating uncertainties and preparing the files necessary for a global sensitivity analysis.
 
