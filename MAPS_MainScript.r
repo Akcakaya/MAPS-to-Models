@@ -16,18 +16,19 @@ rm(list=ls())    # clear the workspace
 #########################
 ### Choose user (for managing files/directories)
 
-CHLOE = T
+CHLOE = F
 CHLOE_LAPTOP = F
-KEVIN = F
+LAB_COMPUTER = F
+KEVIN = T
 EVA = F
 RESIT = F
 
 #########################
 ####  Define the scope of the analysis
 
-SPECIES_CODE <- "CACH"           # Focal Species
+SPECIES_CODE <- "NOCA"           # Focal Species
 BEGINYEAR    <- 1994             # First year of study period
-ENDYEAR      <- 2012             # Final year of study period
+ENDYEAR      <- 2012            # Final year of study period
 MAPSyears=c(BEGINYEAR:ENDYEAR)   # MAPSyears: vector of all years of interest
 
 #########################
@@ -43,32 +44,47 @@ CORRELATION <- 1.0     					 # Set correlation between S and F  (in this study, 
 
 #########################
 ###   Set MCMC parameters (for estimating fecundity)
-ni <- 5000        # Number of MCMC iterations per chain
-nc <- 2           # Number of chains
-nb <- 1000        # Burn-in length
-nt <- 10          # Thinning rate
+ni <- 1000      # Number of MCMC iterations per chain
+nc <- 1           # Number of chains
+nb <- 500       # Burn-in length
+nt <- 1          # Thinning rate
 
 if(KEVIN) BUGSdir <- 'C:\\Users\\Kevin\\Documents\\Employment\\ESF\\Bog Turtle\\DATA\\software\\BUGS\\WinBUGS14'    # Local WinBUGS directory 
 if(CHLOE) BUGSdir <- "C:/Users/Chloe/Downloads/winbugs14/WinBUGS14"
-
+if(LAB_COMPUTER) BUGSdir <- "C:/Users/Chloe/Downloads/winbugs14/WinBUGS14"
 
 #################################################################################################################
-# SET DIRECTORY AND LOAD PACKAGES
+# SET DIRECTORIES AND LOAD PACKAGES
 #################################################################################################################
 
 #########################
-### Set main directory variables
+### Set directory variables (and make the directory if it doesn't exist)
 
 if(KEVIN) BASE_DIRECTORY <- "C:\\Users\\Kevin\\Dropbox\\MAPS Project\\"
 if(CHLOE) BASE_DIRECTORY <- "C:\\Users\\Chloe\\Dropbox\\MAPS Project\\"
+if(LAB_COMPUTER) BASE_DIRECTORY <- "C:\\Users\\Chloe\\Dropbox\\MAPS Project\\"
 if(RESIT) BASE_DIRECTORY <- "C:\\Users\\Resit\\Dropbox\\MAPS Project\\"
 
 POPMODELS_DIRECTORY <- paste(BASE_DIRECTORY,"Pop models",sep="")
-RESULTS_DIRECTORY <- paste(BASE_DIRECTORY,"Results",sep="")
-DATA_DIRECTORY <- paste(BASE_DIRECTORY,"Data",sep="")
+if(is.na(file.info(POPMODELS_DIRECTORY)[1,"isdir"])) dir.create(POPMODELS_DIRECTORY)                      # create new directory if it doesn't exist already
+RESULTS_DIRECTORY <- paste(BASE_DIRECTORY,"Results\\final",sep="")  # for now, put the results in a separate folder
+if(is.na(file.info(RESULTS_DIRECTORY)[1,"isdir"])) dir.create(RESULTS_DIRECTORY)
+DATA_DIRECTORY <- paste(BASE_DIRECTORY,"Data\\final",sep="")  # for now, put the results in a separate folder
+if(is.na(file.info(DATA_DIRECTORY)[1,"isdir"])) dir.create(DATA_DIRECTORY)
 CODE_DIRECTORY <- paste(BASE_DIRECTORY,"code",sep="")
+if(is.na(file.info(CODE_DIRECTORY)[1,"isdir"])) dir.create(CODE_DIRECTORY)
+
 
 setwd(DATA_DIRECTORY)
+
+### If running for the first time, install required packages in R
+#install.packages("RMark")
+#install.packages("R2WinBUGS")
+#install.packages("MASS")
+#install.packages("gtools")
+#install.packages("foreign")
+#install.packages("RODBC")
+#install.packages("doBy")
 
 ### Load required packages in R
 suppressMessages(suppressWarnings(require(RMark)))
@@ -89,13 +105,46 @@ setwd(DATA_DIRECTORY)
 population_map = read.csv("loc_pop.csv",header=T)      # NOTE: we chose to treat each location as its own biological population
 
 
-###############################################################################################################
-# LOAD FUNCTIONS
-###############################################################################################################
+#################################################################################################################
+# LOAD REGIONAL TREND DATA  (we used estimates derived from BBS data- see XXXXXX  [website])
+#################################################################################################################
 
+############
+###  REGIONAL TREND
+###      - TODO: see if this can be automated. Doesn't seem to be a web service associated with BBS
+###      -   if not, maybe embed a "dictionary" with the focal species trends within the R code?
+
+## From BBS web site, get percent change per year, assign it to BBS.trend (usually a number between -5 and +5)
+## Here are the trends used in this study:
+  
+setwd(BASE_DIRECTORY)
+BBS_TrendFile <- "BBS_Trends.csv"            ### TODO: Get the real numbers 
+sink(BBS_TrendFile)
+cat("SPECIES,  TREND,  LCL, UCL
+NOCA,   0.30,   0.20,   0.40
+WEVI,   0.51,  0.41,   0.61
+GRCA,   0.46,   0.36,   0.56
+COYE,   -0.85,   -0.95,   -0.75
+WOTH,   -2.16,   -2.26,  -2.06
+HOWA,   1.85,   1.75,  1.95
+YBCH,   -0.27,   -0.37, -0.17
+CACH,   -0.37,   -0.47,  -0.27
+BCCH,   0.29,    0.19,   0.39")
+sink()
+  
+BBSTrend_DF <- read.csv(BBS_TrendFile,header=T)
+BBSTrend_DF$SPECIES = as.character(BBSTrend_DF$SPECIES)
+BBS.trend <- list()
+BBS.trend$estimate <- subset(BBSTrend_DF,SPECIES==SPECIES_CODE)$TREND[1]      # central point estimate
+BBS.trend$lcl <- subset(BBSTrend_DF,SPECIES==SPECIES_CODE)$LCL[1]      # lower confidence limit
+BBS.trend$ucl <- subset(BBSTrend_DF,SPECIES==SPECIES_CODE)$UCL[1]      # upper confidence limit
+
+
+#################################################################################################################
+# LOAD FUNCTIONS
+#################################################################################################################
 setwd(CODE_DIRECTORY)
 source("MAPS_AllFunctions.r")
-
 
 #################################################################################################################
 # SET UP INFORMATIVE 'DEBUG' FILE
@@ -104,21 +153,20 @@ source("MAPS_AllFunctions.r")
 DEBUG_FILENAME <- paste(SPECIES_CODE,"_debug.txt",sep="")
 InitializeDebugFile(dir=DATA_DIRECTORY,filename=DEBUG_FILENAME)
 
-
 ##################################################
-# SET UP INFORMATIVE 'RESULTS' FILE
+# SET UP INFORMATIVE 'INTERMEDIATE RESULTS' FILE
 ##################################################
 
-RESULTS_FILENAME <- paste(SPECIES_CODE,"_results.txt",sep="")
+RESULTS_FILENAME <- paste(SPECIES_CODE,"_intermediateResults.txt",sep="")
 InitializeResultsFile(dir=RESULTS_DIRECTORY,filename=RESULTS_FILENAME)
 
 ##################################################
 # SET UP 'POPULATION MODEL SUMMARY' FILE
 ##################################################
+METATPOP_FILENAME <- paste(SPECIES_CODE, ".mp", sep="")
 
 POPMODELSUMMARY_FILENAME <- paste(SPECIES_CODE,"_popmodelsummary.txt",sep="")
 InitializePopModelFile(dir=RESULTS_DIRECTORY,filename=POPMODELSUMMARY_FILENAME)
-
 
 #################################################################################################################
 # PROCESS MAPS DATA FROM ACCESS DATABASE VIA ODBC
@@ -162,7 +210,7 @@ save(RMarkData, file=filename)
 setwd(RESULTS_DIRECTORY) # save all MARK output files (.inp, .out, .res) in RESULTS_DIRECTORY
 
 # Here, only run the initial MARK models. No density, just time-dependent models.
-MarkResults_Time <- Run.Models(RMarkData, initial=0, DensityModel = FALSE) # NOTE: may take 10-20 minutes to run    
+MarkResults_Time <- Run.Models(RMarkData=RMarkData, initial=0, DensityModel = FALSE) # NOTE: may take 10-20 minutes to run    
 
 # save output in RESULTS_DIRECTORY
 setwd(RESULTS_DIRECTORY)
@@ -242,7 +290,8 @@ save(SurvivalTempVarResults, file=filename)
 # RUN WINBUGS MODELS TO COMPUTE FECUNDITY
 ######################################################################################################
 
-FecundityResults <- EstimateFecundity(p.table=p.table, MinAdults=4) # set number of captured adults under which 
+FecundityResults <- EstimateFecundity(p.table=p.table, MinAdults=4) # set number of captured adults under which the data will be discarded
+                                                                    # if model does not run, try different priors and initial values
 
 # save output in RESULTS_DIRECTORY
 setwd(RESULTS_DIRECTORY)
@@ -253,9 +302,11 @@ save(FecundityResults, file=filename)
 ######################################################################################################
 # PRINT OUT KEY RESULTS FOR POPULATION MODELING (stage matrix, temporal variability, density dependence)
 ######################################################################################################
+# Calculate density function for S from model S(~st + maps_density + first_cap_bin:trans)p(~st + effort)
+MarkResults_Density # model 2 in Density Mark Model
 
 PopModelData <- SummarizeForPopModel(RMarkData=finalRMarkData, AppS=SurvivalResults, STempVar=SurvivalTempVarResults, 
-                                     MarkResults=MarkResults_Density, Fec=FecundityResults)       
+                                     MarkResults=MarkResults_Density, Fec=FecundityResults, model.no=2)       
 
 # save output in RESULTS_DIRECTORY
 setwd(RESULTS_DIRECTORY)
@@ -267,7 +318,7 @@ save(PopModelData, file=filename)
 # BUILD RAMAS ".MP" FILE WITH PARAMETERS FROM THE ABOVE ANALYSES 
 ######################################################################################################
 
-WriteMasterMPFile(Data=PopModelData)   
+WriteMasterMPFile(Data=PopModelData, TrendData=BBS.trend)   
 
 
 ################################### END OF CODE ################################################
