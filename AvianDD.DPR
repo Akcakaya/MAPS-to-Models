@@ -1,4 +1,4 @@
-(***************************** MAPS.dpr ***********************************)
+(*******************  Avian Density Dependence (AvianDD) *************************)
 // Density dependence for 2-stage bird models, based on MAPS analysis.
 //
 // This is the source code for the Delphi programming environment of 
@@ -31,6 +31,11 @@
 //     Sad  = exp(S_intcpt        + S_dens*PopDens)/(1 + exp(S_intcpt        + S_dens*PopDens)) 
 //     Fecundity function is used only if F_beta_rD < 0.  
 //     Survival functions are used only if S_dens < 0. 
+//     The above functions for survival rates are assumed to give apparent survival rates.
+//        Thus, survival rates are corrected to account for the difference between apparent
+//        and true survival, by multiplying the result of the above functions with a 
+//        user-defined parameter (TrueScorr).
+//
 //
 //     Below are the parameter values estimated in this study:
 // Species S_intcpt S_st	S_dens	F_mean F_beta_rD MeanDens SD_Dens MaxPopDens
@@ -46,12 +51,12 @@
 
 
 
-library MAPS;
+library AvianDD;
 {$R+,I+,Q+}
 uses
   sysutils,DLL_Intf;
 const
-  UserParameterCount = 8;
+  UserParameterCount = 9;
   filename = 'C:\Resit\Current\Bird refugia\MAPS analysis\test-maps.txt' ; // output file for debugging
   debugging = FALSE;
 var
@@ -72,6 +77,8 @@ var
 // SD_Dens   : standard deviation of density (relative population size)
 // MaxPopDens: maximum value of density (relative population size), above which
 //             a ceiling-type density dependence model is used
+// TrueScorr : True Survival Correction: multiplier for calculating true survival
+//             rate from appearant survival rate: TrueSurv = TrueScorr * AppSurv
 
 // Information about the user parameters entered below include.
 //   UserParameterNames (descriptive names with up to 10 characters)
@@ -82,15 +89,15 @@ var
 
 const
   UserParameterNames: array[1..UserParameterCount] of PAnsiChar = (
-    'S-intcpt', 'Sst', 'S-dens', 'F-mean', 'F-beta_rD', 'MeanDens', 'SDDens', 'max(N/K)');
+    'S-intcpt', 'Sst', 'S-dens', 'F-mean', 'F-beta_rD', 'MeanDens', 'SDDens', 'max(N/K)', 'TrueScorr');
   UserParameterMinimums: array[1..UserParameterCount] of Double = (
-    -10 ,         -10,     -10,     0,      -10,          0,       0.0001,     0);
+    -10 ,         -10,     -10,     0,      -10,          0,       0.0001,     0, 0);
   UserParameterMaximums: array[1..UserParameterCount] of Double = (
-     10 ,          1,       1,      1000,    1,            1000,     1000,    9999);
+     10 ,          1,       1,      1000,    1,            1000,     1000,    9999, 10);
   UserParameterDefaults: array[1..UserParameterCount] of Double = (
-    -0.2 ,         1,      1,      2.0,       1,         1.0 ,    1.0,         1.0 );
+    -0.2 ,         1,      1,      2.0,       1,         1.0 ,    1.0,         1.0, 1.0 );
   UserParameterDecimals: array[1..UserParameterCount] of Cardinal = (
-       4,          4,      4,         4,       4,          4,       4,        2);
+       4,          4,      4,         4,       4,          4,       4,        2, 4);
 
 //---------------------------------------------------------------------------
 procedure GetUserParametersInfo(
@@ -224,7 +231,8 @@ begin
 (************************** VARIABLES ********************************)
 var
   i, j, newN : Integer;
-  S_intcpt, S_st, S_dens, F_mean, F_beta_rD, MeanDens, SD_Dens, MaxPopDens : real;
+  S_intcpt, S_st, S_dens, F_mean, F_beta_rD, MeanDens,
+  SD_Dens, MaxPopDens, TrueScorr : real;
   PopSize, PopSize2, PopDens, PopDens2, reduce, reduce2 : real;
   Fec, S_ad, S_juv, lambda : real;
 
@@ -263,6 +271,7 @@ F_beta_rD := userParams[5];
 MeanDens  := userParams[6];
 SD_Dens   := userParams[7];
 MaxPopDens:= userParams[8];
+TrueScorr := userParams[9];
 
 // Check consistency of input
 if (thisreplication<=1) and (timestep=1) then
@@ -369,6 +378,8 @@ else
                  (1 + exp(S_intcpt + S_st + S_dens*PopDens)) ;
         S_ad  := exp(S_intcpt             + S_dens*PopDens)/
                  (1 + exp(S_intcpt        + S_dens*PopDens)) ;
+        S_juv := S_juv * TrueScorr;
+        S_ad := S_ad * TrueScorr;
         end; // surv DD function
 
     Tmatrix^[1]^[1] := Fec * S_juv;
