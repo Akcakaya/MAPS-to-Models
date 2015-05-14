@@ -32,5 +32,5 @@ For examples of these datasets, see the [Datasets folder] (https://github.com/Ak
 ## References
 Aiello-Lammens, M.A. and H.R. Akçakaya. 2015. New approaches to global sensitivity analysis of demographic models with applications to impact assessment (in review).
 
-Ryu, H.Y., K.T. Shoemaker, É. Kneip, A. Pidgeon, P. Heglund, B. Bateman, W. Thogmartin, H.R. Akçakaya. 2015.  Developing Population Models with Data from Marked Individuals (in preparation).
+Ryu, H.Y., K.T. Shoemaker, É. Kneip, A. Pidgeon, P. Heglund, B. Bateman, W. Thogmartin, H.R. Akçakaya. 2015.  Developing population models with data from marked individuals (in preparation).
 
