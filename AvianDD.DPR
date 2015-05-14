@@ -1,5 +1,6 @@
 (*******************  Avian Density Dependence (AvianDD) *************************)
-// Density dependence for 2-stage bird models, based on MAPS analysis.
+// Density dependence for 2-stage bird models, based on mark-recapture analysis
+// using MAPS-to-Models.
 //
 // This is the source code for the Delphi programming environment of 
 // the density dependence function to be used in a population projection 
@@ -13,6 +14,9 @@
 //
 // For details and for information on the current status of the manuscript, 
 // please contact Resit.Akcakaya@stonybrook.edu
+//
+// For the R script MAPS-to-Models that is used to estimate the parameters for
+// this function, see https://github.com/Akcakaya/MAPS-to-Models
 //
 // The function is based on population density (calculated in this program as 
 // the variable PopDens), which is equal to population size at a given time 
