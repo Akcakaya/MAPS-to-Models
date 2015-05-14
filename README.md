@@ -14,7 +14,7 @@ The program allows estimating survival rates; fecundities; density dependence in
 
 (2) A file with effort data, quantifying the level of effort at each station and each year.
 
-(3) A file that shows the correspondance between stations and populations. Often, ther would be multiple banding stations within each biological population (or subpopulation) of the species.  This files allows the user to group stations into populations.
+(3) A file that shows the correspondance between stations and populations. Often, there would be multiple banding stations within each biological population (or subpopulation) of the species.  This file allows the user to group stations into populations.
 
 For examples of these datasets, see the [Datasets folder] (https://github.com/Akcakaya/MAPS-to-Models/tree/master/Datasets).
 
