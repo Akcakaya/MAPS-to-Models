@@ -7,6 +7,17 @@ For more information, please see Ryu et al. (2015), who describe the methods and
 
 The program allows estimating survival rates; fecundities; density dependence in survival rate; density dependence in fecundity; temporal variability in survival rate; temporal variability in fecundity.  Main features include (1) estimating true survival based on apparent survival estimates and population trend estimates (e.g., from Breeding Bird Survey); (2) fecundity as an unbiased estimate of juvenile:adult ratio by using the relative capture probabilities of juveniles and adults; (3) estimating density dependence in survival and fecundity; (4) estimating natural temporal variability in survival and fecundity (excluding sampling variability); (5) creating ready-to-run demographic model files; (6) incorporating uncertainties and preparing the files necessary for a global sensitivity analysis.
 
+## Program input
+`MAPS-to-Models` inputs data from 3 data files, all in CSV (comma separated values) format:
+
+(1) A file with all the banding and recapture data.
+
+(2) A file with effort data, quantifying the level of effort at each station and each year.
+
+(3) A file that shows the correspondance between stations and populations. Often, ther would be multiple banding stations within each biological population (or subpopulation) of the species.  This files allows the user to group stations into populations.
+
+For examples of these datasets, see the [Datasets folder] (https://github.com/Akcakaya/MAPS-to-Models/tree/master/Datasets).
+
 ## Program output
 `MAPS-to-Models` creates the following files:
 
