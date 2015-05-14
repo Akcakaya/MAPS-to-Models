@@ -27,8 +27,10 @@ For examples of these datasets, see the [Datasets folder] (https://github.com/Ak
 
 (3) Intermediate results file: a text file that contains all output and intermediate results created during the analysis.
 
-(4) MP files: input files for RAMAS Metapop and [RAMAS GIS](http://ramas.com/software.htm) Software.  Three input files are created.  One includes the best estimates of all parameters of the population model.  Two other files include the lower and upper bounds of the parameters.  These can be used with the R package `demgsa` [(github.com/mlammens/demgsa)](https://github.com/mlammens/demgsa) to perform a global sensitivity analysis.
+(4) MP files: input files for RAMAS Metapop and [RAMAS GIS](http://ramas.com/software.htm) Software.  Three input files are created.  One includes the best estimates of all parameters of the population model.  Two other files include the lower and upper bounds of the parameters.  These can be used with the R package `demgsa` [(github.com/mlammens/demgsa)](https://github.com/mlammens/demgsa) to perform a global sensitivity analysis (Aiello-Lammens & Akçakaya 2015).
 
 ## References
+Aiello-Lammens, M.A. and H.R. Akçakaya. 2015. New approaches to global sensitivity analysis of demographic models with applications to impact assessment (in review).
+
 Ryu, H.Y., K.T. Shoemaker, É. Kneip, A. Pidgeon, P. Heglund, B. Bateman, W. Thogmartin, H.R. Akçakaya. 2015.  Developing Population Models with Data from Marked Individuals (in preparation).
 
