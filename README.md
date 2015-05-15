@@ -29,6 +29,14 @@ For examples of these datasets, see the [Datasets folder] (https://github.com/Ak
 
 (4) MP files: input files for RAMAS Metapop and [RAMAS GIS](http://ramas.com/software.htm) Software.  Three input files are created.  One includes the best estimates of all parameters of the population model.  Two other files include the lower and upper bounds of the parameters.  These can be used with the R package `demgsa` [(github.com/mlammens/demgsa)](https://github.com/mlammens/demgsa) to perform a global sensitivity analysis (Aiello-Lammens & Akçakaya 2015).
 
+## Getting started
+
+(1) Get all the files to your computer (click on "Download ZIP" or "Clone in Desktop").
+
+(2) In MAPS_MainScript.r, specify the folder where you saved the files as the BASE_DIRECTORY.
+
+(3) Follow other instructions in MAPS_MainScript.r, modify the settings as needed, and run this script in R.
+
 ## References
 Aiello-Lammens, M.A. and H.R. Akçakaya. 2015. New approaches to global sensitivity analysis of demographic models with applications to impact assessment (in review).
 
