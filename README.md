@@ -16,7 +16,7 @@ The program allows estimating survival rates; fecundities; density dependence in
 
 (3) A file that shows the correspondance between stations and populations. Often, there would be multiple banding stations within each biological population (or subpopulation) of the species.  This file allows the user to group stations into populations.
 
-For examples of these datasets, see the [Datasets folder] (https://github.com/Akcakaya/MAPS-to-Models/tree/master/Datasets).
+For examples of these data files, see the [Datasets folder] (https://github.com/Akcakaya/MAPS-to-Models/tree/master/Datasets), which include the data used in Ryu et al. (2015).
 
 ## Program output
 `MAPS-to-Models` creates the following files that include the results of the analysis:
