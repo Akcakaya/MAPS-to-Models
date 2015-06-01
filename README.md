@@ -19,15 +19,15 @@ The program allows estimating survival rates; fecundities; density dependence in
 For examples of these datasets, see the [Datasets folder] (https://github.com/Akcakaya/MAPS-to-Models/tree/master/Datasets).
 
 ## Program output
-`MAPS-to-Models` creates the following files:
+`MAPS-to-Models` creates the following files that include the results of the analysis:
 
-(1) Population model summary: a text file that includes all the components of the population model.
+(1) Population model summary: a text file that includes all the components of the population model estimated by the program.
 
-(2) Debug file: a text file  with error and warning messages created during the analysis.
+(2) Debug file: a text file with error and warning messages created during the analysis.
 
 (3) Intermediate results file: a text file that contains all output and intermediate results created during the analysis.
 
-(4) MP files: input files for RAMAS Metapop and [RAMAS GIS](http://ramas.com/software.htm) Software.  Three input files are created.  One includes the best estimates of all parameters of the population model.  Two other files include the lower and upper bounds of the parameters.  These can be used with the R package `demgsa` [(github.com/mlammens/demgsa)](https://github.com/mlammens/demgsa) to perform a global sensitivity analysis (Aiello-Lammens & Akçakaya 2015).
+(4) MP files: input files for RAMAS Metapop and [RAMAS GIS](http://ramas.com/software.htm) Software.  Three input files are created.  One includes the best estimates of all parameters of the population model.  Two other files include the lower and upper bounds of the parameters; these can be used with the R package `demgsa` [(github.com/mlammens/demgsa)](https://github.com/mlammens/demgsa) to perform a global sensitivity analysis (Aiello-Lammens & Akçakaya 2015).
 
 ## Getting started
 
