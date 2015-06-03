@@ -13,22 +13,33 @@
 
 rm(list=ls())    # clear the workspace
 
-#########################
-### Choose user (for managing files/directories)
+##########################################
+### GETTING STARTED:
+### FIRST, get all the files to your computer (click on "Download ZIP" or "Clone in Desktop").
+### SECOND, in the following line, specify the folder where you saved the files:
+BASE_DIRECTORY <- "C:\\xxxxxxx\\"
+### THIRD, modify the settings in the lines below as needed.
+### FOURTH, run this script (MAPS_MainScript.r) in R.
 
-CHLOE = F
+
+
+### Do not change the following lines (for developer use only)
+
+CHLOE = T
 CHLOE_LAPTOP = F
 LAB_COMPUTER = F
-KEVIN = T
+KEVIN = F
 EVA = F
 RESIT = F
 
 #########################
 ####  Define the scope of the analysis
 
-SPECIES_CODE <- "NOCA"           # Focal Species
+## 'GRCA','WOTH','WEVI','YBCH','HOWA','COYE','BCCH','CACH','NOCA'  [focal species for Ryu et al. for reference]
+
+SPECIES_CODE <- "YBCH"           # Focal Species
 BEGINYEAR    <- 1994             # First year of study period
-ENDYEAR      <- 2012            # Final year of study period
+ENDYEAR      <- 2012             # Final year of study period
 MAPSyears=c(BEGINYEAR:ENDYEAR)   # MAPSyears: vector of all years of interest
 
 #########################
@@ -44,47 +55,55 @@ CORRELATION <- 1.0     					 # Set correlation between S and F  (in this study, 
 
 #########################
 ###   Set MCMC parameters (for estimating fecundity)
-ni <- 1000      # Number of MCMC iterations per chain
-nc <- 1           # Number of chains
-nb <- 500       # Burn-in length
-nt <- 1          # Thinning rate
+ni <- 1000000      # Number of MCMC iterations per chain
+nc <- 3           # Number of chains
+nb <- 500000       # Burn-in length
+nt <- 100          # Thinning rate
 
 if(KEVIN) BUGSdir <- 'C:\\Users\\Kevin\\Documents\\Employment\\ESF\\Bog Turtle\\DATA\\software\\BUGS\\WinBUGS14'    # Local WinBUGS directory 
-if(CHLOE) BUGSdir <- "C:/Users/Chloe/Downloads/winbugs14/WinBUGS14"
+if(CHLOE) BUGSdir <- "C:/Users/haeyeong86/Desktop/WinBUGS14"
+if(CHLOE_LAPTOP) BUGSdir <- "C:\\Users\\haeyeong86\\Desktop\\WinBUGS14"
 if(LAB_COMPUTER) BUGSdir <- "C:/Users/Chloe/Downloads/winbugs14/WinBUGS14"
+
 
 #################################################################################################################
 # SET DIRECTORIES AND LOAD PACKAGES
 #################################################################################################################
+
+####Current line 67: Change:
+  DATA_DIRECTORY <- paste(BASE_DIRECTORY,"Data\\final",sep="")  # for now, put the results in a separate folder
+to:
+  DATA_DIRECTORY <- paste(BASE_DIRECTORY,"Datasets",sep="")
 
 #########################
 ### Set directory variables (and make the directory if it doesn't exist)
 
 if(KEVIN) BASE_DIRECTORY <- "C:\\Users\\Kevin\\Dropbox\\MAPS Project\\"
 if(CHLOE) BASE_DIRECTORY <- "C:\\Users\\Chloe\\Dropbox\\MAPS Project\\"
+if(CHLOE_LAPTOP) BASE_DIRECTORY <- "C:\\Users\\haeyeong86\\Dropbox\\MAPS Project\\"
 if(LAB_COMPUTER) BASE_DIRECTORY <- "C:\\Users\\Chloe\\Dropbox\\MAPS Project\\"
 if(RESIT) BASE_DIRECTORY <- "C:\\Users\\Resit\\Dropbox\\MAPS Project\\"
 
-POPMODELS_DIRECTORY <- paste(BASE_DIRECTORY,"Pop models",sep="")
+PUBLICDATA_DIRECTORY <- paste(BASE_DIRECTORY,"Public dataset",sep="")
+if(is.na(file.info(PUBLICDATA_DIRECTORY)[1,"isdir"])) dir.create(PUBLICDATA_DIRECTORY)        
+POPMODELS_DIRECTORY <- paste(BASE_DIRECTORY,"Pop models\\final2",sep="")
 if(is.na(file.info(POPMODELS_DIRECTORY)[1,"isdir"])) dir.create(POPMODELS_DIRECTORY)                      # create new directory if it doesn't exist already
-RESULTS_DIRECTORY <- paste(BASE_DIRECTORY,"Results\\final",sep="")  # for now, put the results in a separate folder
+RESULTS_DIRECTORY <- paste(BASE_DIRECTORY,"Results\\final2",sep="")  # for now, put the results in a separate folder
 if(is.na(file.info(RESULTS_DIRECTORY)[1,"isdir"])) dir.create(RESULTS_DIRECTORY)
-DATA_DIRECTORY <- paste(BASE_DIRECTORY,"Data\\final",sep="")  # for now, put the results in a separate folder
+DATA_DIRECTORY <- paste(BASE_DIRECTORY,"Data\\final2",sep="")  # for now, put the results in a separate folder
 if(is.na(file.info(DATA_DIRECTORY)[1,"isdir"])) dir.create(DATA_DIRECTORY)
 CODE_DIRECTORY <- paste(BASE_DIRECTORY,"code",sep="")
 if(is.na(file.info(CODE_DIRECTORY)[1,"isdir"])) dir.create(CODE_DIRECTORY)
 
-
-setwd(DATA_DIRECTORY)
-
 ### If running for the first time, install required packages in R
-#install.packages("RMark")
-#install.packages("R2WinBUGS")
-#install.packages("MASS")
-#install.packages("gtools")
-#install.packages("foreign")
-#install.packages("RODBC")
-#install.packages("doBy")
+install.packages("RMark")
+install.packages("R2WinBUGS")
+install.packages("MASS")
+install.packages("gtools")
+install.packages("foreign")
+install.packages("RODBC")
+install.packages("doBy")
+install.packages("msm")
 
 ### Load required packages in R
 suppressMessages(suppressWarnings(require(RMark)))
@@ -94,57 +113,46 @@ suppressMessages(suppressWarnings(require(gtools)))
 suppressMessages(suppressWarnings(require(foreign)))
 suppressMessages(suppressWarnings(require(RODBC)))
 suppressMessages(suppressWarnings(require(doBy)))
-
-########################
-###  Define the association between MAPS locations and distinct populations
-# Format as CSV file with two columns:
-# -- COL1 labeled "loc", indicating the names of MAPS locations
-# -- COL2 labeled "pop", designating the corresponding biological population.
-
-setwd(DATA_DIRECTORY)
-population_map = read.csv("loc_pop.csv",header=T)      # NOTE: we chose to treat each location as its own biological population
-
-
-#################################################################################################################
-# LOAD REGIONAL TREND DATA  (we used estimates derived from BBS data- see XXXXXX  [website])
-#################################################################################################################
-
-############
-###  REGIONAL TREND
-###      - TODO: see if this can be automated. Doesn't seem to be a web service associated with BBS
-###      -   if not, maybe embed a "dictionary" with the focal species trends within the R code?
-
-## From BBS web site, get percent change per year, assign it to BBS.trend (usually a number between -5 and +5)
-## Here are the trends used in this study:
-  
-setwd(BASE_DIRECTORY)
-BBS_TrendFile <- "BBS_Trends.csv"            ### TODO: Get the real numbers 
-sink(BBS_TrendFile)
-cat("SPECIES,  TREND,  LCL, UCL
-NOCA,   0.30,   0.20,   0.40
-WEVI,   0.51,  0.41,   0.61
-GRCA,   0.46,   0.36,   0.56
-COYE,   -0.85,   -0.95,   -0.75
-WOTH,   -2.16,   -2.26,  -2.06
-HOWA,   1.85,   1.75,  1.95
-YBCH,   -0.27,   -0.37, -0.17
-CACH,   -0.37,   -0.47,  -0.27
-BCCH,   0.29,    0.19,   0.39")
-sink()
-  
-BBSTrend_DF <- read.csv(BBS_TrendFile,header=T)
-BBSTrend_DF$SPECIES = as.character(BBSTrend_DF$SPECIES)
-BBS.trend <- list()
-BBS.trend$estimate <- subset(BBSTrend_DF,SPECIES==SPECIES_CODE)$TREND[1]      # central point estimate
-BBS.trend$lcl <- subset(BBSTrend_DF,SPECIES==SPECIES_CODE)$LCL[1]      # lower confidence limit
-BBS.trend$ucl <- subset(BBSTrend_DF,SPECIES==SPECIES_CODE)$UCL[1]      # upper confidence limit
-
+suppressMessages(suppressWarnings(require(msm)))
 
 #################################################################################################################
 # LOAD FUNCTIONS
 #################################################################################################################
 setwd(CODE_DIRECTORY)
 source("MAPS_AllFunctions.r")
+
+#################################################################################################################
+#  DEFINE ASSOCIATION BETWEEN BANDING STATIONS AND DISTINCT POPULATIONS
+#################################################################################################################
+# Format as CSV file with two columns:
+# -- COL1 labeled "station", indicating the names of banding (e.g., MAPS) stations
+# -- COL2 labeled "population", designating the corresponding biological population.
+# This file should be located in DATA_DIRECTORY and called "station_pop.csv".   
+
+setwd(PUBLICDATA_DIRECTORY)
+population_map = read.csv("station_pop.csv",header=T)      # user-defined csv file where stations are grouped into separate biological populations
+                                                           # In the manuscript, we chose to treat each location (comprised of multiple stations) as its own biological population
+
+#################################################################################################################
+# LOAD REGIONAL TREND DATA  (we used estimates derived from BBS data- see http://www.mbr-pwrc.usgs.gov/bbs/trend/tf13.html)
+#################################################################################################################
+
+### for reference:  BBS trend for focal species from Ryu et al. paper
+# spec,trend,lcl,ucl
+# NOCA,0.30,0.16,0.43
+# WEVI,0.51,0.19,0.84
+# GRCA,0.46,0.28,0.64
+# COYE,-0.85,-1.08,-0.62
+# WOTH,-2.16,-2.42,-1.89
+# HOWA,1.85,1.11,2.64
+# YBCH,-0.27,-0.58,0.04
+# CACH,-0.37,-0.72,-0.02
+# BCCH,0.29,-0.20,0.80
+
+# estimate = central point estimate   (default is zero)
+# lcl = lower confidence limit
+# ucl = upper confidence limit
+BBS.Trend <- Assign.Trend(estimate=-2.16, lcl=-2.42, ucl=-1.89)
 
 #################################################################################################################
 # SET UP INFORMATIVE 'DEBUG' FILE
@@ -163,40 +171,40 @@ InitializeResultsFile(dir=RESULTS_DIRECTORY,filename=RESULTS_FILENAME)
 ##################################################
 # SET UP 'POPULATION MODEL SUMMARY' FILE
 ##################################################
-METATPOP_FILENAME <- paste(SPECIES_CODE, ".mp", sep="")
 
+METAPOP_FILENAME <- paste(SPECIES_CODE, ".mp", sep="")   
 POPMODELSUMMARY_FILENAME <- paste(SPECIES_CODE,"_popmodelsummary.txt",sep="")
 InitializePopModelFile(dir=RESULTS_DIRECTORY,filename=POPMODELSUMMARY_FILENAME)
 
 #################################################################################################################
-# PROCESS MAPS DATA FROM ACCESS DATABASE VIA ODBC
+# READ IN RAW DATA FROM CSV FILES
 #################################################################################################################
 
-ProcessedData <- RetrieveData(dir=DATA_DIRECTORY, odbc.source="maps", population_map=population_map)
+BandDataFile <- sprintf("%s_BandDataAllMonths.csv",SPECIES_CODE)    # name of CSV file containing raw band recapture data
+EffortDataFile <- "Effort.csv"                                       # name of CSV file containing raw information on survey effort at each banding station 
+MAPSData <- ReadRawData(dir=PUBLICDATA_DIRECTORY, BandData=BandDataFile, EffortData=EffortDataFile, StationToPop=population_map)    
 
 # save output in DATA_DIRECTORY
 setwd(DATA_DIRECTORY)
-filename <- paste(SPECIES_CODE, "ProcessedData.RData", sep="_")
-save(ProcessedData, file=filename)    # store the processed data in permanent storage for later retrieval
-
+filename <- paste(SPECIES_CODE, "MAPSData.RData", sep="_")
+save(MAPSData, file=filename)
 
 #######################################################################################################
 # CREATE DATA STRUCTURES FOR CAPTURE MARK RECAPTURE FROM THE RETRIEVED MAPS DATA (capture history format)
 #######################################################################################################
 
-CMRData <- FormatForCMR(MAPSData=ProcessedData, dir=DATA_DIRECTORY)       # this function can take a very long time (~20 mins)
+CMRData <- FormatForCMR(MAPSData=MAPSData, dir=DATA_DIRECTORY)       # NOTE: With a 2.4GHz processor, this code takes about 20 minutes to run.
 
 # save output in DATA_DIRECTORY
 setwd(DATA_DIRECTORY)
 filename <- paste(SPECIES_CODE, "CMRData.RData", sep="_")
 save(CMRData, file=filename)
 
-
 #######################################################################################################
 # CREATE DATA STRUCTURES FOR RMARK FROM THE CAPTURE MARK RECAPTURE DATA
 #######################################################################################################
 
-RMarkData <- FormatForRMark(CMRData=CMRData, MAPSData=ProcessedData, dir=DATA_DIRECTORY, AddDensity=FALSE)
+RMarkData <- FormatForRMark(CMRData=CMRData, MAPSData=MAPSData, dir=DATA_DIRECTORY, AddDensity=FALSE)
 
 # save output in DATA_DIRECTORY
 setwd(DATA_DIRECTORY)
@@ -210,7 +218,7 @@ save(RMarkData, file=filename)
 setwd(RESULTS_DIRECTORY) # save all MARK output files (.inp, .out, .res) in RESULTS_DIRECTORY
 
 # Here, only run the initial MARK models. No density, just time-dependent models.
-MarkResults_Time <- Run.Models(RMarkData=RMarkData, initial=0, DensityModel = FALSE) # NOTE: may take 10-20 minutes to run    
+MarkResults_Time <- Run.Models(RMarkData=RMarkData, initial=0, DensityModel = FALSE) # NOTE: With a 2.4GHz processor, this code takes about 10 minutes to run.   
 
 # save output in RESULTS_DIRECTORY
 setwd(RESULTS_DIRECTORY)
@@ -224,19 +232,20 @@ save(MarkResults_Time, file=filename)
 # Use model S (~st + time + st:time + first_cap_bin:trans), p(~st + effort) 
 
 MarkResults_Time  # Set to the corresponding model.no from MarkResults_Time
-p.table <- PCapResults(RMarkResults=MarkResults_Time, maps.ddl=RMarkData$maps.ddl, band.data = ProcessedData$band.data, model.no = 1)   # NOTE: may take 10-20 minutes to run
+p.table <- PCapResults(RMarkResults=MarkResults_Time, maps.ddl=RMarkData$maps.ddl, band.data=MAPSData$band.data, model.no=1)   # NOTE: With a 2.4GHz processor, this code takes about 20 minutes to run for species with a large dataset.
 
 # save output in DATA_DIRECTORY
 setwd(DATA_DIRECTORY)
 filename <- paste(SPECIES_CODE, "PTable.RData", sep="_")
 save(p.table, file=filename)
 
-
+filename<-"WOTH_PTABLE_TEST2.csv"
+write.csv(p.table, filename)
 #######################################################################################################
 # ADD DENSITY COVARIATE TO THE RMARK DATA --- FOR ESTIMATING DENSITY-DEPENDENCE IN FINAL SURVIVAL ANALYSIS 
 ######################################################################################################
 
-finalRMarkData <- FormatForRMark(CMRData=CMRData, MAPSData=ProcessedData, dir=DATA_DIRECTORY, AddDensity=TRUE)
+finalRMarkData <- FormatForRMark(CMRData=CMRData, MAPSData=MAPSData, dir=DATA_DIRECTORY, AddDensity=TRUE) # set dir to load up the previous RMarkData
 
 # save output in DATA_DIRECTORY
 setwd(DATA_DIRECTORY)
@@ -250,7 +259,7 @@ save(finalRMarkData, file=filename)
 setwd(RESULTS_DIRECTORY) # save all MARK output files (.inp, .out, .res) in RESULTS_DIRECTORY
 
 # Here, run the density-dependent MARK models. 
-MarkResults_Density <- Run.Models(RMarkData=finalRMarkData, initial=0, DensityModel = TRUE)    # NOTE: may take 10-20 minutes to run
+MarkResults_Density <- Run.Models(RMarkData=finalRMarkData, initial=0, DensityModel = TRUE)    # NOTE: With a 2.4 GHz processor, this code takes about 5 minutes to run.
 
 # save output in RESULTS_DIRECTORY
 setwd(RESULTS_DIRECTORY)
@@ -264,7 +273,7 @@ save(MarkResults_Density, file=filename)
 # Use S(~st+first_cap_bin:trans), p(~st+effort) 
 
 MarkResults_Time  # Set to the corresponding model.no from MarkResults_Time
-SurvivalResults <- ApparentS(RMarkResults=MarkResults_Time, model.no = 3) 
+SurvivalResults <- ApparentS(RMarkResults=MarkResults_Time, model.no = 2) 
 
 # save output in RESULTS_DIRECTORY
 setwd(RESULTS_DIRECTORY)
@@ -292,7 +301,7 @@ save(SurvivalTempVarResults, file=filename)
 
 FecundityResults <- EstimateFecundity(p.table=p.table, MinAdults=4) # set number of captured adults under which the data will be discarded
                                                                     # if model does not run, try different priors and initial values
-
+                                                                    # NOTE: With a 2.4 GHz processor, this code takes about 100 minutes to run.
 # save output in RESULTS_DIRECTORY
 setwd(RESULTS_DIRECTORY)
 filename <- paste(SPECIES_CODE, "FecundityResults.RData", sep="_")
@@ -303,10 +312,10 @@ save(FecundityResults, file=filename)
 # PRINT OUT KEY RESULTS FOR POPULATION MODELING (stage matrix, temporal variability, density dependence)
 ######################################################################################################
 # Calculate density function for S from model S(~st + maps_density + first_cap_bin:trans)p(~st + effort)
-MarkResults_Density # model 2 in Density Mark Model
+MarkResults_Density
 
 PopModelData <- SummarizeForPopModel(RMarkData=finalRMarkData, AppS=SurvivalResults, STempVar=SurvivalTempVarResults, 
-                                     MarkResults=MarkResults_Density, Fec=FecundityResults, model.no=2)       
+                                     MarkResults=MarkResults_Density, Fec=FecundityResults, model.no=1)       
 
 # save output in RESULTS_DIRECTORY
 setwd(RESULTS_DIRECTORY)
@@ -315,19 +324,30 @@ save(PopModelData, file=filename)
 
 
 ######################################################################################################
+# CREATE STAGE MATRIX, SD MATRIX AND CORRECT FOR APPARENT SURVIVAL AND TEMPORAL VARIABILITY OF JUVENILES USING CV METHOD
+######################################################################################################
+
+SummaryMP<-SummaryMP(Data=PopModelData, TrendData=BBS.Trend)   
+
+# save output in RESULTS_DIRECTORY
+setwd(RESULTS_DIRECTORY)
+filename <- paste(SPECIES_CODE, "SummaryMP.RData", sep="_")
+save(SummaryMP, file=filename)
+
+
+######################################################################################################
 # BUILD RAMAS ".MP" FILE WITH PARAMETERS FROM THE ABOVE ANALYSES 
 ######################################################################################################
 
-WriteMasterMPFile(Data=PopModelData, TrendData=BBS.trend)   
+WriteMasterMPFile(Result=SummaryMP)  
+
 
 
 ################################### END OF CODE ################################################
 
 
 
-
-
-
+#######################################################################################################
 #######################################################################################################
 # DICTIONARY OF WORKSPACE VARIABLES
 #######################################################################################################
@@ -357,7 +377,7 @@ WriteMasterMPFile(Data=PopModelData, TrendData=BBS.trend)
 # CORRELATION                    -- Degree to which stochastic fluctuations in survival and fecundity are correlated. 
                                     # (e.g., year with high survival tends to also associated with high fecundity)		   
 # INITIAL_ABUNDANCE              -- Inital total abundance to be specified in the population model. Not a fitted parameter. Can be changed post hoc if desired.		
-# METAPOP_VERSION                -- Version of Ramas Metapop. Should be version 6.0 compiled for 64 bit architecture (TODO)
+# METAPOP_VERSION                -- Version of Ramas Metapop. Should be version 6.0 compiled for 64 bit architecture
 # REPLICATES                     -- Number of simulation replicates. Can be changed post hoc if desired.							   
 
 ############

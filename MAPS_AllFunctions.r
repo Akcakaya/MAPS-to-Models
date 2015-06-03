@@ -2,8 +2,22 @@
 ####  R Functions used for accessing and processing MAPS data, building datafiles
 ####  for RMark, estimating demographic parameteters, and assembing a population model. 
 
-####  [From Ryu et al., "Developing Population Models with Data from Marked Individuals", submitted to MEE, April 2015] 
+####  [From Ryu et al., "Developing Population Models with Data from Marked Individuals", submitted to MEE, May 2015] 
 ########################################################################################################################
+
+##################################################################################
+###### FUNCTION FOR READING IN TREND DATA
+##################################################################################
+
+Assign.Trend <- function(estimate=0,lcl=0,ucl=0){
+  trend <- list()
+  trend$estimate = estimate
+  trend$lcl = lcl
+  trend$ucl = ucl
+  return(trend)
+}
+
+
 
 #################################################################################
 ######   FUNCTION FOR CATCHING AND STORING ERRORS (but allowing the program to keep running)
@@ -25,7 +39,7 @@ tryCatch.W.E <- function(expr){
 ################################################################################
 
 
-InitializeDebugFile <- function(dir=DATA_DIRECTORY,filename=DEBUG_FILENAME){
+InitializeDebugFile <- function(dir, filename){
 	   # clear file
 	setwd(dir)
 	sink(filename)
@@ -50,7 +64,7 @@ InitializeDebugFile <- function(dir=DATA_DIRECTORY,filename=DEBUG_FILENAME){
 
 	 ## call this function to append text to the debug file....
 		 ## NOTE: use \" for quotes. Don't use commas!
-ToDebugFile <- function(InText,dir=DATA_DIRECTORY,filename=DEBUG_FILENAME){
+ToDebugFile <- function(InText, dir, filename){
   setwd(dir)
   sink(filename,append=T)
   cat(InText)
@@ -59,27 +73,29 @@ ToDebugFile <- function(InText,dir=DATA_DIRECTORY,filename=DEBUG_FILENAME){
 
 
 ####################################################################################
-######  SET UP INFORMATIVE RESULTS FILE
+######  SET UP INTERMEDIATE RESULTS FILE
 ####################################################################################
 
-InitializeResultsFile <- function(dir=RESULTS_DIRECTORY,filename=RESULTS_FILENAME){
+InitializeResultsFile <- function(dir, filename){
 	setwd(dir)
 	sink(filename)
 	cat(" ")
 	      ## Set up the file header
 
 	cat("
-	----------------------------------------------------------------------
-	RESULTS FOR MAPS TO MODELS ANALYSIS
+----------------------------------------------------------------------
+INTERMEDIATE RESULTS FOR MAPS TO MODELS ANALYSIS
 
-	Reference: Ryu et al: \"Developing Population Models with Data from Marked Individuals\" submitted to MEE, April 2015
+Reference: Ryu et al: \"Developing Population Models with Data from Marked Individuals\" submitted to MEE, April 2015
 
-	This document contains details about the \"MAPS to Models\" analysis results. Please read this
-	document carefully before running any population models derived from this analysis.
+This document contains details about the \"MAPS to Models\" analysis results. Please read this
+document carefully before running any population models derived from this analysis.
 
-	The organization of the document reflects the order of operations in the workflow: 
-		DATA EXTRACTION >> SURVIVAL ESTIMATION (Program MARK) >> FECUNDITY ESTIMATION (WinBUGS) >> POPULATION MODEL ASSEMBLY (Ramas Metapop)
-		
+Please see the \"popmodelsummary\" folder for a full description of the final population model.
+
+The organization of the document reflects the order of operations in the workflow: 
+	DATA EXTRACTION >> SURVIVAL ESTIMATION (Program MARK) >> FECUNDITY ESTIMATION (WinBUGS) >> POPULATION MODEL ASSEMBLY (Ramas Metapop)
+	
 	")
 	sink()
 }
@@ -87,7 +103,7 @@ InitializeResultsFile <- function(dir=RESULTS_DIRECTORY,filename=RESULTS_FILENAM
 
      ## call this function to append text to the results file....
          ## NOTE: use \" for quotes. Don't use commas!
-ToResultsFile <- function(InText,dir=RESULTS_DIRECTORY,filename=RESULTS_FILENAME){
+ToResultsFile <- function(InText, dir, filename){
   setwd(dir)
   sink(filename,append=T)
   cat(InText)
@@ -99,31 +115,55 @@ ToResultsFile <- function(InText,dir=RESULTS_DIRECTORY,filename=RESULTS_FILENAME
 ######  SET UP POPULATION MODEL SUMMARY FILE
 ####################################################################################
 
-InitializePopModelFile <- function(dir=RESULTS_DIRECTORY,filename=POPMODELSUMMARY_FILENAME){
+InitializePopModelFile <- function(dir, filename){
   setwd(dir)
   sink(filename)
   cat(" ")
   ## Set up the file header
   
-  cat("
-	----------------------------------------------------------------------
-	POPULATION MODEL SUMMARY
+  cat(
+  sprintf("
+****************************************
+*****  POPULATION MODEL SUMMARY ********
+****************************************
 
-	Reference: Ryu et al: \"Developing Population Models with Data from Marked Individuals\" submitted to MEE, April 2015
+Reference: Ryu et al: \"Developing Population Models with Data from Marked Individuals\" submitted to MEE, May 2015
 
-	This file contains a summary of the population model resulting from the analysis of the mark-recapture data. In addition to this file, check the following files created from this analysis:
-  1. [debug filename] is a debug file with error and warning messages created during the analysis.
-  2. [Intermediate results filename] contains all output and intermediate results created during the analysis.
-  3. [MP filename] is the input file for RAMAS Metapop and RAMAS GIS that includes the final population model.
+This file contains a summary of the population model resulting from the analysis of the mark-recapture data. \n
+  In addition to this file, check the following files created from this analysis: \n
 
-	")
+  1. [%s] is a debug file with error and warning messages created during the analysis.
+  2. [%s] contains all output and intermediate results created during the analysis.
+  3. [%s] is the input file for RAMAS Metapop and RAMAS GIS that includes the final population model.
+
+  Species: %s
+
+  A. General Assumptions:
+
+  * Population is censused after breeding.
+  * Individuals start breeding at age 12 months.
+  * First-year (juvenile) survival rate (Sj) may be different than survival rate in later years (adult survival, Sa)
+  * Survival rate does not depend on age after the first year.
+  * Average fecundity is the same for juveniles (1 year olds) and adults (2+ year olds).
+  * Only females are modeled.
+  * Fecundity (F) is the number of daughters per female.
+  * The stage matrix has the following structure:
+
+ \t\t\t|------|-------| 
+ \t\t\t| F*Sj | F*Sa  |
+ \t\t\t|------|-------|
+ \t\t\t| Sj   | Sa    |  
+ \t\t\t|------|-------|
+ 
+	", DEBUG_FILENAME, RESULTS_FILENAME, METAPOP_FILENAME, SPECIES_CODE)
+  )
   sink()
 }
 
 
 ## call this function to append text to the population model summary file....
 ## NOTE: use \" for quotes. Don't use commas!
-ToPopModelFile <- function(InText,dir=RESULTS_DIRECTORY,filename=POPMODELSUMMARY_FILENAME){
+ToPopModelFile <- function(InText, dir, filename){
   setwd(dir)
   sink(filename,append=T)
   cat(InText)
@@ -132,143 +172,65 @@ ToPopModelFile <- function(InText,dir=RESULTS_DIRECTORY,filename=POPMODELSUMMARY
 
 ###########################################################################
 
-#########################################
-# Function 'RetrieveData'
-# SUMMARY: - Connects to MAPS database and extracts information for the target species necessary for estimating demographic parameters.   
-# ARGUMENTS:
-#			'dir' -- project data directory
-#			'odbc.source' -- ODBC database connection that links to a database with raw MAPS data
-#           'population_map' -- data frame that associates each MAPS location with a distinct biological population
 
-# RETURNS:
-#   'MAPS_ProcessedData', which is a list object that includes:
-#       'band.data'        --       Data frame object with the following fields:  
-#                                     band           -- unique band ID associated with the bird 
-#                                     captureyear    -- year of capture 
-#                                     month          -- month of capture
-#                                     birthyear      -- estimated birth year 
-#                                     actualage      -- estimated age at capture
-#                                     agegroup       -- ??
-#                                     loc            -- MAPS location where bird was captured
-#                                     freq           -- ??
-#                                     station        -- MAPS banding station where bird was captured. Listed separately for months 5,6,7,8
-#       'band.data_allmon' -- data frame: same as 'band.data', but including all months, not just focal (breeding) months
-#       'effort'           -- information of the trapping effort at each station for each month of interest
-#       'sim.stations'     -- distinct stations (and its corresponding loc) for species in the focal set... [KTS: why is this needed??]
-#			
-###    NOTE: must have an ODBC database connection.
-###                 - use function odbcDataSources() to see what data sources are locally available
-###                 - to set up an ODBC data source, follow the instructions provided in the attached Word document (XXX)
-###                 - on Windows machines you may need to use the 32-bit version of R 
-###############################################################################################################
+######################################################################################
+# Function "ReadRawData" 
+# SUMMARY: Reads the raw band data and effort data and create effort data by user-defined population
 
-RetrieveData <- function(dir=DATA_DIRECTORY,odbc.source="maps",population_map=population_map){
+### ARGUMENTS
+#			 'dir' -- project data directory
+#            'BandData' <- text string indicating name of CSV file containing raw data from banding station
+#            'EffortData' <- text string indicating name of CSV file containing raw data from banding station
+#            
+######################################################################################
 
-	  # Connect to database	
-	con = odbcConnect(odbc.source) # KTS: I can only run using 32-bit version of R
-
-	  # Develop SQL query
-	stmt1=sprintf("SELECT DISTINCT finalMAPSBAND.band, captureyear, month, birthyear, actualage, agegroup, CP, BP, loc, station, 1 as freq ")
-	stmt2=sprintf("FROM finalMAPSBAND")
-	stmt3=sprintf("WHERE dupeSpec=0 AND spec=\'%s\' AND captureyear >= %s AND captureyear <= %s AND month in (5,6,7,8);", SPECIES_CODE, BEGINYEAR, ENDYEAR)
-	stmt4=sprintf("%s %s %s", stmt1, stmt2, stmt3)
-	band.data=sqlQuery(con, paste(stmt4), errors=FALSE)
-	odbcClose(con)
-		
-	if (length(band.data)==1) {
-		if (band.data[1]==-1) cat("Function create.banddata failed! \n")
-		break
-	}
-
-	#############################################################
-  # 1') Get Bird banding information from Access for all months 
-	# this is for transients
-	# previously, Function create.banddata   
-	# output is 'band.data' - band, captureyear, month, birthyear, actualage, agegroup, loc, freq, station
-
-	# Get connection to Access database
-  # odbcDataSources()
-	con = odbcConnect(odbc.source)   # KTS: I can only run using 32-bit version of R
-
-	stmt1=sprintf("SELECT DISTINCT finalMAPSBAND.band, captureyear, month, birthyear, actualage, agegroup, CP, BP, loc, station, 1 as freq ")
-	stmt2=sprintf("FROM finalMAPSBAND")
-	stmt3=sprintf("WHERE dupeSpec=0 AND spec=\'%s\' AND captureyear >= %s AND captureyear <= %s;", SPECIES_CODE, BEGINYEAR, ENDYEAR)
-	stmt4=sprintf("%s %s %s", stmt1, stmt2, stmt3)
-	band.data_allmon=sqlQuery(con, paste(stmt4), errors=FALSE)
-	odbcClose(con)
-
-	if (length(band.data_allmon)==1) {
-	  if (band.data_allmon[1]==-1) cat("Function create.banddata failed! \n")
-	  break
-	}
-
-  ##############################################################
-	# 2) Get effort information from Access
-	# previously, Function create.effort - get effort information from Access
-	# output is 'effort' - loc, year, month, effort
-
-	# Get connection to Access database
-	# odbcDataSources()
-	con = odbcConnect(odbc.source)  # KTS: I can only run using 32-bit version of R
-
-	stmt11 = sprintf('SELECT loc, year(date) as year, month(date) as month, round(sum(cint(length)*((Cint(mid(end,1,2))*60+Cint(mid(end,3))*10) - (Cint(mid(start,1,2))*60+Cint(mid(start,3))*10) ))/1440,2) as effort')
-	stmt22 = sprintf('FROM mapsef GROUP BY loc, year(date), month(date)')
-	stmt33 = sprintf('%s %s', stmt11, stmt22)
-	effort=sqlQuery(con, paste(stmt33), errors=FALSE)
-	odbcClose(con)
-
-	if (length(effort)==1) {
-		if (effort[1]==-1) ToDebugFile("Function create.effort failed! \n")
-		break
-	}	
-
-	############################################################
-	# Get bird's station data from Access
-	# previously, Function get.stationdata - get bird  information from Access
-	# output is 'sim.stations' - station, loc
-	# distinct stations (and its corresponding loc) for species in our list
-
-  # Get connection to Access database
-	# odbcDataSources()
-	con = odbcConnect(odbc.source) 
-		
-	stmt111 = sprintf("SELECT distinct station, loc")
-	stmt222 = sprintf("FROM finalmapsband")
-	stmt333 = sprintf("where spec in ('GRCA','WOTH','WEVI','YBCH','HOWA', COYE','BCCH', 'CACH','NOCA')")
-	stmt444 = sprintf("%s %s %s", stmt111, stmt222, stmt333)
-	sim.stations=sqlQuery(con, paste(stmt444), errors=FALSE)
-	odbcClose(con)
-		
-	if (length(sim.stations)==1) {
-		if (sim.stations[1]==-1) ToDebugFile("Function get.stationdata failed! \n")
-		break
-	}
-
-	###############################################################
-  # make 'station.loc.pop' - station/loc/pop matrix
-	# match population in population_map with loc in sim.stations
-	# 'station.loc.pop' - station, loc, populations
-	
-  station.loc.pop<-cbind(sim.stations, NA)
-	colnames(station.loc.pop)<-c("station","loc","pop")
-	for (i in 1:nrow(station.loc.pop)) {
-	  index<-which(as.character(population_map$loc)==as.character(station.loc.pop$loc)[i])
-	  station.loc.pop$pop[i]<-population_map$pop[index]
-	}
-
-	###############################################################
-	# Build structure for storing all key results...
-	
-	MAPS_ProcessedData = list()
-	MAPS_ProcessedData$band.data <- band.data
-	MAPS_ProcessedData$band.data_allmon <- band.data_allmon
-	MAPS_ProcessedData$effort <- effort
-	MAPS_ProcessedData$sim.stations <- sim.stations
-	MAPS_ProcessedData$station.loc.pop <- station.loc.pop
-	
-    return(MAPS_ProcessedData)
-} # end of function 'RetrieveData'
-
+ReadRawData <- function(dir, BandData, EffortData, StationToPop){
+   setwd(dir)
+   band.data_allMon <- read.csv(BandData,h=T)   
+   
+   # add 'pop' to band.data_allMon
+   band.data_allMon$pop<-NA
+   for(i in 1:nrow(band.data_allMon)){
+     index<-which(StationToPop$station==as.character(band.data_allMon$station[i]))
+     band.data_allMon$pop[i]<-StationToPop$population[index]
+   }
+   
+   # for capture history, select out breeding months (May~August)
+   band.data<-band.data_allMon[ which(band.data_allMon$month %in% c(5,6,7,8)), ]  
+   effort_bystation <- read.csv(EffortData,h=T)
+      
+    # re-create effort based on user-defined population
+   unique.pop<-sort(unique(StationToPop$population))
+   yrs<-sort(unique(effort_bystation$year))
+   months<-sort(unique(effort_bystation$month))
+    # create a data frame structure for new effort 
+   effort<-data.frame(pop=rep(unique.pop, each=length(yrs)*length(months)), year=rep(yrs, each=length(months)), month=rep(months, times=length(yrs)), effort=NA)
+    # add pop to effort_bystation
+   effort_bystation_pop<-merge(effort_bystation, StationToPop, by="station")
+    # sum of effort for stations that belong to same population
+    # result is an array
+   effort_temp <- with(effort_bystation_pop, tapply(effort, list(population,year,month), sum))
+   
+    # put the sum(effort) to corresponding year/month 
+   for(i in 1:length(unique.pop)){
+     for (j in 1:length(yrs)){
+       for (k in 1:length(months)){
+         index<-which((effort$pop==unique.pop[i])&(effort$year==yrs[j])&(effort$month==months[k]))
+         effort$effort[index]<-effort_temp[i, j, k]
+       }
+     }
+   }
+   
+    # if effort is NA, remove that row
+   effort<-na.omit(effort)
+   
+   data <- list()
+   data$band.data_allMon <- band.data_allMon
+   data$band.data <-band.data
+   data$effort <- effort
+   data$station.pop <- StationToPop
+   return(data)  
+}
 
 ######################################################################################
 
@@ -282,22 +244,25 @@ RetrieveData <- function(dir=DATA_DIRECTORY,odbc.source="maps",population_map=po
 ###    RETURNS 'CMR_Data', which is a data frame containing all the information necessary to run a capture-mark-recapture analysis
 #######################################################################################
 
-FormatForCMR <- function(MAPSData=ProcessedData, dir=DATA_DIRECTORY){	
-
+FormatForCMR <- function(MAPSData, dir){	
+  
     # Extract the processed data from MAPS
-	data=MAPSData$band.data
-	data.allMon <- MAPSData$band.data_allMon
-	effort=MAPSData$effort
-	station.loc.pop <- MAPSData$station.loc.pop
+	data <- MAPSData$band.data
+	band.data_allmon <- MAPSData$band.data_allMon
+	effort <- MAPSData$effort
+	station.pop <- MAPSData$station.pop
 	
 	CMR_Data <- list()
-	
+	  
 		# Structuring input file for processing
-	work=data[,c("band","captureyear","month","loc","birthyear","agegroup","actualage","freq","station","CP","BP")]
-	work2=cbind(work[c(1)], year_month=paste(work[,c(2)],work[,c(3)],sep="_"),  work[c(4:11,2,3)])
+	work=data[,c("band","captureyear","month","birthyear","agegroup","actualage","loc","station","pop","CP","BP","freq")]
+
+    # combine captureyear and month
+	work2=cbind(work[c("band")], year_month=paste(work[,c("captureyear")],work[,c("month")],sep="_"),  
+              work[c("loc","station","pop","birthyear","agegroup","actualage","freq","CP","BP")])
 
     ###############################
-	  ## MAKE "FAKE BIRDS" TO ENSURE THAT ALL LOCATIONS/TIMES ARE REPRESENTED IN THE CAPTURE HISTORY
+	  ## MAKE "FAKE BIRDS" TO ENSURE THAT ALL POPULATIONS/TIMES ARE REPRESENTED IN THE CAPTURE HISTORY
 	  # Making fake birds to create uniform secondary occasions for each primary occasion (year)
 	  # make sure at least one individual is in the dataset for each year-month period
 	  # if missing, add a "fake bird" with ID "99999"
@@ -318,26 +283,19 @@ FormatForCMR <- function(MAPSData=ProcessedData, dir=DATA_DIRECTORY){
 		  work2$band[ndx] = 99999
 		  work2$year_month[ndx] = paste(i,"_",j,sep="") 
 		  
-		  work2[ndx,3:ncol(work2)] <- work2[1,3:ncol(work2)] #use the below code for BCCH and YEWA
-		  # For BCCH and YEWA, the fake bird is put into location that has no effort values for the corresponding year_month
-		  # none of the locations have full effort values for all the year_month
-		  #work2[ndx,3:ncol(work2)] <- work2[2,3:ncol(work2)]
+		  work2[ndx,3:ncol(work2)] <- work2[1,3:ncol(work2)] 
 		}
 	  }
 	}
 	work2$year_month <- as.factor(work2$year_month)   # reconvert to factor
 
-		# 'work3' - band, year_month, loc, birthyear, agegroup(A/J), actualage(from -1 to 7;0=juveniles,all other=adults), freq, station, CP, BP, captureyear, month
 		# work3 puts the bands in order by year_month 
 	work3=work2[order(work2$year_month), ]	
-		
-		# 'work_reshape' - band, year_month, loc, birthyear, agegroup, actualage, freq, CP, BP
-	work_reshape=work3[,c("band", "year_month", "loc", "birthyear", "agegroup", "actualage", "freq", "CP", "BP")]			
-		# 'work_density' - band, captureyear, month, station
-	work_density=work3[,c("band","captureyear","month","station")]		
-
-		#### make sure only a single obs for each unique individual and time period   [NOTE: takes a while to run!]
+				
+    #### make sure only a single obs for each unique individual and time period   [NOTE: takes a while to run!]
 		# leave only one capture for each year-month for each individual
+	work_reshape<-work3
+  
 	indivs <- unique(work_reshape$band) 	# unique bands
 	tps <- as.character(unique(work_reshape$year_month))	# unique year_month
 	flag <- array(0,dim=c(length(indivs),length(tps))) 	# array of capture frequencies (0 or 1) with indivs as rows and year_month as columns
@@ -357,21 +315,11 @@ FormatForCMR <- function(MAPSData=ProcessedData, dir=DATA_DIRECTORY){
 	ndx <- which(temp==1) 
 	flags <- indivs[ndx] ##individuals caught more than once in each year_month 
 	
-	  # write to Debug file
-	ToDebugFile("
-  ------------------------------------------------------------------------------------------------------ 
-	The following individuals were removed from the analysis because they were captured more than once: \n 
-	")
-	ToDebugFile(
-	as.character(flags)
-	)
-
 		# "explode" the dataset so that each survey event gets its own column 
-		# 'test'- band, loc, birthyear, freq, agegroup1994_5, actualage1994_5, CP1994_5, BP1994_5, agegroup1994_6, actualage1994_6, etc..
-
-	test=reshape(work_reshape, timevar='year_month', direction='wide', idvar='band', v.names=c('agegroup','actualage','CP','BP'), sep='')  
-
-		# determine the columns that will make up the capture history
+	suppressWarnings(
+  test<-reshape(work_reshape, timevar='year_month', direction='wide', idvar='band', v.names=c('agegroup','actualage','CP','BP'), sep='')  
+  )
+    # determine the columns that will make up the capture history
 		# which are columns with 'agegroup' 
 	indx=grep("agegroup",x=names(test)) 	#selects columns that contain 'agegroup' in them
 
@@ -380,12 +328,12 @@ FormatForCMR <- function(MAPSData=ProcessedData, dir=DATA_DIRECTORY){
 	rdmonth=as.numeric(substr(names(test[,indx]),14,14))	#Take out month (14th position) from ex) agegroup1994_5
 	rdn_year=length(unique(rdyear))
 	rdn_secondaryoccasion=as.numeric(table(rdyear))		#number of each year appearing in agegroup1994_5, etc.. (for each year 4 because May, June, July, August)
-
+  
 		# make a preliminary capture history (not collapsed)
 	ch2=apply(test[,indx],c(1,2),function(t) ifelse(is.na(t),0,1))	#for columns in test with agegoup in them, replace NA with 0
 
 		# Create effort matrix to the same structure as capture history
-		# from the previous brought-in effort matrix (loc, year, month, effort), navigate for each individual where it was located for specific year_month and put that effort value
+		# from the previous brought-in effort matrix (pop, year, month, effort), navigate for each individual where it was located for specific year_month and put that effort value
 		# in the form of a new matrix with individual as rows and year_month as columns 
 
 	occasion_names=work3$year_month
@@ -395,7 +343,7 @@ FormatForCMR <- function(MAPSData=ProcessedData, dir=DATA_DIRECTORY){
 	realbout <- as.character(unique(occasion_names))
 	realyear <- as.numeric(substr(realbout,1,4))
 	realmonth <- as.numeric(substr(realbout,6,6))
-	realloc <- as.character(ch_data$loc)
+	realpop <- as.numeric(ch_data$pop)
 
 	firstyear <- min(realyear)
 	lastyear <- max(realyear)
@@ -406,21 +354,21 @@ FormatForCMR <- function(MAPSData=ProcessedData, dir=DATA_DIRECTORY){
 		# shape into matrices with same dimensions as capture history
 	yearmat <- matrix(rep(realyear,times=nind),nrow=nind,ncol=nbouts,byrow=T)
 	monmat <- matrix(rep(realmonth,times=nind),nrow=nind,ncol=nbouts,byrow=T)
-	locmat <- matrix(rep(realloc,times=nbouts),nrow=nind,ncol=nbouts,byrow=F)
+	popmat <- matrix(rep(realpop,times=nbouts),nrow=nind,ncol=nbouts,byrow=F)
 
-		# generate a new effort matrix
+    # generate a new effort matrix
 	effortmatrix <- matrix(0,nrow=nind,ncol=nbouts)   
 	for(i in 1:nind){
 	  for(j in 1:nbouts){
-		ndx <- which((effort$loc==locmat[i,j])&(effort$year==yearmat[i,j])&(effort$month==monmat[i,j]))
+		ndx <- which((effort$pop==popmat[i,j])&(effort$year==yearmat[i,j])&(effort$month==monmat[i,j]))
 		effortmatrix[i,j] <- ifelse(length(ndx)>0, effort$effort[ndx],NA)
 	  }
 	}
 	effortmat<-effortmatrix
 		
 	  ######## IMPORTANT ########
-		# Where NA in effort matrix(ind as rows, year_month as columns), which means there is no data, 
-		# replace "1"s and "0"s in ch2 matrix (ind as rows, agegroupyear_month as colums) with "." (=NA) for survey occasions with no data....
+		# If NA in effort matrix(ind as rows, year_month as columns), it means there is no trapping event. 
+		# For such, replace "1"s and "0"s in ch2 matrix (ind as rows, agegroupyear_month as colums) with "." (=NA) for survey occasions with no data....
 	for(i in 1:nind){
 		ndx=which(is.na(effortmat[i,]))   # which are NAs in the effort matrix
 		ch2[i,ndx]=NA 	#change 0 to NA
@@ -434,6 +382,8 @@ FormatForCMR <- function(MAPSData=ProcessedData, dir=DATA_DIRECTORY){
 	  # remove individuals in 'effortmat' as well
 	if(length(ndx)>0) effortmat <- effortmat[-ndx,]
 	effortdf=as.data.frame(apply(effortmat,c(1,2),function (t) ifelse(is.na(t), log(0.001), log(t))))
+	effortcolnames=paste("eff", realyear,rep(c(1,2,3,4),times=nyears),sep="")
+	names(effortdf)=effortcolnames
 	  # remove individuals in 'test' as well
 	test2<-test
 	if(length(ndx)>0) test2 <- test[-ndx,]
@@ -450,7 +400,7 @@ FormatForCMR <- function(MAPSData=ProcessedData, dir=DATA_DIRECTORY){
 	write.table(ch, file=filename, sep="\t")
 	
 	ToResultsFile(
-    paste("To view the capture history, go to file location:", dir, "and \n look for file: ", filename))
+    paste("To view the capture history, go to file location:", dir, "and \n look for file: ", filename), RESULTS_DIRECTORY, RESULTS_FILENAME)
 
 
 		########## "st" - individual covariate for stage ####################
@@ -528,13 +478,13 @@ FormatForCMR <- function(MAPSData=ProcessedData, dir=DATA_DIRECTORY){
 
 	for (i in 1:length(indvs)){
 	  for (j in 1:nyears){
-		index<-which((ProcessedData$band.data_allmon$band==indvs[i])&(ProcessedData$band.data_allmon$captureyear==years[j]))
+		index<-which((band.data_allmon$band==indvs[i])&(band.data_allmon$captureyear==years[j]))
 		recap_within_sameyear[i,j]<-ifelse(length(index)==1,1,0)
 	  }
 	}
 
 	  # final 'pot_trans' 
-	  # for each individual, whether potential transient in a given year
+	  # for each individual, whether it is a potential transient in a given year
 	pot_trans<-matrix(NA,nrow=nrow(test2),ncol=nyears) 
 	for (i in 1:nrow(pot_trans)){
 	  for (j in 1:ncol(pot_trans)){
@@ -545,26 +495,16 @@ FormatForCMR <- function(MAPSData=ProcessedData, dir=DATA_DIRECTORY){
 
 	pot_transcolnames=paste("trans", unique(yearlab),sep="")
 	colnames(pot_trans)=pot_transcolnames
-	head(pot_trans)
 	
 
 	  ##################### CMR_Data (structure for sending along) #####################################
 		
-	# only st and effort and potential trasient as temporarily varying individual covariate
-	CMR_Data$MasterCapHist=data.frame(band=test2[c(1)], ch=ch, freq=test2[c(4)], loc=test2[c(2)], stratadf, effortdf, pot_trans)
+	 # only st and effort and potential trasient as temporarily varying individual covariate
+	CMR_Data$MasterCapHist=data.frame(band=test2[c("band")], ch=ch, freq=test2[c("freq")], pop=test2[c("pop")], station=test2[c("station")], stratadf, effortdf, pot_trans)
 	CMR_Data$MasterCapHist$ch=as.character(CMR_Data$MasterCapHist$ch)
+   # change 'pop' to a factor variable to feed into MARK
+	CMR_Data$MasterCapHist$pop<-as.factor(CMR_Data$MasterCapHist$pop)
 
-	  # add population into CMR_Data
-	CMR_Data$MasterCapHist[, "pop"] <- NA
-	for (i in 1:nrow(CMR_Data$MasterCapHist)){
-	  index<-which(station.loc.pop$loc==as.character(CMR_Data$MasterCapHist$loc[i]))
-	  CMR_Data$MasterCapHist$pop[i]<-ifelse(length(index)>0, station.loc.pop$pop[index], NA)
-	}
-	CMR_Data$MasterCapHist$pop=as.factor(CMR_Data$MasterCapHist$pop)   # change pop as factor
-	  # move pop after loc
-	end<-ncol(CMR_Data$MasterCapHist)
-	CMR_Data$MasterCapHist=CMR_Data$MasterCapHist[,c(1:4,end,5:(end-1))] 
-	
 	  # remove "fake bird" :)
 	  # nrow(CMR_Data[which(CMR_Data$band==99999),])
 	if (nrow(CMR_Data$MasterCapHist[which(CMR_Data$band==99999),])!= 0 ) CMR_Data$MasterCapHist=CMR_Data$MasterCapHist[-which(CMR_Data$band==99999),]
@@ -596,7 +536,7 @@ FormatForCMR <- function(MAPSData=ProcessedData, dir=DATA_DIRECTORY){
  
   # Generate Design data for Survival estimation - based on Robust Design model
 
-FormatForRMark <- function(CMRData=CMRData, MAPSData=ProcessedData, dir=DATA_DIRECTORY, AddDensity = FALSE){
+FormatForRMark <- function(CMRData, MAPSData, dir, AddDensity){
 
     if(!AddDensity){
 		inputFile <- CMRData$MasterCapHist
@@ -611,17 +551,16 @@ FormatForRMark <- function(CMRData=CMRData, MAPSData=ProcessedData, dir=DATA_DIR
 		lastyear=ENDYEAR
 
 		time.interval=rep(c(0,0,0,1), times=rdn_year)[-(4*rdn_year)]  	#last 1 omitted
-		maps.process=process.data(file, model="RDHuggins", time.intervals=time.interval, begin.time=startyear, groups='loc') # groups by loc
+		maps.process=process.data(file, model="RDHuggins", time.intervals=time.interval, begin.time=startyear, groups='pop') # groups by user-defined population
     maps.ddl=make.design.data(maps.process,parameters=list(S=list(pim.type="all")))
-			#Resulting S has index, group(which is loc), cohort, age, time, occ.cohort, cohort, Age, Time, loc
-			#same for GammaDoublePrime, GammaPrime
-			#p has index, group, time, session, Time, loc, c(all 0s)
-			#same for c, but c with all 1s
+			# Resulting maps.ddl$S has index, group (represents population), cohort, age, time, occ.cohort, cohort, Age, Time, pop
+			# same for GammaDoublePrime, GammaPrime
+			# maps.ddl$p has index, group, time, session, Time, pop, c(all 0s)
+			# same for c, but c with all 1s
 			
 		  ########### first capture year #############
 			# identify first year of capture to model transients
 			# 'age' in MARK is the year after first capture, not the real age
-		  # Resulting S has index, group, cohort, age, time, occ.cohort, cohort, Age, Time, loc, first_cap
 		maps.ddl=add.design.data(maps.process,maps.ddl,parameter="S",type="age",bins=c(0,0.5,lastyear-startyear+1),name="first_cap" )
 
 			#make first_cap binary (0 or 1)
@@ -631,9 +570,7 @@ FormatForRMark <- function(CMRData=CMRData, MAPSData=ProcessedData, dir=DATA_DIR
 		} 
 
 			######################ADD DUMMY VARIABLES FOR YEAR (SESSION)
-			# add dummy variables for the "p" design data representing the "year" identity of each bout. 
-			# resulting p and c has index, group, time, session, Time, loc, c(all 0s), and is1994, is 1995, ... to is2012
-			
+			# add dummy variables for the "p" design data representing the "year" identity of each bout. 	
 		newyears=unique(realyear)
 		nbouts=length(realbout)
 		nyears=ncol(stratadf)
@@ -646,24 +583,21 @@ FormatForRMark <- function(CMRData=CMRData, MAPSData=ProcessedData, dir=DATA_DIR
 
 			## add another new column to the design data
 			# Intercept column with 1s
-			# resulting p and c has index, group, time, session, Time, loc, c(all 0s), and is1994, is 1995, ... to is2012, and newIntercept
-
 		maps.ddl$p$newIntercept=rep(1,times=nrow(maps.ddl$p))
 		maps.ddl$c$newIntercept=rep(1,times=nrow(maps.ddl$c))
-
+    
 		  ##### Add effort to "p" and "c" design data: alternative method for modeling EFFORT
 			## This works if the assumption of no movement between locations and stations is met. 
-			# resulting p and c has index, group, time, session, Time, loc, c(all 0s), and year1994,..., newIntercept, and effort	
 		maps.ddl$p$effort=numeric(nrow(maps.ddl$p))
 		maps.ddl$c$effort=numeric(nrow(maps.ddl$c))
 		for(i in 1:nrow(maps.ddl$p)){
 			index = which((effort$year==maps.ddl$p$session[i])&
-							 (as.character(effort$loc)==as.character(maps.ddl$p$loc)[i])&((effort$month-4)==maps.ddl$p$time[i]))
+							 (effort$pop==maps.ddl$p$pop[i])&((effort$month-4)==maps.ddl$p$time[i]))
 			maps.ddl$p$effort[i] = ifelse(length(index>0),log(effort$effort[index]),log(0.001)) 	
 		} 	
 		for(i in 1:nrow(maps.ddl$c)){
 			index = which((effort$year==maps.ddl$c$session[i])&
-							 (as.character(effort$loc)==as.character(maps.ddl$c$loc)[i])&((effort$month-4)==maps.ddl$c$time[i]))
+							 (effort$pop==maps.ddl$c$pop[i])&((effort$month-4)==maps.ddl$c$time[i]))
 			maps.ddl$c$effort[i] = ifelse(length(index>0),log(effort$effort[index]),log(0.001))		
 		} 
 		
@@ -687,11 +621,11 @@ FormatForRMark <- function(CMRData=CMRData, MAPSData=ProcessedData, dir=DATA_DIR
 	  ######### density from MAPS ##############
     if(AddDensity){
 	    
-		setwd(DATA_DIRECTORY)      # load up the previous RMarkData
+		setwd(dir)      # load up the previous RMarkData
     filename<-paste(SPECIES_CODE, "RMarkData.RData", sep="_")    
     load(filename)
     
-		maps.ddl = RMarkData$maps.ddl
+		maps.ddl=RMarkData$maps.ddl
 		maps.process=RMarkData$maps.process
 
 		  # create 'maps_density_frame'
@@ -702,32 +636,31 @@ FormatForRMark <- function(CMRData=CMRData, MAPSData=ProcessedData, dir=DATA_DIR
 		  # leave only rows with values for maps_rD - one row for each year
 		maps_density_frame2<-maps_density_frame[!is.na(maps_density_frame$maps_rD),] 
 
-		  # determine max(MAPS previous density) above which ceiling-type density-dependence will be used
-		  # max(MAPS previous density) = mean of max(maps_prev.rD) for each population
+		  # determine the value of MAPS previous density above which ceiling-type density-dependence will be used
+		  # This value will be calculated as the mean of max(maps_prev.rD) for each population
 		unique.pop<-sort(unique(maps_density_frame2$pop))
-		  # max for each location over time
+		  # first, get maximum for each population across all time periods
 		max.maps_prev.rD<-data.frame(pop=unique.pop, max.maps_prev.rD=NA)
 		for (i in 1:nrow(max.maps_prev.rD)){
 		  index<-which(maps_density_frame2$pop==max.maps_prev.rD$pop[i])
 		  max.maps_prev.rD$max.maps_prev.rD[i]<-max(maps_density_frame2$maps_prev.rD[index],na.rm=T)
 		}
 
-	    # get the mean ( max over time) over all locations 
+	    # get the mean of maximums of each population 
 		mean_max.maps_prev.rD<-mean(max.maps_prev.rD$max.maps_prev.rD)
 
-		  #leave only rows with values for maps_prev.rD - one row for each year
+		  # leave only rows with values for maps_prev.rD - one row for each year
 		  # BEGINYEAR removed
 		maps_density_frame<-maps_density_frame[!is.na(maps_density_frame$maps_prev.rD),] # removes year 1994 since there is no prev.rD
 
-		  # add real maps previous density for each location and time step into maps.ddl$S
+		  # add real maps previous density for each population and time step into maps.ddl$S
 		maps.ddl$S$maps_density=numeric(nrow(maps.ddl$S))
 	
 		maps_density_frame$year <- as.character(maps_density_frame$year)    # added because factors weren't aligning.
 		maps.ddl$S$time <- as.character(maps.ddl$S$time)    # added because factors weren't aligning.
 		
 		for(i in 1:nrow(maps.ddl$S)){
-		  index = which((maps_density_frame$year==maps.ddl$S$time[i])&
-						  (as.character(maps_density_frame$pop)==as.character(maps.ddl$S$loc)[i])) 
+		  index = which((maps_density_frame$year==maps.ddl$S$time[i])&(maps_density_frame$pop==maps.ddl$S$pop[i])) 
 		  maps.ddl$S$maps_density[i] = ifelse(length(index>0),maps_density_frame$maps_prev.rD[index],0.001)
 		}
 
@@ -763,7 +696,7 @@ FormatForRMark <- function(CMRData=CMRData, MAPSData=ProcessedData, dir=DATA_DIR
 # 
 ############################################################################
 
-Run.Models <- function(RMarkData, initial, DensityModel=FALSE) {
+Run.Models <- function(RMarkData, initial, DensityModel) {
 
   process <- RMarkData$maps.process
   ddl <- RMarkData$maps.ddl
@@ -783,7 +716,6 @@ Run.Models <- function(RMarkData, initial, DensityModel=FALSE) {
     S.st.plus.trans=list(formula=~st+first_cap_bin:trans)
     
     # Time model - estimates temporal variability in S for juveniles/adults
-    S.st.plus.time.plus.trans=list(formula=~st+time+first_cap_bin:trans) 
     S.st.plus.time.plus.st.time.time.plus.trans=list(formula=~st+time+st:time+first_cap_bin:trans) # with st:time
                   
     #################### Capture probability ########################
@@ -801,8 +733,8 @@ Run.Models <- function(RMarkData, initial, DensityModel=FALSE) {
     GammaPrime.fixed=list(formula=~1, fixed=1)
     GammaDoublePrime.fixed=list(formula=~1, fixed=0)
 
-    cml=suppressMessages(create.model.list("RDHuggins"))
-    results=suppressMessages(mark.wrapper(cml,data=process,ddl=ddl, use.initial=TRUE, silent=TRUE))  # takes a long time to run!   the values from the previous model used as initial values in the later models
+    cml=create.model.list("RDHuggins")
+    results=suppressMessages(mark.wrapper(cml,data=process,ddl=ddl, use.initial=TRUE,silent=TRUE)) # takes a long time to run! the values from the previous model used as initial values in the later models
   }
   
   ###################### DENSITY MODELS ############################
@@ -817,7 +749,6 @@ Run.Models <- function(RMarkData, initial, DensityModel=FALSE) {
     
     # Density model - measures density-dependence in S for juveniles/adults/adult transients
     S.st.plus.maps_density.plus.trans=list(formula=~st+maps_density+first_cap_bin:trans)
-    S.st.plus.maps_density.plus.st.times.maps_density.plus.trans=list(formula=~st+maps_density+st:maps_density+first_cap_bin:trans)
     
     #################### Capture probability ########################
     
@@ -833,7 +764,7 @@ Run.Models <- function(RMarkData, initial, DensityModel=FALSE) {
     
     GammaPrime.fixed=list(formula=~1, fixed=1)
     GammaDoublePrime.fixed=list(formula=~1, fixed=0)
- 
+     
     cml=create.model.list("RDHuggins")
     results=suppressMessages(mark.wrapper(cml,data=process,ddl=ddl, use.initial=TRUE,silent=TRUE))  #the values from the previous model used as initial values in the later models
   }
@@ -859,20 +790,20 @@ Run.Models <- function(RMarkData, initial, DensityModel=FALSE) {
 #                                   birthyear      -- estimated birth year 
 #                                   actualage      -- estimated age at capture
 #                                   agegroup       -- ??
-#                                   loc            -- MAPS location where bird was captured
+#                                   loc            -- MAPS location where bird was captured  ## TODO: change to refer to user-defined population
 #                                   freq           -- ??
 #                                   station        -- MAPS banding station where bird was captured. Listed separately for months 5,6,7,8
 ###################################################################################
 
-PCapResults <- function (RMarkResults=MarkResults, maps.ddl=RMarkData$maps.ddl, band.data=ProcessedData$band.data, model.no=3){
+PCapResults <- function (RMarkResults, maps.ddl, band.data, model.no){
   
   # Extract population, year, month, log(effort) information from maps.ddl
-  p.table <- maps.ddl$p[,c("loc","session","time","effort")]     
+  p.table <- maps.ddl$p[,c("pop","session","time","effort")]     
   colnames(p.table) <- c("pop","year","month","log_effort")
   
   # Calculate capture probability for each month/year at each population 
   # the effort values in maps.ddl$p are already log-transformed and the models were fitted to those 
-  # use model S (~st + time + st:time + first_cap_bin:trans), p(~st + effort) - model 1
+  # use model S (~st + time + st:time + first_cap_bin:trans), p(~st + effort) 
   model <- RMarkResults[[model.no]]
   betas <- RMarkResults[[model.no]]$result$beta
   
@@ -882,20 +813,57 @@ PCapResults <- function (RMarkResults=MarkResults, maps.ddl=RMarkData$maps.ddl, 
   b.st <- betas$estimate[grep("p:st", rownames(betas))]
   # beta for effort
   b.effort <- betas$estimate[grep("p:effort", rownames(betas))]
+
+  # beta ucl for intercept
+  b.itcp.ucl <- betas$ucl[grep("p:st", rownames(betas))-1] 
+  # beta lcl for intercept
+  b.itcp.lcl <- betas$lcl[grep("p:st", rownames(betas))-1]   
+  # beta ucl for stage
+  b.st.ucl <- betas$ucl[grep("p:st", rownames(betas))]
+  # beta lcl for stage
+  b.st.lcl <- betas$lcl[grep("p:st", rownames(betas))]
+  # beta ucl for effort
+  b.effort.ucl <- betas$ucl[grep("p:effort", rownames(betas))]
+  # beta lcl for effort
+  b.effort.lcl <- betas$lcl[grep("p:effort", rownames(betas))]
   
   # Calculate capture probability
-  # p.j: capture probability of juvenile at a given time and location
-  # p.a: capture probability of adult at a given time and location
+  # p.j: capture probability of juvenile at a given time and population
+  # p.a: capture probability of adult at a given time and population
   for (i in 1:nrow(p.table)){
     # Juv: beta(intercept)+beta(st)+beta(effort)*log(effort)
     p.table$p.j[i]<-inv.logit(b.itcp + b.st + b.effort* p.table$log_effort[i])
+	  p.table$p.j.lcl[i]<-min( inv.logit(b.itcp.lcl + b.st.lcl + b.effort.lcl* p.table$log_effort[i]), 
+                             inv.logit(b.itcp.lcl + b.st.lcl + b.effort.ucl* p.table$log_effort[i]),
+	                           inv.logit(b.itcp.lcl + b.st.ucl + b.effort.ucl* p.table$log_effort[i]),
+	                           inv.logit(b.itcp.ucl + b.st.lcl + b.effort.lcl* p.table$log_effort[i]),
+	                           inv.logit(b.itcp.ucl + b.st.lcl + b.effort.ucl* p.table$log_effort[i]),
+	                           inv.logit(b.itcp.ucl + b.st.ucl + b.effort.ucl* p.table$log_effort[i])                 
+                             ) # all combinations of lcl/ucl required to calculate the min
+	  p.table$p.j.ucl[i]<-max( inv.logit(b.itcp.lcl + b.st.lcl + b.effort.lcl* p.table$log_effort[i]), 
+	                           inv.logit(b.itcp.lcl + b.st.lcl + b.effort.ucl* p.table$log_effort[i]),
+	                           inv.logit(b.itcp.lcl + b.st.ucl + b.effort.ucl* p.table$log_effort[i]),
+	                           inv.logit(b.itcp.ucl + b.st.lcl + b.effort.lcl* p.table$log_effort[i]),
+	                           inv.logit(b.itcp.ucl + b.st.lcl + b.effort.ucl* p.table$log_effort[i]),
+	                           inv.logit(b.itcp.ucl + b.st.ucl + b.effort.ucl* p.table$log_effort[i])                 
+	                           ) # all combinations of lcl/ucl required to calculate the max
     # Adults: beta(intercept)+beta(effort)*log(effort)
     p.table$p.a[i]<-inv.logit(b.itcp + b.effort* p.table$log_effort[i])
+    p.table$p.a.lcl[i]<-min( inv.logit(b.itcp.lcl + b.effort.lcl* p.table$log_effort[i]), 
+                             inv.logit(b.itcp.lcl + b.effort.ucl* p.table$log_effort[i]),
+                             inv.logit(b.itcp.ucl + b.effort.lcl* p.table$log_effort[i]),
+                             inv.logit(b.itcp.ucl + b.effort.ucl* p.table$log_effort[i])                   
+                             ) # all combinations of lcl/ucl required to calculate the min
+	  p.table$p.a.ucl[i]<-max( inv.logit(b.itcp.lcl + b.effort.lcl* p.table$log_effort[i]), 
+	                           inv.logit(b.itcp.lcl + b.effort.ucl* p.table$log_effort[i]),
+	                           inv.logit(b.itcp.ucl + b.effort.lcl* p.table$log_effort[i]),
+	                           inv.logit(b.itcp.ucl + b.effort.ucl* p.table$log_effort[i])                   
+	                           ) # all combinations of lcl/ucl required to calculate the max
   }
   
   # Calculate capture probability for a given year
-  # p.j_year: capture probability of juvenile at a given year and location  
-  # p.a_year: capture probability of adult at a given year and location
+  # p.j_year: capture probability of juvenile at a given year and population  
+  # p.a_year: capture probability of adult at a given year and population
   for (i in 1:(nrow(p.table)/4)){
     p.table$p.j_year[4*i]<-(1-(1-p.table$p.j[4*i-3])*(1-p.table$p.j[4*i-2])*(1-p.table$p.j[4*i-1])*(1-p.table$p.j[4*i]))
   }
@@ -916,7 +884,7 @@ PCapResults <- function (RMarkResults=MarkResults, maps.ddl=RMarkData$maps.ddl, 
   band.data_A_breed<-band.data[-non_breed_A,]
   
   ###### IMPORTANT! #########
-  # processing 'band.data' to avoid double (or triple) counting of individuals that were captured multiple times within a year
+  # processing 'band.data' to avoid multiple counting of individuals that were captured multiple times within a year
   # If an individual is caught multiple times, only 1 capture left for each year 
   
   # For juveniles and all adults 
@@ -957,17 +925,17 @@ PCapResults <- function (RMarkResults=MarkResults, maps.ddl=RMarkData$maps.ddl, 
   
   ########### calculate Njuv, Nad, Nad_breed #############
   for (i in 1:(nrow(p.table)/4)){
-    index = which((band.data2$captureyear==p.table$year[4*i])&(as.character(band.data2$loc)==as.character(p.table$pop)[4*i])
+    index = which((band.data2$captureyear==p.table$year[4*i])&(band.data2$pop==p.table$pop[4*i])
                   &(band.data2$agegroup=="J"))
     p.table$Njuv[4*i]<-ifelse(length(index>0),length(index),0) 
   }
   for (i in 1:(nrow(p.table)/4)){
-    index = which((band.data2$captureyear==p.table$year[4*i])&(as.character(band.data2$loc)==as.character(p.table$pop)[4*i])
+    index = which((band.data2$captureyear==p.table$year[4*i])&(band.data2$pop==p.table$pop[4*i])
                   &(band.data2$agegroup=="A"))
     p.table$Nad[4*i]<-ifelse(length(index>0),length(index),0) 
   }
   for (i in 1:(nrow(p.table)/4)){
-    index = which((band.data_A_breed2$captureyear==p.table$year[4*i])&(as.character(band.data_A_breed2$loc)==as.character(p.table$pop)[4*i])
+    index = which((band.data_A_breed2$captureyear==p.table$year[4*i])&(band.data_A_breed2$pop==p.table$pop[4*i])
                   &(band.data_A_breed2$agegroup=="A"))
     p.table$Nad_breed[4*i]<-ifelse(length(index>0),length(index),0) 
   }
@@ -1028,10 +996,10 @@ PCapResults <- function (RMarkResults=MarkResults, maps.ddl=RMarkData$maps.ddl, 
   }
   
   # Use MAPS previous year's density (maps_prev.rD) to model effect of density on the vital rates
-  # put maps_prev.rD into corresponding year and location
+  # put maps_prev.rD into corresponding year and population
   suppressWarnings(
     for (i in 1:(nrow(p.table)/4)){
-      index = which((p.table$year==as.numeric(as.character(p.table$year[4*i]))-1)&(as.character(p.table$pop)==as.character(p.table$pop)[4*i]))
+      index = which((p.table$year==as.numeric(as.character(p.table$year[4*i]))-1)&(p.table$pop==p.table$pop[4*i]))
       index = max(index)
       p.table$maps_prev.rD[4*i] = ifelse(length(index>0),p.table$maps_rD[index],NA)   
     } # warnings() are due to the first year where there is no maps_prev.rD available
@@ -1060,7 +1028,7 @@ PCapResults <- function (RMarkResults=MarkResults, maps.ddl=RMarkData$maps.ddl, 
   # put maps_prev.rD_ad into corresponding year and location
   suppressWarnings(
     for (i in 1:(nrow(p.table)/4)){
-      index = which((p.table$year==as.numeric(as.character(p.table$year[4*i]))-1)&(as.character(p.table$pop)==as.character(p.table$pop)[4*i]))
+      index = which((p.table$year==as.numeric(as.character(p.table$year[4*i]))-1)&(p.table$pop==p.table$pop[4*i]))
       index = max(index)
       p.table$maps_prev.rD_ad[4*i] = ifelse(length(index>0),p.table$maps_rD_ad[index],NA)   
     } # warnings() are due to the first year (no prev.rD for the beginyear)
@@ -1126,12 +1094,21 @@ ApparentS <- function(RMarkResults, model.no){
   
     # Select apparent S 
     # S for juveniles
-  Sjuv=s.p.j$real[1] #this accounts for st:time
+  Sjuv<-list()
+  Sjuv$estimate=s.p.j$real[1] #this accounts for st:time
+  Sjuv$lcl=s.p.j$lcl[1]
+  Sjuv$ucl=s.p.j$ucl[1]
     # S for adult residents
-  Sad=s.p.a$real[1]
+  Sad<-list()
+  Sad$estimate=s.p.a$real[1]
+  Sad$lcl=s.p.a$lcl[1]
+  Sad$ucl=s.p.a$ucl[1]
     # S for adult transients
-  Sad_trans=s.p.a_trans$real[1]
-  
+  Sad_trans<-list()
+  Sad_trans$estimate=s.p.a_trans$real[1]
+  Sad_trans$lcl=s.p.a_trans$lcl[1]
+  Sad_trans$ucl=s.p.a_trans$ucl[1]
+    
   result<-list(Sjuv=Sjuv, Sad=Sad, Sad_trans=Sad_trans)
   return(result)
   
@@ -1326,8 +1303,6 @@ VarianceComponent <- function (RMarkResults, model.no) {
     Computing process variance for adult transients with all years worked!
     " , RESULTS_DIRECTORY, RESULTS_FILENAME)
   }
-  
-
 
     # time in years
   x_axis=c(BEGINYEAR:(ENDYEAR-1))
@@ -1385,8 +1360,8 @@ VarianceComponent <- function (RMarkResults, model.no) {
   ifelse( length(idx)>0, time.sel.j.rm<-time.sel[-idx], time.sel.j.rm<-time.sel)
     # output message about the converging years
   if (length(time.sel.j.rm)==length(time.sel)){
-          ToResultsFile("
-    All years between ", BEGINYEAR, " and ", ENDYEAR, " converged for juveniles! \n", RESULTS_DIRECTORY, RESULTS_FILENAME)
+          ToResultsFile(paste("
+    All years between ", BEGINYEAR, " and ", ENDYEAR, " converged for juveniles! \n"), RESULTS_DIRECTORY, RESULTS_FILENAME)
           } else { ToResultsFile(paste("
     A total of ",length(idx)," years did not converge between ", BEGINYEAR, " and ", ENDYEAR, " for juveniles! \n"), RESULTS_DIRECTORY, RESULTS_FILENAME)
   }
@@ -1395,9 +1370,10 @@ VarianceComponent <- function (RMarkResults, model.no) {
   ifelse( length(idx2)>0, time.sel.a.rm<-time.sel[-idx2], time.sel.a.rm<-time.sel)
     # output message about the converging years
   if (length(time.sel.a.rm)==length(time.sel)){
-    ToResultsFile("
-    All years between ", BEGINYEAR, " and ", ENDYEAR, " converged for adult residents! \n", RESULTS_DIRECTORY, RESULTS_FILENAME)
-  } else { ToResultsFile(paste("
+    ToResultsFile(paste("
+    All years between ", BEGINYEAR, " and ", ENDYEAR, " converged for adult residents! \n"), RESULTS_DIRECTORY, RESULTS_FILENAME)
+  } else { 
+    ToResultsFile(paste("
     A total of ",length(idx2)," years did not converge between ", BEGINYEAR, " and ", ENDYEAR, " for adult residents! \n"), RESULTS_DIRECTORY, RESULTS_FILENAME)
   }
           
@@ -1405,8 +1381,8 @@ VarianceComponent <- function (RMarkResults, model.no) {
   ifelse( length(idx3)>0, time.sel.a_trans.rm<-time.sel_trans[-idx3], time.sel.a_trans.rm<-time.sel_trans)
     # output message about the converging years
   if (length(time.sel.a_trans.rm)==length(time.sel_trans)){
-    ToResultsFile("
-    All years between ", BEGINYEAR, " and ", ENDYEAR, " converged for adult transients! \n", RESULTS_DIRECTORY, RESULTS_FILENAME)
+    ToResultsFile(paste("
+    All years between ", BEGINYEAR, " and ", ENDYEAR, " converged for adult transients! \n"), RESULTS_DIRECTORY, RESULTS_FILENAME)
   } else { ToResultsFile(paste("
     A total of ",length(idx3)," years did not converge between ", BEGINYEAR, " and ", ENDYEAR, " for adult transients! \n"), RESULTS_DIRECTORY, RESULTS_FILENAME)
   }
@@ -1467,8 +1443,6 @@ VarianceComponent <- function (RMarkResults, model.no) {
     " , RESULTS_DIRECTORY, RESULTS_FILENAME)
   }
   
-
-
     # 2) Compute process variance for adult residents
 
   varc.a.rm.W.E<-tryCatch.W.E(
@@ -1640,6 +1614,7 @@ VarianceComponent <- function (RMarkResults, model.no) {
   
   } else {
   
+    if (("varc.a.rm" %in% ls()) & ("varc.a_trans.rm" %in% ls())) {
   # When variance component analysis with only converging years worked only for adult residents/adult transients
   
   SSummary.rm<-data.frame()
@@ -1661,6 +1636,23 @@ VarianceComponent <- function (RMarkResults, model.no) {
   SSummary.rm[2,8]<-as.numeric(varc.a_trans.rm$sigmasq[3])
   colnames(SSummary.rm)<-c("mean", "mean_shrunken","total_sd", "total_var", "proc_sd", "proc_var_estimate", "proc_var_lower", "proc_var_upper")
   row.names(SSummary.rm)<-c("A", "A_trans")
+  
+    } else {
+      
+      SSummary.rm<-data.frame()
+      SSummary.rm[1,1]<-mean(s.a.rm)
+      SSummary.rm[1,2]<-mean(varc.a.rm$betaran$estimate)
+      SSummary.rm[1,3]<-sd(s.a.rm)
+      SSummary.rm[1,4]<-var(s.a.rm)
+      SSummary.rm[1,5]<-as.numeric(varc.a.rm$sigma)
+      SSummary.rm[1,6]<-as.numeric(varc.a.rm$sigmasq[1])
+      SSummary.rm[1,7]<-as.numeric(varc.a.rm$sigmasq[2])
+      SSummary.rm[1,8]<-as.numeric(varc.a.rm$sigmasq[3])
+
+      colnames(SSummary.rm)<-c("mean", "mean_shrunken","total_sd", "total_var", "proc_sd", "proc_var_estimate", "proc_var_lower", "proc_var_upper")
+      row.names(SSummary.rm)<-c("A")
+            
+    } 
   
   setwd(RESULTS_DIRECTORY)
   filename<-paste(SPECIES_CODE, "SSummary_conv.yrs.csv", sep='_')
@@ -1704,6 +1696,7 @@ EstimateFecundity <- function (p.table=p.table, MinAdults = 4){
   p.table2<-p.table2[p.table2$Nad>MinAdults,]
   rownames(p.table2)<-NULL
   
+  
       ######### Read in data for input in WinBUGS ############
 	  
       # Bring in number of observed adults and juvenile captures
@@ -1712,15 +1705,27 @@ EstimateFecundity <- function (p.table=p.table, MinAdults = 4){
 	   
 	    # capture probability - time- and location- specific
     Juvp <- numeric(nrow(p.table2))
+	  Juvplow <- numeric(nrow(p.table2))
+	  Juvphigh <- numeric(nrow(p.table2))
 	  Adultp <- numeric(nrow(p.table2))
-	  
+	  Adultplow <- numeric(nrow(p.table2))
+	  Adultphigh <- numeric(nrow(p.table2))
+
 	  for(i in 1:nrow(p.table2)){
 		ndx <- which((as.character(p.table$pop)==as.character(p.table2$pop[i]))&(p.table$year==p.table2$year[i]))
 		tempj <- tapply(p.table$p.j[ndx],p.table$month[ndx],mean)   ##### KTS
+		tempjlow <- tapply(p.table$p.j.lcl[ndx],p.table$month[ndx],mean)   ##### KTS
+		tempjhigh <- tapply(p.table$p.j.ucl[ndx],p.table$month[ndx],mean)   ##### KTS
 		tempa <- tapply(p.table$p.a[ndx],p.table$month[ndx],mean)   ##### KTS
+		tempalow <- tapply(p.table$p.a.lcl[ndx],p.table$month[ndx],mean)   ##### KTS
+		tempahigh <- tapply(p.table$p.a.ucl[ndx],p.table$month[ndx],mean)   ##### KTS
 		
-		Juvp[i]<-1-prod(1-tempj)      
-		Adultp[i]<-1-prod(1-tempa)    
+		Juvp[i]<-1-prod(1-tempj)  
+    Juvplow[i]<-1-prod(1-tempjlow)
+    Juvphigh[i]<-1-prod(1-tempjhigh)		
+		Adultp[i]<-1-prod(1-tempa) 
+    Adultplow[i]<-1-prod(1-tempalow)
+    Adultphigh[i]<-1-prod(1-tempahigh)		
 	  }
 	  
   	  # MAPS density
@@ -1752,55 +1757,47 @@ EstimateFecundity <- function (p.table=p.table, MinAdults = 4){
     setwd(CODE_DIRECTORY)
 	  sink("fecundity_MAPS_full.bug")
 	  cat("
-		  model {
+		 model {
 
-		  for (i in 1:n) {
-		  		  
-		    # Demographic stochasticity component
+  ## process model
+for (i in 1:n) {
+  Adultp[i] ~ dbeta(1,1)I(palow[i],pahigh[i])
+  Juvp[i] ~ dbeta(1,1)I(pjlow[i],pjhigh[i])		  
+  Adults[i] <- trunc(obsAdults[i]/Adultp[i])   #  estimated true number of adults in the population
+  Juvs[i] <- exp(log(Adults[i]) + log.mean.fec + env.stoch.dev[yrs[i]] + beta.rD*rD[i])   # expected number of juveniles
+}
 
-		  lower[i] <- obsAdults[i]
-		  upper[i] <- (obsAdults[i]/Adultp[i])*10  # arbitary
-		  Adults[i] ~ dunif(lower[i],upper[i])   # latent
-		  Juvs[i] ~ dpois(lambda[i])             # latent
-		  
-        # Fecundity model, poisson regression
-        # Link and linear predictor
+# Observation model
 
-		  lambda[i] <- exp(log(Adults[i]) + log.mean.fec + env.stoch.dev[yrs[i]] + beta.rD*rD[i])   # log-linear model
-		  }
-		  
-		    # Observation model
+for (i in 1:n) {
+  obsJuvsexp[i] <- Juvs[i]*Juvp[i]
+  obsJuvs[i] ~ dpois(obsJuvsexp[i])   ## DATA NODE
+}
 
-		  for (i in 1:n) {
-		  Juvs2[i] <- Juvs[i] + 1    # to avoid sampling from a binomial with size 0
-		  obsJuvs[i] ~ dbin(Juvp[i],Juvs2[i])
-		  obsAdults[i] ~ dbin(Adultp[i],Adults[i])
-		  }
-		  
-		    # Uninformative priors 
+# Priors 
 
-		  mean.fec ~ dunif(0.01, 100)   
-		  env.stoch.tau ~ dgamma(0.1,0.1)
-		  beta.rD ~ dnorm(0,0.01)  # precision=1/variance=0.001
-		  
-		    # Derived terms
-		 
-		  env.stoch.sd <- sqrt(1/env.stoch.tau)
-		  log.mean.fec <- log(mean.fec)
-		 		  
-		    # Estimated mean fecundity each year
+mean.fec ~ dunif(0.01, 10)        # mean fecundity [KTS: should we make these bounds a bit more biologically reasonable?]
+env.stoch.tau ~ dgamma(0.1,0.1)
+beta.rD ~ dnorm(0,0.01)            # precision=1/variance=0.001
 
-		  for(i in 1:nt) {
-		  est.mean.fec[i] <- exp(log.mean.fec + env.stoch.dev[i])
-		  }
-		  
-		    # Random effects
-		  
-      for (t in 1:nt) {
-		    env.stoch.dev[t] ~ dnorm(0,env.stoch.tau)   # Deviates represent environmental stochasticity 
-		  }  
+# Derived terms
 
-		  } # end model
+env.stoch.sd <- sqrt(1/env.stoch.tau)
+log.mean.fec <- log(mean.fec)
+
+# Estimated mean fecundity each year
+
+for(t in 1:nt) {
+  est.mean.fec[t] <- exp(log.mean.fec + env.stoch.dev[t])
+}
+
+# Random effects
+
+for (t in 1:nt) {
+  env.stoch.dev[t] ~ dnorm(0,env.stoch.tau)   # Deviates represent environmental stochasticity 
+}  
+
+} # end model
 		  ", fill=TRUE)
 	  sink()
 	  
@@ -1810,33 +1807,58 @@ EstimateFecundity <- function (p.table=p.table, MinAdults = 4){
       # Load in data 
 		  # WinBUGS brings in data in a list format
 	  Data_full <- list(
-		obsJuvs=obsJuvs + 1,   # add one to uncorrect a bias introduced into the BUGS code (obsJuvs is never 0)
+		obsJuvs=obsJuvs,   # add one to uncorrect a bias introduced into the BUGS code (obsJuvs is never 0)
 		obsAdults=obsAdults, 
 		n=length(obsJuvs),
 		rD=density,
 		yrs=yrs,
 		nt=max(unique(yrs)),
-		Adultp=Adultp,
-		Juvp=Juvp
+		palow=Adultplow,
+		pjlow=Juvplow,
+		pahigh=Adultphigh,
+		#pa=Adultp,
+		#pj=Juvp,
+		pjhigh=Juvphigh
 	  )
 	  
-	    # Set initial values
-	  inits_full = function () list(
-		Adults=obsAdults/Adultp,
-		Juvs=obsJuvs/Juvp,
-		mean.fec=rnorm(1,0.5,0.01),
-		env.stoch.tau=rnorm(1, 16, 1), 
-		beta.rD=-0.1
-	  )
-	  
+	    # Set initial values  
+    inits_full = function () list(
+      #Adults=obsAdults/Adultp,
+      #Juvs=obsJuvs/Juvp,
+	  Adultp = Adultp,
+	  Juvp = Juvp,
+      mean.fec=rnorm(1,2,0.01),
+      env.stoch.tau=rnorm(1, 25, 1), 
+      beta.rD=-0.1
+    )
+   
+             #  nt=5;nc=2;nb=10000;ni=20000
 	    #Send information to WinBUGS
 	  Mod_full <- bugs(data=Data_full, inits=inits_full, 
-				  parameters.to.save=c("mean.fec", "env.stoch.sd", "est.mean.fec", "beta.rD", "Adults", "Juvs"), 
+				  parameters.to.save=c("mean.fec", "env.stoch.sd", "est.mean.fec", "beta.rD", "Adultp", "Juvp"), 
 				  model.file="fecundity_MAPS_full.bug", n.thin=nt, n.chains=nc, n.burnin=nb, n.iter=ni, 
-          bugs.directory=BUGSdir, codaPkg=TRUE, debug=FALSE)
+          bugs.directory=BUGSdir, codaPkg=TRUE, over.relax=T, debug=FALSE)   
 	  
       # read in results
 	  FecResults_full = read.bugs(Mod_full)
+      # To test for convergence, use the Gelman and Rubin's convergence diagnostic
+      # Approximate convergence is diagnosed when the upper limit is close to 1. 
+    GR_full<-gelman.diag(FecResults_full, confidence = 0.95, transform=FALSE, autoburnin=TRUE,
+              multivariate=TRUE)
+      # print the GR convergence diagnostic in Results.txt
+	  
+	  # gelman.plot(FecResults_full)
+    ToResultsFile(
+    sprintf("
+    ----------------------------------------------------------------------------------------
+    GELMAN AND RUBIN'S CONVERGENCE DIAGNOSTIC - FECUNDITY CORRECTED FOR CAPTURE PROBABILITY
+    
+    Upper C.I. of Mean fecundity: %s \n
+    Upper C.I. of Slope of DD relationship for fecundity: %s \n
+    Upper C.I. of Temporal env variability (SD) in fecundity: %s \n
+    *Approximate convergence is diagnosed when the upper limit is close to 1. 
+    " , GR_full$psrf["mean.fec","Upper C.I."], GR_full$psrf["beta.rD","Upper C.I."], GR_full$psrf["env.stoch.sd","Upper C.I."]
+    ),  RESULTS_DIRECTORY, RESULTS_FILENAME)
 
       # read in values 	  
 	  ModResults_full <- as.data.frame(FecResults_full[[1]])
@@ -1856,44 +1878,44 @@ EstimateFecundity <- function (p.table=p.table, MinAdults = 4){
 	  setwd(CODE_DIRECTORY)
 	  sink("fecundity_MAPS_null.bug")
 	  cat("
-		  model {
+		 model {
 
-		  for (i in 1:n) {
-		  
-		    # Demographic stochasticity component
+  ## process model
+for (i in 1:n) {		  
+  #Adults[i] <- trunc(obsAdults[i]/Adultp[i])   #  estimated true number of adults in the population
+  Juvsexp[i] <- exp(log(Adults[i]) + log.mean.fec + env.stoch.dev[yrs[i]] + beta.rD*rD[i])   # expected number of juveniles
+}
 
-		  Juvs[i] ~ dpois(lambda[i])
-		  
-        # Fecundity model, poisson regression
-        # Link and linear predictor
-		  
-      lambda[i] <- exp(log(Adults[i]) + log.mean.fec + env.stoch.dev[yrs[i]]+ beta.rD*rD[i])   # log-linear model
-		  }
-		  
-		    # Uninformative priors 
+# Observation model
 
-		  mean.fec ~ dunif(0.01, 50)   
-		  env.stoch.tau ~ dgamma(0.01,0.01)
-		  beta.rD ~ dnorm(0,0.01)  # precision=1/variance=0.001
-		  
-		    # Derived terms
+for (i in 1:n) {
+  Juvs[i] ~ dpois(Juvsexp[i])   ## DATA NODE
+}
 
-		  env.stoch.sd <- sqrt(1/env.stoch.tau)
-		  log.mean.fec <- log(mean.fec)
-		  		  
-		    # Estimated fecundity each year
+# Priors 
 
-		  for(i in 1:nt) {
-		  est.mean.fec[i] <- exp(log.mean.fec + env.stoch.dev[i])
-		  }
-		  
-		    # Random effects
+mean.fec ~ dunif(0.01, 10)        # mean fecundity [KTS: should we make these bounds a bit more biologically reasonable?]
+env.stoch.tau ~ dgamma(0.1,0.1)
+beta.rD ~ dnorm(0,0.01)            # precision=1/variance=0.001
 
-		  for (t in 1:nt) {
-		  env.stoch.dev[t] ~ dnorm(0,env.stoch.tau)   # Deviates represent environmental stochasticity
-		  }    
+# Derived terms
 
-		  } # end model
+env.stoch.sd <- sqrt(1/env.stoch.tau)
+log.mean.fec <- log(mean.fec)
+
+# Estimated mean fecundity each year
+
+for(t in 1:nt) {
+  est.mean.fec[t] <- exp(log.mean.fec + env.stoch.dev[t])
+}
+
+# Random effects
+
+for (t in 1:nt) {
+  env.stoch.dev[t] ~ dnorm(0,env.stoch.tau)   # Deviates represent environmental stochasticity 
+}  
+
+} # end model
 		  ", fill=TRUE)
 	  sink()
 	  
@@ -1914,19 +1936,36 @@ EstimateFecundity <- function (p.table=p.table, MinAdults = 4){
 	  
 	    # Set initial values
 	  inits_null = function () list(
-    mean.fec=rnorm(1,0.7,0.01),
-	  env.stoch.tau=rnorm(1, 16, 5),
-		beta.rD=-0.1)
+	    mean.fec=rnorm(1,0.7,0.01),
+	    env.stoch.tau=rnorm(1, 16, 5),
+	    beta.rD=-0.1)
 		  
 	    #Send information to WinBUGS
 	  Mod_null <- bugs(data=Data_null, inits=inits_null, 
 				  parameters.to.save=c("mean.fec", "env.stoch.sd", "Juvs.pred","beta.rD", "est.mean.fec"), 
 				  model.file="fecundity_MAPS_null.bug", n.thin=nt, n.chains=nc, n.burnin=nb,	n.iter=ni, 
-          bugs.directory=BUGSdir, codaPkg=TRUE, debug=FALSE)
+          bugs.directory=BUGSdir, codaPkg=TRUE, over.relax=T, debug=FALSE)
 	  
 	    # Read the results back to R
 	  FecResults_null = read.bugs(Mod_null)
 	 
+    # To test for convergence, use the Gelman and Rubin's convergence diagnostic
+    # Approximate convergence is diagnosed when the upper limit is close to 1. 
+    GR_null<-gelman.diag(FecResults_null, confidence = 0.95, transform=FALSE, autoburnin=TRUE,
+                       multivariate=TRUE)
+    # print the GR convergence diagnostic in Results.txt
+  ToResultsFile(
+    sprintf("
+    ----------------------------------------------------------------------------------------
+    GELMAN AND RUBIN'S CONVERGENCE DIAGNOSTIC - FECUNDITY NOT CORRECTED FOR CAPTURE PROBABILITY
+            
+    Upper C.I. of Mean fecundity: %s \n
+    Upper C.I. of Slope of DD relationship for fecundity: %s \n
+    Upper C.I. of Temporal env variability (SD) in fecundity: %s \n
+    *Approximate convergence is diagnosed when the upper limit is close to 1. 
+    " , GR_null$psrf["mean.fec","Upper C.I."], GR_null$psrf["beta.rD","Upper C.I."], GR_null$psrf["env.stoch.sd","Upper C.I."]
+    ),  RESULTS_DIRECTORY, RESULTS_FILENAME)
+  
 	    # read in values for nc chains
     ModResults_null <- as.data.frame(FecResults_null[[1]])
 	  if(nc>1){
@@ -1938,9 +1977,9 @@ EstimateFecundity <- function (p.table=p.table, MinAdults = 4){
 	
     ###############################
 	  # PLOT RESULTS 
-	  
 	  setwd(RESULTS_DIRECTORY)
-	    # plot 2 chains sepearately and compare visually
+  
+	    # plot multiple chains sepearately and compare visually
 	
     filename <- paste(SPECIES_CODE,"BUGStrace_corrected.svg", sep="_")
     svg(file=filename,width=10,height=10, onefile=TRUE)
@@ -2032,12 +2071,18 @@ EstimateFecundity <- function (p.table=p.table, MinAdults = 4){
     FecundityResults<-list(
       Mean.rD=mean.raw.density,
       SD.rD=sd.raw.density,
+      No.iter=ni,
+      Burnin=nb,
+      No.chains=nc,
+      Thinningrate=nt,
       Data_full=Data_full,
       Data_null=Data_null,
       initial_full=inits_full,
       initial_null=inits_null,
       FResults_full=ModResults_full,
       FResults_null=ModResults_null,
+      GR_full=GR_full,
+      GR_null=GR_null,
       FTable_full=FTable_full,
       FTable_null=FTable_null
       )
@@ -2058,39 +2103,117 @@ EstimateFecundity <- function (p.table=p.table, MinAdults = 4){
 #                                							
 ######################################################################################
 
-SummarizeForPopModel <- function(RMarkData, AppS, STempVar, MarkResults, Fec){ # writes text file output of all key population-level parameters, and also returns a list containing the same parameters
+SummarizeForPopModel <- function(RMarkData, AppS, STempVar, MarkResults, Fec, model.no){ # writes text file output of all key population-level parameters, and also returns a list containing the same parameters
 
     # Apparent survival rates for juveniles and adults
-  Sjuv <- AppS$Sjuv
-  Sad <- AppS$Sad
+    # TCM: from Time-constant model (Use when density relationship is positive)
+    # DM: from Density model (Use when density relationship is negative) - see below
+  Sjuv_TCM <- AppS$Sjuv
+  Sad_TCM <- AppS$Sad
   
     # Temporal variability in survival rates for juveniles and adults
-  SD_Sjuv <- STempVar["J","proc_sd"]
-  SD_Sad <- STempVar["A","proc_sd"]
+  if ("J" %in% row.names(STempVar)){
+    Var_Sjuv <- list()
+    Var_Sjuv$estimate <- STempVar["J","proc_var_estimate"]
+    Var_Sjuv$lcl <- STempVar["J","proc_var_lower"]
+    Var_Sjuv$ucl <- STempVar["J","proc_var_upper"]
+    Var_Sad <- list()
+    Var_Sad$estimate <- STempVar["A","proc_var_estimate"]
+    Var_Sad$lcl <- STempVar["A","proc_var_lower"]
+    Var_Sad$ucl <- STempVar["A","proc_var_upper"]
+  } else {  
+      Var_Sad <- list()
+      Var_Sad$estimate <- STempVar["A","proc_var_estimate"]
+      Var_Sad$lcl <- STempVar["A","proc_var_lower"]
+      Var_Sad$ucl <- STempVar["A","proc_var_upper"]
+  }
   
     # beta coefficients in model (S)
     # from model S(~st + maps_density + first_cap_bin:trans)p(~st + effort): model 2 in Density Mark Model
-  S.betas<-MarkResults[[2]]$results$beta
-
-  S_intcpt<-S.betas$estimate[1]
-  S_st<-S.betas$estimate[2]
-  S_dens<-S.betas$estimate[3]
+  S.betas<-MarkResults[[model.no]]$results$beta
+  vcv<-MarkResults[[model.no]]$results$beta.vcv
+  mean.maps_density<-mean(RMarkData$maps.ddl$S$maps_density)
+    
+  # function 'logitCI'
+  # calculates CI (at 95% level)
+  logitCI = function(val, se) {
+    transSurv=logit(val)  # reconvert inv.logit(X) to X
+    transSurvSE=deltamethod(list(~log(x1/(1-x1))), mean=val, cov=se^2)  #calculate SE for X
+    transSurvLow=transSurv-1.96*transSurvSE  	#get X low/high value
+    transSurvHigh=transSurv+1.96*transSurvSE
+    survLow=inv.logit(transSurvLow)	#convert to inv.logit(X low), inv.logit(X high)
+    survHigh=inv.logit(transSurvHigh)
+    return(c(survLow, survHigh))
+  }
+  
+  form1 = sprintf('~ exp(x1 + x2 + x3 * %f)/(1 + exp(x1 + x2 + x3 * %f))', mean.maps_density, mean.maps_density)  
+  form2 = sprintf('~ exp(x1 + x3 * %f)/(1 + exp(x1 + x3 * %f))', mean.maps_density, mean.maps_density) 
+  
+    # Survival estimates at mean density
+    # DM: from Density model (Use when density relationship is negative) - see below
+    # Sjuv at mean density
+  Sjuv_DM <- list()  
+  Sjuv_DM$estimate<-inv.logit(S.betas$estimate[1] + S.betas$estimate[2] + S.betas$estimate[3]*mean.maps_density) # Juvenile (st=1): S(Intercept) + S(st) + S(maps_density)*mean(maps_density)
+  Sjuv_DM$SE<-deltamethod(as.formula(form1), mean=S.betas$estimate, vcv, ses=TRUE) # deltamethod: approximating the standard error of a transformation g(X) of a random variable X
+  Sjuv_logitCI<-logitCI(Sjuv_DM$estimate, Sjuv_DM$SE)
+  Sjuv_DM$lcl<-Sjuv_logitCI[1]
+  Sjuv_DM$ucl<-Sjuv_logitCI[2]
+    
+    # Sad at mean density
+  Sad_DM <- list()  
+  Sad_DM$estimate<-inv.logit(S.betas$estimate[1] + S.betas$estimate[3]*mean.maps_density) # Adult residents (st=1): S(Intercept) + S(maps_density)*mean(maps_density)
+  Sad_DM$SE<-deltamethod(as.formula(form2), mean=S.betas$estimate, vcv, ses=TRUE) # deltamethod: approximating the standard error of a transformation g(X) of a random variable X
+  Sad_logitCI<-logitCI(Sad_DM$estimate, Sad_DM$SE)
+  Sad_DM$lcl<-Sad_logitCI[1]
+  Sad_DM$ucl<-Sad_logitCI[2]
+    
+    # beta for intercept
+  S_intcpt<-list()
+  S_intcpt$estimate<-S.betas$estimate[1]
+  S_intcpt$lcl<-S.betas$lcl[1]
+  S_intcpt$ucl<-S.betas$ucl[1]
+    
+    # beta for stage
+  S_st<-list()
+  S_st$estimate<-S.betas$estimate[2]
+  S_st$lcl<-S.betas$lcl[2]
+  S_st$ucl<-S.betas$ucl[2]
+  
+    # beta for density
+  S_dens<-list()
+  S_dens$estimate<-S.betas$estimate[3]
+  S_dens$lcl<-S.betas$lcl[3]
+  S_dens$ucl<-S.betas$ucl[3]
   
     # Fecundity related parameters
-  F_mean <- Fec$FTable_full$mean_fec[4]
-  F_beta_rD <- Fec$FTable_full$beta.rD[4]
-  SD_F <- Fec$FTable_full$env.stoch.sd[4]
+  F_mean <- list()
+  F_mean$estimate <- Fec$FTable_full$mean_fec[4]
+  F_mean$lcl <- Fec$FTable_full$mean_fec[2]
+  F_mean$ucl <- Fec$FTable_full$mean_fec[5]
+  
+  F_beta_rD <- list()
+  F_beta_rD$estimate <- Fec$FTable_full$beta.rD[4]
+  F_beta_rD$lcl <- Fec$FTable_full$beta.rD[2]
+  F_beta_rD$ucl <- Fec$FTable_full$beta.rD[5]
+  
+  SD_F <- list()
+  SD_F$estimate <- Fec$FTable_full$env.stoch.sd[4]
+  SD_F$lcl <- Fec$FTable_full$env.stoch.sd[2]
+  SD_F$ucl <- Fec$FTable_full$env.stoch.sd[5]
   
     # mean and SD of raw densities, and maximum rD above which ceiling-type density dependence will be used
   MeanDens<-FecundityResults$Mean.rD
   SD_Dens<-FecundityResults$SD.rD
   MaxPopDens <- RMarkData$max.rD
 
+  if ("Var_Sjuv" %in% ls()){
   MPparameters<-list(
-    Sjuv=Sjuv,
-    Sad=Sad,   
-    SD_Sjuv=SD_Sjuv,
-    SD_Sad=SD_Sad,
+    Sjuv_TCM=Sjuv_TCM,
+    Sad_TCM=Sad_TCM,
+    Sjuv_DM=Sjuv_DM,
+    Sad_DM=Sad_DM,
+    Var_Sjuv=Var_Sjuv,
+    Var_Sad=Var_Sad,
     S_intcpt=S_intcpt,
     S_st=S_st,
     S_dens=S_dens,
@@ -2099,28 +2222,69 @@ SummarizeForPopModel <- function(RMarkData, AppS, STempVar, MarkResults, Fec){ #
     F_beta_rD=F_beta_rD,
     MeanDens=MeanDens,
     SD_Dens=SD_Dens,
-    MaxPopDens=MaxPopDens
-    )
+    MaxPopDens=MaxPopDens)
+  } else {
+    MPparameters<-list(
+      Sjuv_TCM=Sjuv_TCM,
+      Sad_TCM=Sad_TCM,
+      Sjuv_DM=Sjuv_DM,
+      Sad_DM=Sad_DM,
+      Var_Sad=Var_Sad,
+      S_intcpt=S_intcpt,
+      S_st=S_st,
+      S_dens=S_dens,
+      F_mean=F_mean,
+      SD_F=SD_F,
+      F_beta_rD=F_beta_rD,
+      MeanDens=MeanDens,
+      SD_Dens=SD_Dens,
+      MaxPopDens=MaxPopDens)
+  }
  
     # output parameter values to RESULT.txt
+  if ("Var_Sjuv" %in% ls()){
   ToResultsFile(
       paste("
-      -----------------------------------------
-      ALL PARAMETERS USED FOR POPULATION MODEL \n \n",
-      paste("1. Apparent survival rate of juveniles:",Sjuv,"\n"),
-      paste("2. Apparent survival rate of adults:",Sad,"\n"),
-      paste("3. Temporal variability in survival of juveniles:",SD_Sjuv,"\n"),
-      paste("4. Temporal variability in survival for adults:",SD_Sad,"\n"),
-      paste("5. Intercept of density-dependence relationship for survival in logit scale:",S_intcpt,"\n"),
-      paste("6. Juvenile effect in the density-dependence function for survival in logit scale:", S_st,"\n"),
-      paste("7. Slope of density-dependence relationship for survival in logit scale:",S_dens,"\n"),
-      paste("8. Mean fecundity:",F_mean,"\n"),
-      paste("9. Temporal variability in fecundity:",SD_F,"\n"),
-      paste("10. Slope of density-dependence relationship for fecundity in log scale:",F_beta_rD,"\n"),
-      paste("11. Mean of MAPS density:",MeanDens,"\n"),
-      paste("12. SD of MAPS density:",SD_Dens,"\n"),
-      paste("13. Maximum MAPS density above which ceiling-type density-dependence will be assumed:",MaxPopDens,"\n")
+      ----------------------------------------------------------------------------------------
+      PARAMETER VALUES FOR POPULATION MODEL BEFORE CORRECTING FOR APPARENT SURVIVAL \n \n",
+      paste("1. Apparent survival rate of juveniles from time-constant model:",Sjuv_TCM$estimate,"\n"),
+      paste("2. Apparent survival rate of adults from time-constant model:",Sad_TCM$estimate,"\n"),
+      paste("3. Apparent survival rate of juveniles from Density model:",Sjuv_DM$estimate,"\n"),
+      paste("4. Apparent survival rate of adults from Density model:",Sad_DM$estimate,"\n"),
+      paste("5. Temporal variability in survival of juveniles:",Var_Sjuv$estimate,"\n"),
+      paste("6. Temporal variability in survival for adults:",Var_Sad$estimate,"\n"),
+      paste("7. Intercept of density-dependence relationship for survival in logit scale:",S_intcpt$estimate,"\n"),
+      paste("8. Juvenile effect in the density-dependence function for survival in logit scale:", S_st$estimate,"\n"),
+      paste("9. Slope of density-dependence relationship for survival in logit scale:",S_dens$estimate,"\n"),
+      paste("10. Mean fecundity:",F_mean$estimate,"\n"),
+      paste("11. Temporal variability in fecundity:",SD_F$estimate^2,"\n"),
+      paste("12. Slope of density-dependence relationship for fecundity in log scale:",F_beta_rD$estimate,"\n"),
+      paste("13. Mean of MAPS density:",MeanDens,"\n"),
+      paste("14. SD of MAPS density:",SD_Dens,"\n"),
+      paste("15. Maximum MAPS density above which ceiling-type density-dependence will be assumed:",MaxPopDens,"\n")
       ), RESULTS_DIRECTORY, RESULTS_FILENAME)
+  }  else {
+    ToResultsFile(
+      paste("
+      ----------------------------------------------------------------------------------------
+      PARAMETER VALUES FOR POPULATION MODEL BEFORE CORRECTING FOR APPARENT SURVIVAL \n \n",
+            paste("1. Apparent survival rate of juveniles from time-constant model:",Sjuv_TCM$estimate,"\n"),
+            paste("2. Apparent survival rate of adults from time-constant model:",Sad_TCM$estimate,"\n"),
+            paste("3. Apparent survival rate of juveniles from Density model:",Sjuv_DM$estimate,"\n"),
+            paste("4. Apparent survival rate of adults from Density model:",Sad_DM$estimate,"\n"),
+            paste("5. Temporal variability in survival of juveniles: NA \n"),
+            paste("6. Temporal variability in survival for adults:",Var_Sad$estimate,"\n"),
+            paste("7. Intercept of density-dependence relationship for survival in logit scale:",S_intcpt$estimate,"\n"),
+            paste("8. Juvenile effect in the density-dependence function for survival in logit scale:", S_st$estimate,"\n"),
+            paste("9. Slope of density-dependence relationship for survival in logit scale:",S_dens$estimate,"\n"),
+            paste("10. Mean fecundity:",F_mean$estimate,"\n"),
+            paste("11. Temporal variability in fecundity:",SD_F$estimate^2,"\n"),
+            paste("12. Slope of density-dependence relationship for fecundity in log scale:",F_beta_rD$estimate,"\n"),
+            paste("13. Mean of MAPS density:",MeanDens,"\n"),
+            paste("14. SD of MAPS density:",SD_Dens,"\n"),
+            paste("15. Maximum MAPS density above which ceiling-type density-dependence will be assumed:",MaxPopDens,"\n")
+      ), RESULTS_DIRECTORY, RESULTS_FILENAME)
+  }
     
   return(MPparameters)
   
@@ -2128,23 +2292,26 @@ SummarizeForPopModel <- function(RMarkData, AppS, STempVar, MarkResults, Fec){ #
 
 
 #########################################################################################################
-# Function 'WriteMasterMPFile'
-#  Build RAMAS ".MP" file on the basis of information from MAPS analysis(and BBS trend analysis)
-#  OUTPUT -- writes MP file to POPMODELS_DIRECTORY
+# Function 'SummaryMP'
+# Correct for apparent survival and temporal variability of juveniles using CV method
+#  OUTPUT 
+#     -- 'Population Model Summary' text file
 #########################################################################################################
 
-WriteMasterMPFile <- function(Data){
+SummaryMP <- function(Data,TrendData){
   
   # READ IN RESULTS FROM MAPS ANALYSIS
   
-  setwd(MAPS_ResultsDirectory)
-  filename <- paste(SPECIES_CODE,".mp_parameters.2015-04-13.RData",sep="")
-  load(filename)
+  #### test to see if the DD survival model is in effect
   
-  Sjuv <- Data$Sjuv
-  Sad <- Data$Sad
-  SD_Sjuv <- Data$SD_Sjuv
-  SD_Sad <- Data$SD_Sad
+  DD_FLAG <- ifelse(Data$S_dens$estimate<0,TRUE,FALSE)
+  
+  Sjuv <- Data$Sjuv_TCM
+  if(DD_FLAG) Sjuv <- Data$Sjuv_DM
+  Sad <- Data$Sad_TCM
+  if(DD_FLAG) Sad <- Data$Sad_DM
+  Var_Sjuv <- Data$Var_Sjuv
+  Var_Sad <- Data$Var_Sad
   S_intcpt <- Data$S_intcpt
   S_st <- Data$S_st
   S_dens <- Data$S_dens
@@ -2159,114 +2326,413 @@ WriteMasterMPFile <- function(Data){
                 ---------------------------------------------------------
                 DESCRIPTION OF VARIABLE NAMES
                 F_mean            Mean fecundity
-                F_beta_rD         Slope of DD relationship for fecundity, log scale
+                F_beta_rD         Slope of DD relationship for fecundity, log space
                 MaxPopDens        Maximum population density
-                SD_F              Temporal env variability in fecundity
+                SD_F              Temporal env variability (SD) in fecundity
                 MeanDens          Mean population density (for standardizign density covariate)
                 SD_Dens           StDev of population density (for standardizing density covariate)
                 Sad               Mean adult survival
                 Sjuv              Mean juv survival
-                SD_Sad            Temporal env variability in adult survival
-                SD_Sjuv           Temporal env variability in juv survival
-                S_intcpt          Intercept of DD relationship for survival, logit scale
-                S_dens            Slope of DD relationship for survival, logit scale
+                Var_Sad           Temporal env variability (Variance) in adult survival
+                Var_Sjuv          Temporal env variability (Variance) in juv survival
+                S_intcpt          Intercept of DD relationship for survival, logit space
+                S_dens            Slope of DD relationship for survival, logit space
                 S_st              Juvenile effect in the DD function for survival          
-                ")			
+                ", RESULTS_DIRECTORY, RESULTS_FILENAME)			
   
-  ############
-  ###  REGIONAL TREND
-  ###      - TODO: see if this can be automated. Doesn't seem to be a web service associated with BBS
-  ###      -   if not, maybe embed a "dictionary" with the focal species trends within the R code?
+
   
-  ## From BBS web site, get percent change per year, assign it to BBS.trend (usually a number between -5 and +5)
-  ## Here are the trends used in this study:
+  ###  CALCULATE TRUE SURVIVAL (apparent to actual survival)
   
-  setwd(BASE_DIRECTORY)
-  BBS_TrendFile <- "BBS_Trends.csv"
-  sink(BBS_TrendFile)
-  cat("
-      SPECIES,  TREND
-      NOCA,   0.30
-      WEVI,   0.51
-      GRCA,   0.46
-      COYE,   -0.85
-      WOTH,   -2.16
-      HOWA,   1.85
-      YBCH,   -0.27
-      CACH,   -0.37
-      BCCH,   0.29
-      ")
-  sink()
+  ### use the upper and lower bounds of trends
   
-  BBSTrend_DF <- read.csv(BBS_TrendFile,header=T)
-  BBSTrend_DF$SPECIES = as.character(BBSTrend_DF$SPECIES)
-  BBS.trend <- subset(BBSTrend_DF,SPECIES==SPECIES_CODE)$TREND[1]
+  real.lambda <- list()
+  real.lambda$estimate <- 1.0 + TrendData$estimate /100.0
+  real.lambda$lcl <- 1.0 + TrendData$lcl /100.0
+  real.lambda$ucl <- 1.0 + TrendData$ucl /100.0
   
+ 
+  allcombs <- expand.grid(real.lambda=c(real.lambda$lcl,real.lambda$estimate,real.lambda$ucl),Sad=c(Sad$lcl,Sad$estimate,Sad$ucl),Sjuv=c(Sjuv$lcl,Sjuv$estimate,Sjuv$ucl),F_mean=c(F_mean$lcl,F_mean$estimate,F_mean$ucl))
+  allcombs_ndx <- expand.grid(real.lambda.ndx=c(1,2,3),Sad.ndx=c(1,2,3),Sjuv.ndx=c(1,2,3),F_mean.ndx=c(1,2,3))
+  allcombs$correction.factor <- allcombs$real.lambda/(allcombs$Sad + allcombs$Sjuv*allcombs$F_mean)
+  allcombs$corrected.Sad <- allcombs$Sad * allcombs$correction.factor
+  allcombs$corrected.Sjuv <- allcombs$Sjuv * allcombs$correction.factor
+  allcombs <- cbind(allcombs,allcombs_ndx)
   
-  ###  CALCULATE TRUE SURVIVAL
+  corrected.Sad <- list()
+  pointEstNdx <- with(allcombs,which((Sjuv.ndx==2)&(F_mean.ndx==2)&(Sad.ndx==2)&(real.lambda.ndx==2)))
+  corrected.Sad$estimate <- with(allcombs,corrected.Sad[pointEstNdx])
+  corrected.Sad$lcl <- with(allcombs,min(corrected.Sad))
+  corrected.Sad$ucl <- with(allcombs,max(corrected.Sad))
+
+  corrected.Sjuv <- list()
+  corrected.Sjuv$estimate <- with(allcombs,corrected.Sjuv[pointEstNdx])
+  corrected.Sjuv$lcl <- with(allcombs,min(corrected.Sjuv))
+  corrected.Sjuv$ucl <- with(allcombs,max(corrected.Sjuv)) 
   
-  ## apparent to actual survival
-  BBS.lambda <- 1.0 + BBS.trend /100.0
-  apparent.lambda <- Sad + Sjuv *  F_mean
-  survival.correction <- BBS.lambda /  apparent.lambda
-  corrected.Sad <- Sad * survival.correction 
-  corrected.Sjuv <- Sjuv * survival.correction 
+  correction.factor <- list()
+  correction.factor$estimate <- with(allcombs,correction.factor[pointEstNdx])
+  correction.factor$lcl <- with(allcombs,min(correction.factor))
+  correction.factor$ucl <- with(allcombs,max(correction.factor))
+
+  FSa <- list()
+  FSa$estimate <- corrected.Sad$estimate *  F_mean$estimate 
+  FSa$lcl <- corrected.Sad$lcl *  F_mean$lcl
+  FSa$ucl <- corrected.Sad$ucl *  F_mean$ucl
   
+  FSj <- list()
+  FSj$estimate <- corrected.Sjuv$estimate *  F_mean$estimate 
+  FSj$lcl <- corrected.Sjuv$lcl *  F_mean$lcl
+  FSj$ucl <- corrected.Sjuv$ucl *  F_mean$ucl  
   
   ###   ASSEMBLE STAGE MATRIX
   
   ## stage.matrix [ row, column ]
   ## stage.matrix = ( ( (F * Sj), (F *Sad) ), ( Sj, Sad ) )
   
-  stage.matrix <- matrix(c(0,0,0,0),nrow=2)
-  stage.matrix[1,1] <- corrected.Sjuv *  F_mean
-  stage.matrix[1,2] <- corrected.Sad *  F_mean
-  stage.matrix[2,1] <- corrected.Sjuv 
-  stage.matrix[2,2] <- corrected.Sad 
+  stage.matrix <- list()
   
+  stage.matrix$estimate <- matrix(c(0,0,0,0),nrow=2)
+  stage.matrix$lcl <- matrix(c(0,0,0,0),nrow=2)
+  stage.matrix$ucl <- matrix(c(0,0,0,0),nrow=2)
+
+  stage.matrix$estimate[1,1] <- FSj$estimate  # corrected.Sjuv$estimate *  F_mean$estimate
+  stage.matrix$estimate[1,2] <- FSa$estimate  # corrected.Sad$estimate *  F_mean$estimate
+  stage.matrix$estimate[2,1] <- corrected.Sjuv$estimate 
+  stage.matrix$estimate[2,2] <- corrected.Sad$estimate 
   
-  ### ASSEMBLE STANDARD DEVIATIONS MATRIX (ENV. STOCHASTICITY)
+  stage.matrix$lcl[1,1] <- FSj$lcl  # corrected.Sjuv$lcl *  F_mean$lcl
+  stage.matrix$lcl[1,2] <- FSa$lcl # corrected.Sad$lcl *  F_mean$lcl
+  stage.matrix$lcl[2,1] <- corrected.Sjuv$lcl 
+  stage.matrix$lcl[2,2] <- corrected.Sad$lcl 
+  
+  stage.matrix$ucl[1,1] <- FSj$ucl #corrected.Sjuv$ucl *  F_mean$ucl
+  stage.matrix$ucl[1,2] <- FSa$ucl # corrected.Sad$ucl *  F_mean$ucl
+  stage.matrix$ucl[2,1] <- corrected.Sjuv$ucl 
+  stage.matrix$ucl[2,2] <- corrected.Sad$ucl
+  
+  ### ASSEMBLE STANDARD DEVIATION MATRIX (ENV. STOCHASTICITY)
   
   ## Fecundity process variance from sqr(env.stoch.sd)
-  fec_variance <- (SD_F)^2
-  Sad_variance <- (SD_Sad)^2
+  fec_variance <- list()
+  fec_variance$estimate <- (SD_F$estimate)^2
+  fec_variance$lcl <- (SD_F$lcl)^2
+  fec_variance$ucl <- (SD_F$ucl)^2
+
+  ## compute the CV for adult survival
+  CV_Sad <- list()
+  CV_Sad$estimate <- sqrt(Var_Sad$estimate)/Sad$estimate
+  CV_Sad$lcl <- sqrt(Var_Sad$lcl)/Sad$estimate   # smallest CV is smallest sd divided by the point estimate for survival
+  CV_Sad$ucl <- sqrt(Var_Sad$ucl)/Sad$estimate   # smallest CV is smallest sd divided by the point estimate for survival
+  
+  ## compute the CV for juvenile survival
+  
+  JuvSDFlag <- length(Var_Sjuv)>0
+  if(JuvSDFlag) JuvSDFlag <- (Var_Sjuv$lcl>0)
+  if(JuvSDFlag){
+    CV_Sjuv <- list()
+    CV_Sjuv$estimate <- sqrt(Var_Sjuv$estimate)/Sjuv$estimate
+    CV_Sjuv$lcl <- sqrt(Var_Sjuv$lcl)/Sjuv$estimate   # smallest CV is smallest sd divided by the point estimate for survival
+    CV_Sjuv$ucl <- sqrt(Var_Sjuv$ucl)/Sjuv$estimate   # smallest CV is smallest sd divided by the point estimate for survival
+  }
+  
+  ## correct temporal variation in adult survival. Hold CV constant
+  corrected.Var_Sad <- list()
+  corrected.Var_Sad$estimate <- (corrected.Sad$estimate * CV_Sad$estimate)^2
+  corrected.Var_Sad$lcl <- (corrected.Sad$estimate * CV_Sad$lcl)^2
+  corrected.Var_Sad$ucl <- (corrected.Sad$estimate * CV_Sad$ucl)^2
+
   
   ## Sjuv variance cannot be calculated for most species, so it's based on CV of Sad
-  
-  Sjuv_variance <- SD_Sjuv^2
-  
-  if(is.na(Sjuv_variance)){
-    CV.Sad <- SD_Sad / corrected.Sad
-    Sjuv_variance <- (CV.Sad * corrected.Sjuv)^2
+  corrected.Var_Sjuv <- list()  
+  if(JuvSDFlag){             
+    ## correct temporal variation in juvenile survival. Hold CV constant
+	  corrected.Var_Sjuv$estimate <- (corrected.Sjuv$estimate * CV_Sjuv$estimate)^2
+	  corrected.Var_Sjuv$lcl <- (corrected.Sjuv$estimate * CV_Sjuv$lcl)^2
+	  corrected.Var_Sjuv$ucl <- (corrected.Sjuv$estimate * CV_Sjuv$ucl)^2   # if no issues, keep the results from MARK
+  } else {
+	  corrected.Var_Sjuv$estimate <- (corrected.Sjuv$estimate * CV_Sad$estimate)^2
+	  corrected.Var_Sjuv$lcl <- (corrected.Sjuv$estimate * CV_Sad$lcl)^2
+	  corrected.Var_Sjuv$ucl <- (corrected.Sjuv$estimate * CV_Sad$ucl)^2     # otherwise, use CV for adults
   }
   
+  ## FSj and FSa terms (composite terms for the stage matrix...)
+  
+  ## Develop SD matrix- specifically, the stdev matrix elements combining fecundity and juvenile and adult survival rates
+  
+  FSj_variance <- list()
+  FSa_variance <- list()
   if(CORRELATION == 0){    # exact variance when correlation is zero 
     ## Variance of (F*Sjuv)                                                  
-    FSj_variance <- fec_variance * corrected.Sjuv^2 + Sjuv_variance *  F_mean^2 + fec_variance * Sjuv_variance
-    ## Variance of (F*Sad)
-    FSa_variance <- fec_variance * corrected.Sad^2 + Sad_variance *  F_mean^2 + fec_variance * Sad_variance
+    FSj_variance$estimate <- fec_variance$estimate * corrected.Sjuv$estimate^2 + 
+	                         corrected.Var_Sjuv$estimate *  F_mean$estimate^2 + fec_variance$estimate * corrected.Var_Sjuv$estimate
+							 
+	FSj_variance$lcl <- fec_variance$lcl * corrected.Sjuv$lcl^2 + 
+	                         corrected.Var_Sjuv$lcl *  F_mean$lcl^2 + fec_variance$lcl * corrected.Var_Sjuv$lcl
+							 
+	FSj_variance$ucl <- fec_variance$ucl * corrected.Sjuv$ucl^2 + 
+	                         corrected.Var_Sjuv$ucl *  F_mean$ucl^2 + fec_variance$ucl * corrected.Var_Sjuv$ucl
+
+							 ## Variance of (F*Sad)
+    FSa_variance$estimate <- fec_variance$estimate * corrected.Sad$estimate^2 + 
+	                         corrected.Var_Sad$estimate *  F_mean$estimate^2 + fec_variance$estimate * corrected.Var_Sad$estimate
+	FSa_variance$lcl <- fec_variance$lcl * corrected.Sad$lcl^2 + 
+	                         corrected.Var_Sad$lcl *  F_mean$lcl^2 + fec_variance$lcl * corrected.Var_Sad$lcl
+	FSa_variance$ucl <- fec_variance$ucl * corrected.Sad$ucl^2 + 
+	                         corrected.Var_Sad$ucl *  F_mean$ucl^2 + fec_variance$ucl * corrected.Var_Sad$ucl
   }else{
     ## Variance of (F*Sjuv)
-    FSj_variance <- fec_variance * corrected.Sjuv^2 + Sjuv_variance *  F_mean^2 + 2 *  F_mean * corrected.Sjuv * sqrt(fec_variance) * sqrt(Sjuv_variance) * CORRELATION
+    FSj_variance$estimate <- fec_variance$estimate * corrected.Sjuv$estimate^2 + 
+	                         corrected.Var_Sjuv$estimate *  F_mean$estimate^2 + 2 *  F_mean$estimate * 
+							 corrected.Sjuv$estimate * sqrt(fec_variance$estimate) * 
+							 sqrt(corrected.Var_Sjuv$estimate) * CORRELATION
+    FSj_variance$lcl <- fec_variance$lcl * corrected.Sjuv$lcl^2 + 
+	                         corrected.Var_Sjuv$lcl *  F_mean$lcl^2 + 2 *  F_mean$lcl * 
+							 corrected.Sjuv$lcl * sqrt(fec_variance$lcl) * 
+							 sqrt(corrected.Var_Sjuv$lcl) * CORRELATION
+    FSj_variance$ucl <- fec_variance$ucl * corrected.Sjuv$ucl^2 + 
+	                         corrected.Var_Sjuv$ucl *  F_mean$ucl^2 + 2 *  F_mean$ucl * 
+							 corrected.Sjuv$ucl * sqrt(fec_variance$ucl) * 
+							 sqrt(corrected.Var_Sjuv$ucl) * CORRELATION
     ## Variance of (F*Sad)
-    FSa_variance <- fec_variance * corrected.Sad^2 + Sad_variance *  F_mean^2 + 2 *  F_mean * corrected.Sad * sqrt(fec_variance) * sqrt(Sad_variance) * CORRELATION
+    FSa_variance$estimate <- fec_variance$estimate * corrected.Sad$estimate^2 + 
+	                         corrected.Var_Sad$estimate *  F_mean$estimate^2 + 2 *  F_mean$estimate * 
+							 corrected.Sad$estimate * sqrt(fec_variance$estimate) * 
+							 sqrt(corrected.Var_Sad$estimate) * CORRELATION
+    FSa_variance$lcl <- fec_variance$lcl * corrected.Sad$lcl^2 + 
+	                         corrected.Var_Sad$lcl *  F_mean$lcl^2 + 2 *  F_mean$lcl * 
+							 corrected.Sad$lcl * sqrt(fec_variance$lcl) * 
+							 sqrt(corrected.Var_Sad$lcl) * CORRELATION
+    FSa_variance$ucl <- fec_variance$ucl * corrected.Sad$ucl^2 + 
+	                         corrected.Var_Sad$ucl *  F_mean$ucl^2 + 2 *  F_mean$ucl * 
+							 corrected.Sad$ucl * sqrt(fec_variance$ucl) * 
+							 sqrt(corrected.Var_Sad$ucl) * CORRELATION
   }
+  
+  
+    # output to 'Population Model Summary' text file
+  ToPopModelFile (
+    sprintf(("
+    B. Vital Rates and Temporal Variability:
+--------------------------------------------------------------------------
+    Param         Mean (95%% conf int)          Std dev (95%% conf int)
+--------------------------------------------------------------------------
+    Sa            %.3f (%.3f - %.3f)        %.3f (%.3f - %.3f)
+    Sj            %.3f (%.3f - %.3f)        %.3f (%.3f - %.3f)
+    F             %.3f (%.3f - %.3f)        %.3f (%.3f - %.3f)
+    F*Sj          %.3f (%.3f - %.3f)        %.3f (%.3f - %.3f)
+    F*Sa          %.3f (%.3f - %.3f)        %.3f (%.3f - %.3f)
+--------------------------------------------------------------------------
+
+  Notes:
+  The mean values are at average density and average environmental conditions.
+  The standard deviations are used to model temporal environmental variability; they exclude variability due to sampling (or demographic stochasticity).
+  [if correlation.SF=1]
+  The standard deviations for F*Sj and F*Sa assume full correlation between survival and fecundity.
+  [if correlation.SF=0]
+  The standard deviations for F*Sj and F*Sa assume zero correlation between survival and fecundity.
+  [else]
+  The standard deviations for F*Sj and F*Sa assume a correlation of [correlation.SF] between survival and fecundity.
+    "), round(corrected.Sad$estimate,3), round(corrected.Sad$lcl,3), round(corrected.Sad$ucl,3), round(sqrt(corrected.Var_Sad$estimate),3), round(sqrt(corrected.Var_Sad$lcl),3), round(sqrt(corrected.Var_Sad$ucl),3),
+            round(corrected.Sjuv$estimate,3), round(Sjuv$lcl,3), round(Sjuv$ucl,3), round(sqrt(corrected.Var_Sjuv$estimate),3), round(sqrt(corrected.Var_Sjuv$lcl),3), round(sqrt(corrected.Var_Sjuv$ucl),3),
+            round(F_mean$estimate,3), round(F_mean$lcl,3), round(F_mean$ucl,3), round(SD_F$estimate,3), round(SD_F$lcl,3), round(SD_F$ucl,3),
+            round(FSj$estimate,3),round(FSj$lcl,3),round(FSj$ucl,3),round(FSj_variance$estimate,3),round(FSj_variance$lcl,3),round(FSj_variance$ucl,3),
+            round(FSa$estimate,3),round(FSa$lcl,3),round(FSa$ucl,3),round(FSa_variance$estimate,3),round(FSa_variance$lcl,3),round(FSa_variance$ucl),3)      
+    
+    , dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
+  
   
   
   ## Standard deviations matrix 
   ## SD.matrix [ row, column ]
   ## stage.matrix = ( ( (F * Sj), (F *Sad) ), ( Sj, Sad ) )
   
-  SD.matrix <- matrix(c(0,0,0,0),nrow=2)
-  SD.matrix[1,1] <- sqrt(FSj_variance)
-  SD.matrix[1,2] <- sqrt(FSa_variance)
-  SD.matrix[2,1] <- sqrt(Sjuv_variance) 
-  SD.matrix[2,2] <- sqrt(Sad_variance)
+  SD.matrix <- list()
+  SD.matrix$estimate <- matrix(c(0,0,0,0),nrow=2)
+  SD.matrix$estimate[1,1] <- sqrt(FSj_variance$estimate)
+  SD.matrix$estimate[1,2] <- sqrt(FSa_variance$estimate)
+  SD.matrix$estimate[2,1] <- sqrt(corrected.Var_Sjuv$estimate) 
+  SD.matrix$estimate[2,2] <- sqrt(corrected.Var_Sad$estimate)
+  
+  SD.matrix$lcl <- matrix(c(0,0,0,0),nrow=2)
+  SD.matrix$lcl[1,1] <- sqrt(FSj_variance$lcl)
+  SD.matrix$lcl[1,2] <- sqrt(FSa_variance$lcl)
+  SD.matrix$lcl[2,1] <- sqrt(corrected.Var_Sjuv$lcl) 
+  SD.matrix$lcl[2,2] <- sqrt(corrected.Var_Sad$lcl)
+  
+  SD.matrix$ucl <- matrix(c(0,0,0,0),nrow=2)
+  SD.matrix$ucl[1,1] <- sqrt(FSj_variance$ucl)
+  SD.matrix$ucl[1,2] <- sqrt(FSa_variance$ucl)
+  SD.matrix$ucl[2,1] <- sqrt(corrected.Var_Sjuv$ucl) 
+  SD.matrix$ucl[2,2] <- sqrt(corrected.Var_Sad$ucl)
+  
+  # output Stage Matrix to 'Population Model Summary' text file
+  ToPopModelFile (
+    sprintf(("
+  C. The Stage Matrix:
+|----------------------------------|-----------------------------------|
+|  %.3f (%.3f - %.3f)           |   %.3f (%.3f - %.3f)           |
+|----------------------------------|-----------------------------------|
+|  %.3f (%.3f - %.3f)           |   %.3f (%.3f - %.3f)           |
+|----------------------------------|-----------------------------------|
+             "), 
+			 round(stage.matrix$estimate[1,1],3),round(stage.matrix$lcl[1,1],3),round(stage.matrix$ucl[1,1],3), 
+			 round(stage.matrix$estimate[1,2],3),round(stage.matrix$lcl[1,2],3),round(stage.matrix$ucl[1,2],3),
+			 round(stage.matrix$estimate[2,1],3),round(stage.matrix$lcl[2,1],3),round(stage.matrix$ucl[2,1],3), 
+			 round(stage.matrix$estimate[2,2],3),round(stage.matrix$lcl[2,2],3),round(stage.matrix$ucl[2,2],3))
+    , dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
   
   
+  # output to SD Matrix to 'Population Model Summary' text file
+  ToPopModelFile (
+    sprintf(("
+  D. The Standard Deviation Matrix:
+  
+|----------------------------------|-----------------------------------|
+|  %.3f (%.3f - %.3f)           |   %.3f (%.3f - %.3f)           |
+|----------------------------------|-----------------------------------|
+|  %.3f (%.3f - %.3f)           |   %.3f (%.3f - %.3f)           |
+|----------------------------------|-----------------------------------|  
+    "), 
+			 round(SD.matrix$estimate[1,1],3),round(SD.matrix$lcl[1,1],3),round(SD.matrix$ucl[1,1],3), 
+			 round(SD.matrix$estimate[1,2],3),round(SD.matrix$lcl[1,2],3),round(SD.matrix$ucl[1,2],3),
+			 round(SD.matrix$estimate[2,1],3),round(SD.matrix$lcl[2,1],3),round(SD.matrix$ucl[2,1],3), 
+			 round(SD.matrix$estimate[2,2],3),round(SD.matrix$lcl[2,2],3),round(SD.matrix$ucl[2,2],3))
+    , dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
+  
+  # output Density-dependence functions to 'Population Model Summary' text file
+  ToPopModelFile (
+    sprintf(("
+  D. Density Dependence:
+
+  When (N/K) > [%.3f], the current population size is truncated at [%.3f]*K
+  or the stage matrix and stage abundances are decreased such that the expected population size in the next time step is [%.3f]*K.
+
+             "), round(MaxPopDens,3), round(MaxPopDens,3), round(MaxPopDens,3))
+    , dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
+  
+  
+  ToPopModelFile (
+    sprintf(("
+  [if F_beta_rD<0 then:]
+  When N/K < [%.3f], fecundity is calculated as the following function of density (N/K) at each time step:
+  F  = F_mean * exp(F_beta_rD * ( (PopDens - MeanDens) / SD_Dens ) )
+  F  = %.3f * %.3f   * ( ( (N/K)  - %.3f  ) / %.3f ) )
+             "), round(MaxPopDens,2), round(F_mean$estimate,3), round(F_beta_rD$estimate,3), round(MeanDens,3), round(SD_Dens,3) )
+    , dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
+  
+  ToPopModelFile (
+    sprintf(("
+  [if S_Dens<0 then:]
+  When N/K < [%s], survival rates are calculated as the following functions of density (N/K) at each time step:
+  Sj = exp(S_intcpt + S_st + S_dens*PopDens)/(1 + exp(S_intcpt + S_st + S_dens*PopDens)) * Corr_factor
+  Sa = exp(S_intcpt        + S_dens*PopDens)/(1 + exp(S_intcpt        + S_dens*PopDens)) * Corr_factor
+             "), round(MaxPopDens,2))
+    , dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
+  
+  ToPopModelFile (
+    sprintf(("
+      
+  Sj = exp(%s - %s * (N/K)) / (1 + exp(%s - %s * (N/K)))
+  Sa = exp(%s - %s * (N/K)) / (1 + exp(%s - %s * (N/K)))
+             "), round(S_intcpt$estimate+S_st$estimate,3), round(S_dens$estimate,3), round(S_intcpt$estimate+S_st$estimate,3), round(S_dens$estimate,3),
+                 round(S_intcpt$estimate,3), round(S_dens$estimate,3), round(S_intcpt$estimate,3), round(S_dens$estimate,3))
+    , dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
+  
+  ToPopModelFile (
+    sprintf(("
+  [else if S_Dens>=0 AND F_beta_rD>=0then:]
+  Neither survival rate nor fecundity are density dependent below N/K of [%s]
+             "), round(MaxPopDens,2))
+    , dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
+	
+	#######################################
+    # output density dependence model to 'Population Model Summary' text file
+  ToPopModelFile (
+    sprintf(("
+Density dependence function values:
+--------------------------------------------------------------------------
+    Param         Mean (95%% conf int)          
+--------------------------------------------------------------------------
+    S_intcpt        %.3f (%.3f - %.3f)       
+    S_st            %.3f (%.3f - %.3f)        
+    S_dens          %.3f (%.3f - %.3f)        
+    F_beta_rD       %.3f (%.3f - %.3f)
+    Corr_factor     %.3f (%.3f - %.3f)	
+    MeanDens        %.3f  
+    SD_Dens         %.3f 
+    MaxPopDens      %.3f 	
+--------------------------------------------------------------------------
+
+    "), round(S_intcpt$estimate,3), round(S_intcpt$lcl,3), round(S_intcpt$ucl,3), 
+	    round(S_st$estimate,3), round(S_st$lcl,3), round(S_st$ucl,3),
+		round(S_dens$estimate,3), round(S_dens$lcl,3), round(S_dens$ucl,3),
+		round(F_beta_rD$estimate,3), round(F_beta_rD$lcl,3), round(F_beta_rD$ucl,3),
+		round(correction.factor$estimate,3), round(correction.factor$lcl,3), round(correction.factor$ucl,3),
+		round(MeanDens,3), round(SD_Dens,3), round(MaxPopDens,3))
+    , dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
+  
+	if ("CV_Sjuv" %in% ls()) {
+	Result<-list(Data=Data, real.lambda=real.lambda, allcombs=allcombs, 
+               corrected.Sad=corrected.Sad, corrected.Sjuv=corrected.Sjuv, correction.factor=correction.factor,
+               FSa=FSa, FSj=FSj, stage.matrix=stage.matrix, fec_variance=fec_variance,
+               CV_Sad=CV_Sad, CV_Sjuv=CV_Sjuv, corrected.Var_Sad=corrected.Var_Sad, corrected.Var_Sjuv=corrected.Var_Sjuv,
+               FSj_variance=FSj_variance, FSa_variance=FSa_variance, SD.matrix=SD.matrix)
+	} else {
+	  Result<-list(Data=Data, real.lambda=real.lambda, allcombs=allcombs, 
+	               corrected.Sad=corrected.Sad, corrected.Sjuv=corrected.Sjuv, correction.factor=correction.factor,
+	               FSa=FSa, FSj=FSj, stage.matrix=stage.matrix, fec_variance=fec_variance,
+	               CV_Sad=CV_Sad, corrected.Var_Sad=corrected.Var_Sad, corrected.Var_Sjuv=corrected.Var_Sjuv,
+	               FSj_variance=FSj_variance, FSa_variance=FSa_variance, SD.matrix=SD.matrix)
+	}
+
+  return(Result)
+  
+} # end of function 'SummaryMP'
+  
+  
+  
+  
+  #########################################################################################################
+  # Function 'WriteMasterMPFile'
+  #  Build RAMAS ".MP" file on the basis of information from MAPS analysis(and BBS trend analysis)
+  #  OUTPUT 
+  #     -- writes MP file to POPMODELS_DIRECTORY
+  #########################################################################################################
+  
+  WriteMasterMPFile <- function(Result){
+    
+    # READ IN RESULTS FROM MAPS ANALYSIS  
+  
+    Data<-Result$Data
+    
+    #### test to see if the DD survival model is in effect
+    DD_FLAG <- ifelse(Data$S_dens$estimate<0,TRUE,FALSE)
+    
+    Sjuv <- Data$Sjuv_TCM
+    if(DD_FLAG) Sjuv <- Data$Sjuv_DM
+    Sad <- Data$Sad_TCM
+    if(DD_FLAG) Sad <- Data$Sad_DM
+    Var_Sjuv <- Data$Var_Sjuv
+    Var_Sad <- Data$Var_Sad
+    S_intcpt <- Data$S_intcpt
+    S_st <- Data$S_st
+    S_dens <- Data$S_dens
+    F_mean <- Data$F_mean
+    SD_F <- Data$SD_F
+    F_beta_rD <- Data$F_beta_rD
+    MeanDens <- Data$MeanDens
+    SD_Dens <- Data$SD_Dens
+    MaxPopDens <- Data$MaxPopDens
+    
+    correction.factor<-Result$correction.factor
+    stage.matrix<-Result$stage.matrix
+    SD.matrix<-Result$SD.matrix
+    
   ###  WRITE THE .MP FILE
   
   closeAllConnections()
+  
   
   ## CONSTRUCT THE POPULATION LINE FOR THE .MP FILE
   
@@ -2278,125 +2744,179 @@ WriteMasterMPFile <- function(Data){
   ## S:(Intercept)    S:st    S:maps_density     F_mean    beta_rD	   Mean_Density   SD_Density    MaxDens
   ## such that it looks like this:
   ## '0.0256,-1.8453,0.0524,1.6960,-0.0828,1.5018,1.1340,3.14'
-  string2 <- paste(S_intcpt, S_st, S_dens, F_mean, F_beta_rD, MeanDens, SD_Dens, MaxPopDens, sep=",") 
+  string2 <- list()
+  string2$estimate <- paste(S_intcpt$estimate, S_st$estimate, S_dens$estimate, F_mean$estimate, F_beta_rD$estimate, MeanDens, SD_Dens, MaxPopDens, correction.factor$estimate, sep=",") 
+  string2$lcl <- paste(S_intcpt$lcl, S_st$lcl, S_dens$lcl, F_mean$lcl, F_beta_rD$lcl, MeanDens, SD_Dens, MaxPopDens, correction.factor$lcl, sep=",")
+  string2$ucl <- paste(S_intcpt$ucl, S_st$ucl, S_dens$ucl, F_mean$ucl, F_beta_rD$ucl, MeanDens, SD_Dens, MaxPopDens, correction.factor$ucl, sep=",")
   
-  Population.String <- paste(string1, string2)
+  Population.String <- list()
+  Population.String$estimate <- paste(string1, string2$estimate)
+  Population.String$lcl <- paste(string1, string2$lcl)
+  Population.String$ucl <- paste(string1, string2$ucl)
   
-  MP_initializeFile <- function(){
+  MP_initializeFiles <- function(){
     setwd(POPMODELS_DIRECTORY)
     MP_line1 <<- paste("Metapopulation input file (",METAPOP_VERSION,") map= ",sep="")
-    MP_title <<- paste("Population model for ",SPECIES_CODE,", parameterized from MAPS data",sep="")
-    MP_fileName <<- paste(SPECIES_CODE,"test.mp",sep="_")
-    MP_dllLocation <<- paste(POPMODELS_DIRECTORY,"\\aviandd.dll",sep="")
+	MP_title <<- list()
+    MP_title$estimate <<- paste("Population model for ",SPECIES_CODE,", parameterized using central point estimates from MAPS data.",sep="")
+	MP_title$lcl <<- paste("Population model for ",SPECIES_CODE,", parameterized using lower bound estimates from MAPS data.",sep="")
+	MP_title$ucl <<- paste("Population model for ",SPECIES_CODE,", parameterized using lower bound estimates from MAPS data.",sep="")
+	MP_fileName <<- list()
+    MP_fileName$estimate <<- paste(SPECIES_CODE,"_pointEstimates.mp",sep="_")
+	MP_fileName$lcl <<- paste(SPECIES_CODE,"_lowerBound.mp",sep="_")
+	MP_fileName$ucl <<- paste(SPECIES_CODE,"_upperBound.mp",sep="_")
+    MP_dllLocation <<- paste(POPMODELS_DIRECTORY,"\\AvianDD.dll",sep="")
     
     ## open a blank file for writing
-    MP_fileConnection <<- file(MP_fileName,"w")   
-    flush(MP_fileConnection)  # remove existing contents
+	MP_fileConnection <<- list()
+    MP_fileConnection$estimate <<- file(MP_fileName$estimate,"w") 
+    MP_fileConnection$lcl <<- file(MP_fileName$lcl,"w")
+    MP_fileConnection$ucl <<- file(MP_fileName$ucl,"w")	
+	
+    flush(MP_fileConnection$estimate)  # remove existing contents
+	flush(MP_fileConnection$lcl)
+	flush(MP_fileConnection$ucl)
+  }
+  
+  writeLines2<- function(text, conList){
+     if(!is.list(text)){
+       writeLines(text,MP_fileConnection$estimate)
+       writeLines(text,MP_fileConnection$lcl)
+       writeLines(text,MP_fileConnection$ucl)	 
+	 }else{
+       writeLines(text$estimate,MP_fileConnection$estimate)
+       writeLines(text$lcl,MP_fileConnection$lcl)
+       writeLines(text$ucl,MP_fileConnection$ucl)	 
+	 }
+  }
+  
+  close2 <- function(conList){
+    close(conList$estimate)
+    close(conList$lcl)
+    close(conList$ucl)	
   }
   
   MP_writeBlock1 <- function(){
-    writeLines(MP_line1,MP_fileConnection)
-    writeLines(MP_title,MP_fileConnection)
+    writeLines2(MP_line1,MP_fileConnection)
+    writeLines2(MP_title,MP_fileConnection)
     for(i in 1:4){
-      writeLines("",MP_fileConnection)
+      writeLines2("",MP_fileConnection)
     }
-    writeLines(as.character(REPLICATES),MP_fileConnection)
-    writeLines(as.character(TIMESTEPS),MP_fileConnection)
-    writeLines("TRUE",MP_fileConnection)
-    writeLines("2 FALSE",MP_fileConnection)
+    writeLines2(as.character(REPLICATES),MP_fileConnection)
+    writeLines2(as.character(TIMESTEPS),MP_fileConnection)
+    writeLines2("TRUE",MP_fileConnection)
+    writeLines2("2 FALSE",MP_fileConnection)
     for(i in 1:2){
-      writeLines("",MP_fileConnection)
+      writeLines2("",MP_fileConnection)
     }
-    writeLines("Local",MP_fileConnection)
-    writeLines("",MP_fileConnection)
-    writeLines("not spread",MP_fileConnection)
-    writeLines("0.0000",MP_fileConnection)
-    writeLines("0.0000,0.0000,0.0000,0.0000",MP_fileConnection)
+    writeLines2("Local",MP_fileConnection)
+    writeLines2("",MP_fileConnection)
+    writeLines2("not spread",MP_fileConnection)
+    writeLines2("0.0000",MP_fileConnection)
+    writeLines2("0.0000,0.0000,0.0000,0.0000",MP_fileConnection)
     for(i in 1:2){
-      writeLines("",MP_fileConnection)
+      writeLines2("",MP_fileConnection)
     }
-    writeLines("Local",MP_fileConnection)
-    writeLines("",MP_fileConnection)
-    writeLines("not spread",MP_fileConnection)
-    writeLines("0.0000",MP_fileConnection)
-    writeLines("0.0000,0.0000,0.0000,0.0000",MP_fileConnection)
-    writeLines("False,Zero",MP_fileConnection)
-    writeLines("all vital rates",MP_fileConnection)
-    writeLines("Lognormal,0",MP_fileConnection)
-    writeLines("0.000000",MP_fileConnection)
-    writeLines("count in total",MP_fileConnection)
-    writeLines("1 (F, S, K correlated)",MP_fileConnection)
-    writeLines("No",MP_fileConnection)
-    writeLines("AllStages",MP_fileConnection)
-    writeLines("No",MP_fileConnection)
-    writeLines("UD",MP_fileConnection)
-    writeLines(MP_dllLocation,MP_fileConnection)
-    writeLines("1",MP_fileConnection)
-    writeLines("years",MP_fileConnection)
-    writeLines("OnlyFemale",MP_fileConnection)
-    writeLines("1",MP_fileConnection)
-    writeLines("Monogamous",MP_fileConnection)
-    writeLines("2.0",MP_fileConnection)
-    writeLines("2.0",MP_fileConnection)
-    writeLines("0.0000",MP_fileConnection)
-    writeLines("0",MP_fileConnection)
+    writeLines2("Local",MP_fileConnection)
+    writeLines2("",MP_fileConnection)
+    writeLines2("not spread",MP_fileConnection)
+    writeLines2("0.0000",MP_fileConnection)
+    writeLines2("0.0000,0.0000,0.0000,0.0000",MP_fileConnection)
+    writeLines2("False,Zero",MP_fileConnection)
+    writeLines2("all vital rates",MP_fileConnection)
+    writeLines2("Lognormal,0",MP_fileConnection)
+    writeLines2("0.000000",MP_fileConnection)
+    writeLines2("count in total",MP_fileConnection)
+    writeLines2("1 (F, S, K correlated)",MP_fileConnection)
+    writeLines2("No",MP_fileConnection)
+    writeLines2("AllStages",MP_fileConnection)
+    writeLines2("No",MP_fileConnection)
+    writeLines2("UD",MP_fileConnection)
+    writeLines2(MP_dllLocation,MP_fileConnection)
+    writeLines2("1",MP_fileConnection)
+    writeLines2("years",MP_fileConnection)
+    writeLines2("OnlyFemale",MP_fileConnection)
+    writeLines2("1",MP_fileConnection)
+    writeLines2("Monogamous",MP_fileConnection)
+    writeLines2("2.0",MP_fileConnection)
+    writeLines2("2.0",MP_fileConnection)
+    writeLines2("0.0000",MP_fileConnection)
+    writeLines2("0",MP_fileConnection)
   }
   
   MP_writeBlock2 <- function(){
-    writeLines("Migration",MP_fileConnection)
-    writeLines("FALSE",MP_fileConnection)
-    writeLines("0.000,0.00000,0.00000,0.00000",MP_fileConnection)
-    writeLines(" 0,",MP_fileConnection)
-    writeLines("Correlation",MP_fileConnection)
-    writeLines("FALSE",MP_fileConnection)
-    writeLines("0.000,0.00000,0.00000",MP_fileConnection)
-    writeLines(" 1,",MP_fileConnection)
-    writeLines("1 type(s) of stage matrix",MP_fileConnection)
-    writeLines("default",MP_fileConnection)
-    writeLines("1.000000",MP_fileConnection)
-    writeLines("1.000000",MP_fileConnection)
-    writeLines("0",MP_fileConnection)
+    writeLines2("Migration",MP_fileConnection)
+    writeLines2("FALSE",MP_fileConnection)
+    writeLines2("0.000,0.00000,0.00000,0.00000",MP_fileConnection)
+    writeLines2(" 0,",MP_fileConnection)
+    writeLines2("Correlation",MP_fileConnection)
+    writeLines2("FALSE",MP_fileConnection)
+    writeLines2("0.000,0.00000,0.00000",MP_fileConnection)
+    writeLines2(" 1,",MP_fileConnection)
+    writeLines2("1 type(s) of stage matrix",MP_fileConnection)
+    writeLines2("default",MP_fileConnection)
+    writeLines2("1.000000",MP_fileConnection)
+    writeLines2("1.000000",MP_fileConnection)
+    writeLines2("0",MP_fileConnection)
   }
   
   MP_writeBlock3 <- function(){
-    writeLines("Constraints Matrix",MP_fileConnection)
-    writeLines("0.000000 0.000000",MP_fileConnection)
+    writeLines2("Constraints Matrix",MP_fileConnection)
+    writeLines2("0.000000 0.000000",MP_fileConnection)
     for(i in 1:8){
-      writeLines("1.000000 1.000000",MP_fileConnection)
+      writeLines2("1.000000 1.000000",MP_fileConnection)
     }
-    writeLines("-1 -1",MP_fileConnection)
-    writeLines("Juvenile",MP_fileConnection)
-    writeLines("1.00000000",MP_fileConnection)
-    writeLines("FALSE",MP_fileConnection)
-    writeLines("TRUE",MP_fileConnection)
-    writeLines("         1",MP_fileConnection)
-    writeLines("Adult",MP_fileConnection)
-    writeLines("1.00000000",MP_fileConnection)
-    writeLines("FALSE",MP_fileConnection)
-    writeLines("TRUE",MP_fileConnection)
-    writeLines("         1",MP_fileConnection)
-    writeLines("0 (pop mgmnt)",MP_fileConnection)
-    writeLines("0.0",MP_fileConnection)
-    writeLines("0.0",MP_fileConnection)
-    writeLines("10",MP_fileConnection)
-    writeLines("-End of file-",MP_fileConnection)
+    writeLines2("-1 -1",MP_fileConnection)
+    writeLines2("Juvenile",MP_fileConnection)
+    writeLines2("1.00000000",MP_fileConnection)
+    writeLines2("FALSE",MP_fileConnection)
+    writeLines2("TRUE",MP_fileConnection)
+    writeLines2("         1",MP_fileConnection)
+    writeLines2("Adult",MP_fileConnection)
+    writeLines2("1.00000000",MP_fileConnection)
+    writeLines2("FALSE",MP_fileConnection)
+    writeLines2("TRUE",MP_fileConnection)
+    writeLines2("         1",MP_fileConnection)
+    writeLines2("0 (pop mgmnt)",MP_fileConnection)
+    writeLines2("0.0",MP_fileConnection)
+    writeLines2("0.0",MP_fileConnection)
+    writeLines2("10",MP_fileConnection)
+    writeLines2("-End of file-",MP_fileConnection)
   }
   
   MP_construct <- function(){
-    MP_initializeFile()
+    MP_initializeFiles()
     MP_writeBlock1()
-    writeLines(Population.String,MP_fileConnection)
+    writeLines2(Population.String,MP_fileConnection)
     MP_writeBlock2()
+	
     ## WRITE STAGE MATRIX
-    writeLines(paste(stage.matrix[1,],collapse=" "),MP_fileConnection)
-    writeLines(paste(stage.matrix[2,],collapse=" "),MP_fileConnection)
-    writeLines("1 type(s) of st.dev. matrix",MP_fileConnection)
-    writeLines("default",MP_fileConnection)
+	topRow <- list()
+	topRow$estimate <- paste(stage.matrix$estimate[1,],collapse=" ")
+	topRow$lcl <- paste(stage.matrix$lcl[1,],collapse=" ")
+	topRow$ucl <- paste(stage.matrix$ucl[1,],collapse=" ")
+	bottomRow <- list()
+	bottomRow$estimate <- paste(stage.matrix$estimate[2,],collapse=" ")
+	bottomRow$lcl <- paste(stage.matrix$lcl[2,],collapse=" ")
+	bottomRow$ucl <- paste(stage.matrix$ucl[2,],collapse=" ")
+    writeLines2(topRow,MP_fileConnection)
+    writeLines2(bottomRow,MP_fileConnection)
+    writeLines2("1 type(s) of st.dev. matrix",MP_fileConnection)
+    writeLines2("default",MP_fileConnection)
+	
     ## WRITE SD MATRIX
-    writeLines(paste(SD.matrix[1,],collapse=" "),MP_fileConnection)
-    writeLines(paste(SD.matrix[2,],collapse=" "),MP_fileConnection)
+	topRow <- list()
+	topRow$estimate <- paste(SD.matrix$estimate[1,],collapse=" ")
+	topRow$lcl <- paste(SD.matrix$lcl[1,],collapse=" ")
+	topRow$ucl <- paste(SD.matrix$ucl[1,],collapse=" ")
+	bottomRow <- list()
+	bottomRow$estimate <- paste(SD.matrix$estimate[2,],collapse=" ")
+	bottomRow$lcl <- paste(SD.matrix$lcl[2,],collapse=" ")
+	bottomRow$ucl <- paste(SD.matrix$ucl[2,],collapse=" ")
+    writeLines2(topRow,MP_fileConnection)
+    writeLines2(bottomRow,MP_fileConnection)
     MP_writeBlock3()
-    close(MP_fileConnection)
+    close2(MP_fileConnection)
   }
   
   MP_construct()
