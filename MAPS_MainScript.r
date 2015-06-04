@@ -18,19 +18,11 @@ rm(list=ls())    # clear the workspace
 ### FIRST, get all the files to your computer (click on "Download ZIP" or "Clone in Desktop").
 ### SECOND, in the following line, specify the folder where you saved the files:
 BASE_DIRECTORY <- "C:\\xxxxxxx\\"
-### THIRD, modify the settings in the lines below as needed.
-### FOURTH, run this script (MAPS_MainScript.r) in R.
+### THIRD, in the following line, specify the folder containing the WinBUGS executable
+BUGSdir <- "C:\\xxxxxxx\\" 
+### FOURTH, modify the settings in the lines below as needed.
+### FIFTH, run this script (MAPS_MainScript.r) in R.
 
-
-
-### Do not change the following lines (for developer use only)
-
-CHLOE = T
-CHLOE_LAPTOP = F
-LAB_COMPUTER = F
-KEVIN = F
-EVA = F
-RESIT = F
 
 #########################
 ####  Define the scope of the analysis
@@ -54,7 +46,6 @@ INITIAL_ABUNDANCE <- 1000				 # Simulation initial abundance
 CARRYING_CAPACITY <- 10000 			 # Simulation carrying capacity (assumed to be fixed throughout the simulation)
 CORRELATION <- 1.0     					 # Set correlation between S and F  (in this study, we assumed full correlation)
 
-
 #########################
 ###   Set MCMC parameters (for estimating fecundity)
 ni <- 1000000      # Number of MCMC iterations per chain
@@ -62,63 +53,34 @@ nc <- 3           # Number of chains
 nb <- 500000       # Burn-in length
 nt <- 100          # Thinning rate
 
-if(KEVIN) BUGSdir <- 'C:\\Users\\Kevin\\Documents\\Employment\\ESF\\Bog Turtle\\DATA\\software\\BUGS\\WinBUGS14'    # Local WinBUGS directory 
-if(CHLOE) BUGSdir <- "C:/Users/haeyeong86/Desktop/WinBUGS14"
-if(CHLOE_LAPTOP) BUGSdir <- "C:\\Users\\haeyeong86\\Desktop\\WinBUGS14"
-if(LAB_COMPUTER) BUGSdir <- "C:/Users/Chloe/Downloads/winbugs14/WinBUGS14"
-
-
 #################################################################################################################
-# SET DIRECTORIES AND LOAD PACKAGES
+# SET DIRECTORIES (and create the directory if it doesn't exist)
 #################################################################################################################
-
-  DATA_DIRECTORY <- paste(BASE_DIRECTORY,"Datasets",sep="")
-
-#########################
-### Set directory variables (and make the directory if it doesn't exist)
-
-if(KEVIN) BASE_DIRECTORY <- "C:\\Users\\Kevin\\Dropbox\\MAPS Project\\"
-if(CHLOE) BASE_DIRECTORY <- "C:\\Users\\Chloe\\Dropbox\\MAPS Project\\"
-if(CHLOE_LAPTOP) BASE_DIRECTORY <- "C:\\Users\\haeyeong86\\Dropbox\\MAPS Project\\"
-if(LAB_COMPUTER) BASE_DIRECTORY <- "C:\\Users\\Chloe\\Dropbox\\MAPS Project\\"
-if(RESIT) BASE_DIRECTORY <- "C:\\Users\\Resit\\Dropbox\\MAPS Project\\"
 
 PUBLICDATA_DIRECTORY <- paste(BASE_DIRECTORY,"Public dataset",sep="")
-if(is.na(file.info(PUBLICDATA_DIRECTORY)[1,"isdir"])) dir.create(PUBLICDATA_DIRECTORY)        
-POPMODELS_DIRECTORY <- paste(BASE_DIRECTORY,"Pop models\\final2",sep="")
-if(is.na(file.info(POPMODELS_DIRECTORY)[1,"isdir"])) dir.create(POPMODELS_DIRECTORY)                      # create new directory if it doesn't exist already
-RESULTS_DIRECTORY <- paste(BASE_DIRECTORY,"Results\\final2",sep="")  # for now, put the results in a separate folder
-if(is.na(file.info(RESULTS_DIRECTORY)[1,"isdir"])) dir.create(RESULTS_DIRECTORY)
-DATA_DIRECTORY <- paste(BASE_DIRECTORY,"Data\\final2",sep="")  # for now, put the results in a separate folder
-if(is.na(file.info(DATA_DIRECTORY)[1,"isdir"])) dir.create(DATA_DIRECTORY)
-# CODE_DIRECTORY <- paste(BASE_DIRECTORY,"code",sep="")
-# if(is.na(file.info(CODE_DIRECTORY)[1,"isdir"])) dir.create(CODE_DIRECTORY)
-
-### If running for the first time, install required packages in R
-install.packages("RMark")
-install.packages("R2WinBUGS")
-install.packages("MASS")
-install.packages("gtools")
-install.packages("foreign")
-install.packages("RODBC")
-install.packages("doBy")
-install.packages("msm")
-
-### Load required packages in R
-suppressMessages(suppressWarnings(require(RMark)))
-suppressMessages(suppressWarnings(require(R2WinBUGS)))
-suppressMessages(suppressWarnings(require(MASS)))
-suppressMessages(suppressWarnings(require(gtools)))
-suppressMessages(suppressWarnings(require(foreign)))
-suppressMessages(suppressWarnings(require(RODBC)))
-suppressMessages(suppressWarnings(require(doBy)))
-suppressMessages(suppressWarnings(require(msm)))
+if(is.na(file.info(PUBLICDATA_DIRECTORY)[1,"isdir"])) dir.create(PUBLICDATA_DIRECTORY,recursive=T)        
+POPMODELS_DIRECTORY <- paste(BASE_DIRECTORY,"Pop models",sep="")
+if(is.na(file.info(POPMODELS_DIRECTORY)[1,"isdir"])) dir.create(POPMODELS_DIRECTORY,recursive=T)                      # create new directory if it doesn't exist already
+RESULTS_DIRECTORY <- paste(BASE_DIRECTORY,"Results",sep="")  # for now, put the results in a separate folder
+if(is.na(file.info(RESULTS_DIRECTORY)[1,"isdir"])) dir.create(RESULTS_DIRECTORY,recursive=T)
+DATA_DIRECTORY <- paste(BASE_DIRECTORY,"Datasets",sep="")  # for now, put the results in a separate folder
+if(is.na(file.info(DATA_DIRECTORY)[1,"isdir"])) dir.create(DATA_DIRECTORY,recursive=T)
 
 #################################################################################################################
-# LOAD FUNCTIONS
+# LOAD FUNCTIONS AND PACKAGES
 #################################################################################################################
+
 setwd(BASE_DIRECTORY)
-source("MAPS_AllFunctions.r")
+source("MAPS_AllFunctions.r")     # functions loaded from GitHub
+
+loadPackage("RMark")
+loadPackage("R2WinBUGS")
+loadPackage("MASS")
+loadPackage("gtools")
+loadPackage("foreign")
+loadPackage("RODBC")
+loadPackage("doBy")
+loadPackage("msm")
 
 #################################################################################################################
 #  DEFINE ASSOCIATION BETWEEN BANDING STATIONS AND DISTINCT POPULATIONS

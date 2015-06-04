@@ -5,6 +5,18 @@
 ####  [From Ryu et al., "Developing Population Models with Data from Marked Individuals", submitted to MEE, May 2015] 
 ########################################################################################################################
 
+########################################
+## GENERIC FUNCTION FOR INSTALLING/LOADING PACKAGES FROM CRAN
+########################################
+
+loadPackage <- function(pkg){
+
+  if(pkg %in% rownames(installed.packages()) == FALSE) {suppressMessages(suppressWarnings(install.packages(pkg)))}
+  eval(parse(text=sprintf("suppressMessages(suppressWarnings(require(%s)))",pkg)), envir= .GlobalEnv)
+
+}
+
+
 ##################################################################################
 ###### FUNCTION FOR READING IN TREND DATA
 ##################################################################################
