@@ -65,6 +65,8 @@ RESULTS_DIRECTORY <- paste(BASE_DIRECTORY,"Results",sep="")  # for now, put the 
 if(is.na(file.info(RESULTS_DIRECTORY)[1,"isdir"])) dir.create(RESULTS_DIRECTORY,recursive=T)
 DATA_DIRECTORY <- paste(BASE_DIRECTORY,"Datasets",sep="")  # for now, put the results in a separate folder
 if(is.na(file.info(DATA_DIRECTORY)[1,"isdir"])) dir.create(DATA_DIRECTORY,recursive=T)
+CODE_DIRECTORY <- paste(BASE_DIRECTORY,"Code",sep="")  # for storing WinBUGS code and other code for the project
+if(is.na(file.info(CODE_DIRECTORY)[1,"isdir"])) dir.create(CODE_DIRECTORY,recursive=T)
 
 #################################################################################################################
 # LOAD FUNCTIONS AND PACKAGES
@@ -200,8 +202,6 @@ setwd(DATA_DIRECTORY)
 filename <- paste(SPECIES_CODE, "PTable.RData", sep="_")
 save(p.table, file=filename)
 
-filename<-"WOTH_PTABLE_TEST2.csv"
-write.csv(p.table, filename)
 #######################################################################################################
 # ADD DENSITY COVARIATE TO THE RMARK DATA --- FOR ESTIMATING DENSITY-DEPENDENCE IN FINAL SURVIVAL ANALYSIS 
 ######################################################################################################
