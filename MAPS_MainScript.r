@@ -35,12 +35,14 @@ RESIT = F
 #########################
 ####  Define the scope of the analysis
 
-## 'GRCA','WOTH','WEVI','YBCH','HOWA','COYE','BCCH','CACH','NOCA'  [focal species for Ryu et al. for reference]
+## MAPS datasets in GitHub (CSV files) are available for the following species:
+##                'GRCA','WOTH','WEVI','YBCH','HOWA','COYE','BCCH','CACH','NOCA'
+## For reference: for MAPS dataset in GitHub, data are available for the period 1994-2012 
+##               (exception is BCCH, for which data are available until 2010)
 
 SPECIES_CODE <- "YBCH"           # Focal Species
 BEGINYEAR    <- 1994             # First year of study period
 ENDYEAR      <- 2012             # Final year of study period
-MAPSyears=c(BEGINYEAR:ENDYEAR)   # MAPSyears: vector of all years of interest
 
 #########################
 ###   Population simulation modeling parameters
@@ -70,9 +72,6 @@ if(LAB_COMPUTER) BUGSdir <- "C:/Users/Chloe/Downloads/winbugs14/WinBUGS14"
 # SET DIRECTORIES AND LOAD PACKAGES
 #################################################################################################################
 
-####Current line 67: Change:
-  DATA_DIRECTORY <- paste(BASE_DIRECTORY,"Data\\final",sep="")  # for now, put the results in a separate folder
-to:
   DATA_DIRECTORY <- paste(BASE_DIRECTORY,"Datasets",sep="")
 
 #########################
@@ -92,8 +91,8 @@ RESULTS_DIRECTORY <- paste(BASE_DIRECTORY,"Results\\final2",sep="")  # for now, 
 if(is.na(file.info(RESULTS_DIRECTORY)[1,"isdir"])) dir.create(RESULTS_DIRECTORY)
 DATA_DIRECTORY <- paste(BASE_DIRECTORY,"Data\\final2",sep="")  # for now, put the results in a separate folder
 if(is.na(file.info(DATA_DIRECTORY)[1,"isdir"])) dir.create(DATA_DIRECTORY)
-CODE_DIRECTORY <- paste(BASE_DIRECTORY,"code",sep="")
-if(is.na(file.info(CODE_DIRECTORY)[1,"isdir"])) dir.create(CODE_DIRECTORY)
+# CODE_DIRECTORY <- paste(BASE_DIRECTORY,"code",sep="")
+# if(is.na(file.info(CODE_DIRECTORY)[1,"isdir"])) dir.create(CODE_DIRECTORY)
 
 ### If running for the first time, install required packages in R
 install.packages("RMark")
@@ -118,7 +117,7 @@ suppressMessages(suppressWarnings(require(msm)))
 #################################################################################################################
 # LOAD FUNCTIONS
 #################################################################################################################
-setwd(CODE_DIRECTORY)
+setwd(BASE_DIRECTORY)
 source("MAPS_AllFunctions.r")
 
 #################################################################################################################
