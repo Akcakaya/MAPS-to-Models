@@ -28,7 +28,7 @@ BUGSdir <- "C:\\xxxxxxx\\"
 ####  Define the scope of the analysis
 
 ## MAPS datasets in GitHub (CSV files) are available for the following species:
-##                'GRCA','WOTH','WEVI','YBCH','HOWA','COYE','BCCH','CACH','NOCA'
+##                'BCCH','CACH','COYE','GRCA','HOWA','NOCA','WEVI','WOTH','YBCH'
 ## For reference: for MAPS dataset in GitHub, data are available for the period 1994-2012 
 ##               (exception is BCCH, for which data are available until 2010)
 
