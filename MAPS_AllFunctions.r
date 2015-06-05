@@ -2148,8 +2148,8 @@ for (t in 1:nt) {
       initial_null=inits_null,
       FResults_full=ModResults_full,
       FResults_null=ModResults_null,
-      GR_full=GR_full,
-      GR_null=GR_null,
+      GR_full.W.E=GR_full.W.E,
+      GR_null.W.E=GR_null.W.E,
       FTable_full=FTable_full,
       FTable_null=FTable_null
       )
