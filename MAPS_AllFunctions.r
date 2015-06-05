@@ -1844,7 +1844,6 @@ for (t in 1:nt) {
       beta.rD=-0.1
     )
    
-             #  nt=5;nc=2;nb=10000;ni=20000
 	    #Send information to WinBUGS
 	  Mod_full <- bugs(data=Data_full, inits=inits_full, 
 				  parameters.to.save=c("mean.fec", "env.stoch.sd", "est.mean.fec", "beta.rD", "Adultp", "Juvp"), 
@@ -1854,14 +1853,40 @@ for (t in 1:nt) {
       # read in results
 	  FecResults_full = read.bugs(Mod_full)
       # To test for convergence, use the Gelman and Rubin's convergence diagnostic
-      # Approximate convergence is diagnosed when the upper limit is close to 1. 
-    GR_full<-gelman.diag(FecResults_full, confidence = 0.95, transform=FALSE, autoburnin=TRUE,
+      # Approximate convergence is diagnosed when the upper limit is close to 1.
+      # Even if the chains are too short to allow the GR calculation, let the WinBUGS simulation run
+    GR_full.W.E<-tryCatch.W.E(
+      GR_full<-gelman.diag(FecResults_full, confidence = 0.95, transform=FALSE, autoburnin=TRUE,
               multivariate=TRUE)
+    )
+  
+      # output warning message if GR did not work
+    if ( length( grep("Error", (paste(class(GR_full.W.E$value), collapse=" ")))) >0 ) {
+      GR_full.W.E$warning <-"Computing Gelman and Rubin's convergence diagnostic for full model failed!"
+    } else {GR_full.W.E$warning<-NULL}
+  
       # print the GR convergence diagnostic in Results.txt
 	  
 	  # gelman.plot(FecResults_full)
-    ToResultsFile(
-    sprintf("
+    if ( length( grep("Error", (paste(class(GR_full.W.E$value), collapse=" ")))) >0 ) {
+      ToResultsFile("
+    ----------------------------------------------------------------------------------------
+    GELMAN AND RUBIN'S CONVERGENCE DIAGNOSTIC - FECUNDITY CORRECTED FOR CAPTURE PROBABILITY
+
+    Computing Gelman and Rubin's convergence diagnostic for full model failed!
+    " , RESULTS_DIRECTORY, RESULTS_FILENAME)
+      
+      ToDebugFile("
+    ----------------------------------------------------------------------------------------
+    GELMAN AND RUBIN'S CONVERGENCE DIAGNOSTIC - FECUNDITY CORRECTED FOR CAPTURE PROBABILITY
+    
+    Computing Gelman and Rubin's convergence diagnostic for full model failed!
+    " , DATA_DIRECTORY, DEBUG_FILENAME)
+      ToDebugFile(paste(paste("Warning",GR_full.W.E$warning, sep=": "), "\n", sep=""), DATA_DIRECTORY, DEBUG_FILENAME)
+      
+    } else {
+      ToResultsFile(
+        sprintf("
     ----------------------------------------------------------------------------------------
     GELMAN AND RUBIN'S CONVERGENCE DIAGNOSTIC - FECUNDITY CORRECTED FOR CAPTURE PROBABILITY
     
@@ -1869,8 +1894,9 @@ for (t in 1:nt) {
     Upper C.I. of Slope of DD relationship for fecundity: %s \n
     Upper C.I. of Temporal env variability (SD) in fecundity: %s \n
     *Approximate convergence is diagnosed when the upper limit is close to 1. 
-    " , GR_full$psrf["mean.fec","Upper C.I."], GR_full$psrf["beta.rD","Upper C.I."], GR_full$psrf["env.stoch.sd","Upper C.I."]
-    ),  RESULTS_DIRECTORY, RESULTS_FILENAME)
+    " , GR_full.W.E$value$psrf["mean.fec","Upper C.I."], GR_full.W.E$value$psrf["beta.rD","Upper C.I."], GR_full.W.E$value$psrf["env.stoch.sd","Upper C.I."]
+        ),  RESULTS_DIRECTORY, RESULTS_FILENAME)
+    }
 
       # read in values 	  
 	  ModResults_full <- as.data.frame(FecResults_full[[1]])
@@ -1963,11 +1989,39 @@ for (t in 1:nt) {
 	 
     # To test for convergence, use the Gelman and Rubin's convergence diagnostic
     # Approximate convergence is diagnosed when the upper limit is close to 1. 
-    GR_null<-gelman.diag(FecResults_null, confidence = 0.95, transform=FALSE, autoburnin=TRUE,
-                       multivariate=TRUE)
+    # Even if the chains are too short to allow the GR calculation, let the WinBUGS simulation run
+    GR_null.W.E<-tryCatch.W.E(
+      GR_null<-gelman.diag(FecResults_null, confidence = 0.95, transform=FALSE, autoburnin=TRUE,
+                         multivariate=TRUE)
+    )
+  
+    # output warning message if GR did not work
+    if ( length( grep("Error", (paste(class(GR_null.W.E$value), collapse=" ")))) >0 ) {
+      GR_null.W.E$warning <-"Computing Gelman and Rubin's convergence diagnostic for null model failed!"
+    } else {GR_null.W.E$warning<-NULL}
+  
     # print the GR convergence diagnostic in Results.txt
-  ToResultsFile(
-    sprintf("
+  
+    # gelman.plot(FecResults_null)
+    if ( length( grep("Error", (paste(class(GR_null.W.E$value), collapse=" ")))) >0 ) {
+      ToResultsFile("
+      ----------------------------------------------------------------------------------------
+      GELMAN AND RUBIN'S CONVERGENCE DIAGNOSTIC - FECUNDITY NOT CORRECTED FOR CAPTURE PROBABILITY
+
+      Computing Gelman and Rubin's convergence diagnostic for null model failed!
+      " , RESULTS_DIRECTORY, RESULTS_FILENAME)
+    
+      ToDebugFile("
+      ----------------------------------------------------------------------------------------
+      GELMAN AND RUBIN'S CONVERGENCE DIAGNOSTIC - FECUNDITY NOT CORRECTED FOR CAPTURE PROBABILITY
+    
+      Computing Gelman and Rubin's convergence diagnostic for null model failed!
+      " , DATA_DIRECTORY, DEBUG_FILENAME)
+      ToDebugFile(paste(paste("Warning",GR_null.W.E$warning, sep=": "), "\n", sep=""), DATA_DIRECTORY, DEBUG_FILENAME)
+    
+    } else {
+      ToResultsFile(
+        sprintf("
     ----------------------------------------------------------------------------------------
     GELMAN AND RUBIN'S CONVERGENCE DIAGNOSTIC - FECUNDITY NOT CORRECTED FOR CAPTURE PROBABILITY
             
@@ -1975,8 +2029,9 @@ for (t in 1:nt) {
     Upper C.I. of Slope of DD relationship for fecundity: %s \n
     Upper C.I. of Temporal env variability (SD) in fecundity: %s \n
     *Approximate convergence is diagnosed when the upper limit is close to 1. 
-    " , GR_null$psrf["mean.fec","Upper C.I."], GR_null$psrf["beta.rD","Upper C.I."], GR_null$psrf["env.stoch.sd","Upper C.I."]
-    ),  RESULTS_DIRECTORY, RESULTS_FILENAME)
+    " , GR_null.W.E$value$psrf["mean.fec","Upper C.I."], GR_null.W.E$value$psrf["beta.rD","Upper C.I."], GR_null.W.E$value$psrf["env.stoch.sd","Upper C.I."]
+        ),  RESULTS_DIRECTORY, RESULTS_FILENAME)
+    }
   
 	    # read in values for nc chains
     ModResults_null <- as.data.frame(FecResults_null[[1]])
