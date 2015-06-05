@@ -16,7 +16,7 @@ The program allows estimating survival rates; fecundities; density dependence in
 
 (3) A file that shows the correspondance between stations and populations. Often, there would be multiple banding stations within each biological population (or subpopulation) of the species.  This file allows the user to group stations into populations.
 
-For examples of these data files, see the [Datasets folder] (https://github.com/Akcakaya/MAPS-to-Models/tree/master/Datasets), which include the data used in Ryu et al. (2015).
+For examples of these data files, see the [Datasets folder] (https://github.com/Akcakaya/MAPS-to-Models/tree/master/Public%20dataset), which include the data used in Ryu et al. (2015).
 
 ## Program output
 `MAPS-to-Models` creates the following files that include the results of the analysis:
@@ -27,7 +27,7 @@ For examples of these data files, see the [Datasets folder] (https://github.com/
 
 (3) Intermediate results file: a text file that contains all output and intermediate results created during the analysis.
 
-(4) MP files: input files for RAMAS Metapop and [RAMAS GIS](http://ramas.com/software.htm) Software.  Three input files are created.  One includes the best estimates of all parameters of the population model.  Two other files include the lower and upper bounds of the parameters; these can be used with the R package `demgsa` [(github.com/mlammens/demgsa)](https://github.com/mlammens/demgsa) to perform a global sensitivity analysis (Aiello-Lammens & Akçakaya 2015).
+(4) MP files: input files for RAMAS Metapop and [RAMAS GIS](http://ramas.com/software.htm) Software.  Three input files are created.  One includes the best estimates of all parameters of the population model.  Two other files include the lower and upper bounds of the parameters; these can be used with the R package `demgsa` [(github.com/mlammens/demgsa)](https://github.com/mlammens/demgsa) to perform a global sensitivity analysis (Aiello-Lammens & Akçakaya 2015). Note: These models use te user-defined density-dependence function, whose source code is included [here](https://github.com/Akcakaya/MAPS-to-Models/blob/master/AvianDD.DPR).
 
 ## Getting started
 
