@@ -359,9 +359,7 @@ WriteMasterMPFile(Result=SummaryMP)
 # Functions
 
 # InitializeDebugFile            -- Initializes a text file for storing debug information. Saved in DATA_DIRECTORY.
-# ToDebugFile                    -- Appends text to the debug text file.
 # InitializeResultsFile          -- Initializes a text file for storing results information. Saved in RESULTS_DIRECTORY.
-# ToResultsFile                  -- Appends text to the intermediate results text file.
 # InitializePopModelFile         -- Initializes a text file for storing population summary information. Saved in RESULTS_DIRECTORY.
 # ReadRawData                    -- Reads in relevant data from the MAPS database. 
 # FormatForCMR                   -- Turn the data extracted from the MAPS database into a "capture history" format. 
