@@ -4,7 +4,7 @@
 ##### Objective: Use MAPS database (Monitoring Avian Productivity and Survivorship) to parameterize 
 #####            a full, stochastic population model for one or more focal species. 
 #####
-##### Reference: Ryu et al. "Developing Population Models with Data from Marked Individuals", submitted to MEE, June 2015
+##### Reference: Ryu et al. "Developing Population Models with Data from Marked Individuals"
 #######################################################################
 
 #################################################################################################################
@@ -122,7 +122,7 @@ population_map = read.csv("station_pop.csv",header=T)      # A user-defined csv 
 # lcl = lower confidence limit
 # ucl = upper confidence limit
 
-BBS.Trend <- Assign.Trend(estimate=-2.16, lcl=-2.42, ucl=-1.89) # Assign trend (point estimate, lcl, and ucl) for each species based on BBS Trend. 
+BBS.Trend <- Assign.Trend(estimate=0.29, lcl=-0.20, ucl=0.80) # Assign trend (point estimate, lcl, and ucl) for each species based on BBS Trend. 
 
 #################################################################################################################
 # SET UP INFORMATIVE 'DEBUG' FILE

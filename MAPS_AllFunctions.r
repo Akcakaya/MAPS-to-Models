@@ -2,7 +2,7 @@
 ####  R Functions used for accessing and processing MAPS data, building datafiles for RMark,
 ####  estimating demographic parameteters, and assembling a population model. 
 
-####  [From Ryu et al., "Developing Population Models with Data from Marked Individuals", submitted to MEE, June 2015] 
+####  [From Ryu et al., "Developing Population Models with Data from Marked Individuals"] 
 ########################################################################################################################
 
 ##################################################################################
@@ -70,7 +70,7 @@ InitializeDebugFile <- function(dir, filename){
 	----------------------------------------------------------------------
 	DEBUG MESSAGES FOR MAPS TO MODELS ANALYSIS (warnings and errors) 
 
-	Reference: Ryu et al: \"Developing Population Models with Data from Marked Individuals\" submitted to MEE, April 2015
+	Reference: Ryu et al: \"Developing Population Models with Data from Marked Individuals\" 
 
 	This document contains details about the \"MAPS to Models\" analysis- warning and error messages. Please read this
 	document carefully before running any population models.
@@ -117,7 +117,7 @@ InitializeResultsFile <- function(dir, filename){
 ----------------------------------------------------------------------
 INTERMEDIATE RESULTS FOR MAPS TO MODELS ANALYSIS
 
-Reference: Ryu et al: \"Developing Population Models with Data from Marked Individuals\" submitted to MEE, April 2015
+Reference: Ryu et al: \"Developing Population Models with Data from Marked Individuals\" 
 
 This document contains details about the \"MAPS to Models\" analysis results. Please read this
 document carefully before running any population models derived from this analysis.
@@ -167,7 +167,7 @@ InitializePopModelFile <- function(dir, filename){
 *****  POPULATION MODEL SUMMARY ********
 ****************************************
 
-Reference: Ryu et al: \"Developing Population Models with Data from Marked Individuals\" submitted to MEE, May 2015
+Reference: Ryu et al: \"Developing Population Models with Data from Marked Individuals\" 
 
 This file contains a summary of the population model resulting from the analysis of the mark-recapture data. \n
   In addition to this file, check the following files created from this analysis: \n
@@ -2640,12 +2640,6 @@ SummaryMP <- function(Data,TrendData){
   Notes:
   The mean values are at average density and average environmental conditions.
   The standard deviations are used to model temporal environmental variability; they exclude variability due to sampling (or demographic stochasticity).
-  [if correlation.SF=1]
-  The standard deviations for F*Sj and F*Sa assume full correlation between survival and fecundity.
-  [if correlation.SF=0]
-  The standard deviations for F*Sj and F*Sa assume zero correlation between survival and fecundity.
-  [else]
-  The standard deviations for F*Sj and F*Sa assume a correlation of [correlation.SF] between survival and fecundity.
     "), round(corrected.Sad$estimate,3), round(corrected.Sad$lcl,3), round(corrected.Sad$ucl,3), round(sqrt(corrected.Var_Sad$estimate),3), round(sqrt(corrected.Var_Sad$lcl),3), round(sqrt(corrected.Var_Sad$ucl),3),
             round(corrected.Sjuv$estimate,3), round(Sjuv$lcl,3), round(Sjuv$ucl,3), round(sqrt(corrected.Var_Sjuv$estimate),3), round(sqrt(corrected.Var_Sjuv$lcl),3), round(sqrt(corrected.Var_Sjuv$ucl),3),
             round(F_mean$estimate,3), round(F_mean$lcl,3), round(F_mean$ucl,3), round(SD_F$estimate,3), round(SD_F$lcl,3), round(SD_F$ucl,3),
@@ -2654,8 +2648,28 @@ SummaryMP <- function(Data,TrendData){
     
     , dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
   
-  
-  
+  if(CORRELATION==1){
+    ToPopModelFile (
+    sprintf(("
+  Correlation between S and F = %s
+  The standard deviations for F*Sj and F*Sa assume full correlation between survival and fecundity.
+    "), CORRELATION), dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
+  } else{
+    if (CORRELATION==0){
+    ToPopModelFile (
+      sprintf(("
+  Correlation between S and F = %s
+  The standard deviations for F*Sj and F*Sa assume zero correlation between survival and fecundity.
+    "), CORRELATION), dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
+    } else {
+    ToPopModelFile (
+      sprintf(("
+  Correlation between S and F = %s
+  The standard deviations for F*Sj and F*Sa assume a correlation of [%s] between survival and fecundity.
+    "), CORRELATION, CORRELATION), dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
+    }
+  }
+    
   ## Standard deviations matrix 
   ## SD.matrix [ row, column ]
   ## stage.matrix = ( ( (F * Sj), (F *Sad) ), ( Sj, Sad ) )
@@ -2720,44 +2734,60 @@ SummaryMP <- function(Data,TrendData){
 
   When (N/K) > [%.3f], the current population size is truncated at [%.3f]*K
   or the stage matrix and stage abundances are decreased such that the expected population size in the next time step is [%.3f]*K.
-
              "), round(MaxPopDens,3), round(MaxPopDens,3), round(MaxPopDens,3))
     , dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
   
-  
   ToPopModelFile (
     sprintf(("
-  [if F_beta_rD<0 then:]
   When N/K < [%.3f], fecundity is calculated as the following function of density (N/K) at each time step:
-  F  = F_mean * exp(F_beta_rD * ( (PopDens - MeanDens) / SD_Dens ) )
-  F  = %.3f * %.3f   * ( ( (N/K)  - %.3f  ) / %.3f ) )
-             "), round(MaxPopDens,2), round(F_mean$estimate,3), round(F_beta_rD$estimate,3), round(MeanDens,3), round(SD_Dens,3) )
+  F  = F_mean * exp( F_beta_rD * ( (PopDens - MeanDens) / SD_Dens ) )
+             "), round(MaxPopDens,3))
     , dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
+  
+  if (F_beta_rD$estimate<0){
+    ToPopModelFile (
+    sprintf(("  
+  F  = %.3f * exp( (%.3f) * ( ( (N/K)  - %.3f  ) / %.3f ) )
+  Negative density-dependence is detected for F, therefore, this function is used in the population model.
+             "), round(F_mean$estimate,3), round(F_beta_rD$estimate,3), round(MeanDens,3), round(SD_Dens,3))
+    , dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
+  } else {
+    ToPopModelFile (
+      sprintf(("
+  F  = %.3f * exp( (%.3f) * ( ( (N/K)  - %.3f  ) / %.3f ) )
+  Positive density-dependence is detected for F, therefore, this function is not used in the population model.
+             "), round(F_mean$estimate,3), round(F_beta_rD$estimate,3), round(MeanDens,3), round(SD_Dens,3))
+      , dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
+  }
+  
   
   ToPopModelFile (
     sprintf(("
-  [if S_Dens<0 then:]
   When N/K < [%s], survival rates are calculated as the following functions of density (N/K) at each time step:
-  Sj = exp(S_intcpt + S_st + S_dens*PopDens)/(1 + exp(S_intcpt + S_st + S_dens*PopDens)) * Corr_factor
-  Sa = exp(S_intcpt        + S_dens*PopDens)/(1 + exp(S_intcpt        + S_dens*PopDens)) * Corr_factor
-             "), round(MaxPopDens,2))
+  Sj = [ exp(S_intcpt + S_st + S_dens*PopDens)/(1 + exp(S_intcpt + S_st + S_dens*PopDens)) ] * Corr_factor
+  Sa = [ exp(S_intcpt        + S_dens*PopDens)/(1 + exp(S_intcpt        + S_dens*PopDens)) ] * Corr_factor
+             "), round(MaxPopDens,3))
     , dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
   
-  ToPopModelFile (
-    sprintf(("
-      
-  Sj = exp(%s - %s * (N/K)) / (1 + exp(%s - %s * (N/K)))
-  Sa = exp(%s - %s * (N/K)) / (1 + exp(%s - %s * (N/K)))
-             "), round(S_intcpt$estimate+S_st$estimate,3), round(S_dens$estimate,3), round(S_intcpt$estimate+S_st$estimate,3), round(S_dens$estimate,3),
-                 round(S_intcpt$estimate,3), round(S_dens$estimate,3), round(S_intcpt$estimate,3), round(S_dens$estimate,3))
+  if (S_dens$estimate<0) {
+    ToPopModelFile (
+    sprintf(("     
+  Sj = [ exp((%s) + (%s) * (N/K)) / (1 + exp((%s) + (%s) * (N/K))) ] * %s
+  Sa = [ exp((%s) + (%s) * (N/K)) / (1 + exp((%s) + (%s) * (N/K))) ] * %s
+  Negative density-dependence is detected for S, therefore, this functions are used in the population model.
+             "), round(S_intcpt$estimate+S_st$estimate,3), round(S_dens$estimate,3), round(S_intcpt$estimate+S_st$estimate,3), round(S_dens$estimate,3), round(correction.factor$estimate,3),
+                 round(S_intcpt$estimate,3), round(S_dens$estimate,3), round(S_intcpt$estimate,3), round(S_dens$estimate,3), round(correction.factor$estimate,3))
     , dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
-  
-  ToPopModelFile (
-    sprintf(("
-  [else if S_Dens>=0 AND F_beta_rD>=0then:]
-  Neither survival rate nor fecundity are density dependent below N/K of [%s]
-             "), round(MaxPopDens,2))
-    , dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
+  } else {
+    ToPopModelFile (
+      sprintf(("     
+  Sj = [ exp((%s) + (%s) * (N/K)) / (1 + exp((%s) + (%s) * (N/K))) ] * %s
+  Sa = [ exp((%s) + (%s) * (N/K)) / (1 + exp((%s) + (%s) * (N/K))) ] * %s
+  Positive density-dependence is detected for S, therefore, this functions are not used in the population model.
+             "), round(S_intcpt$estimate+S_st$estimate,3), round(S_dens$estimate,3), round(S_intcpt$estimate+S_st$estimate,3), round(S_dens$estimate,3), round(correction.factor$estimate,3),
+      round(S_intcpt$estimate,3), round(S_dens$estimate,3), round(S_intcpt$estimate,3), round(S_dens$estimate,3), round(correction.factor$estimate,3))
+, dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
+  }
 	
 	  #######################################
     # output density dependence model to 'Population Model Summary' text file
@@ -2767,11 +2797,11 @@ Density dependence function values:
 --------------------------------------------------------------------------
     Param         Mean (95%% conf int)          
 --------------------------------------------------------------------------
-    S_intcpt        %.3f (%.3f - %.3f)       
-    S_st            %.3f (%.3f - %.3f)        
-    S_dens          %.3f (%.3f - %.3f)        
-    F_beta_rD       %.3f (%.3f - %.3f)
-    Corr_factor     %.3f (%.3f - %.3f)	
+    S_intcpt        %.3f ((%.3f) - (%.3f))       
+    S_st            %.3f ((%.3f) - (%.3f))       
+    S_dens          %.3f ((%.3f) - (%.3f))        
+    F_beta_rD       %.3f ((%.3f) - (%.3f))
+    Corr_factor     %.3f ((%.3f) - (%.3f))	
     MeanDens        %.3f  
     SD_Dens         %.3f 
     MaxPopDens      %.3f 	
