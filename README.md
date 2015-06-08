@@ -27,7 +27,7 @@ For examples of these data files, see the [dataset folder] (https://github.com/A
 
 (3) Intermediate results file: a text file that contains all output and intermediate results created during the analysis.
 
-(4) MP files: input files for RAMAS Metapop and [RAMAS GIS](http://ramas.com/software.htm) Software.  Three input files are created.  One includes the best estimates of all parameters of the population model.  Two other files include the lower and upper bounds of the parameters; these can be used with the R package `demgsa` [(github.com/mlammens/demgsa)](https://github.com/mlammens/demgsa) to perform a global sensitivity analysis (Aiello-Lammens & Akçakaya 2015). Note: These models use the user-defined density-dependence function AvianDD, whose source code is included [here](https://github.com/Akcakaya/MAPS-to-Models/blob/master/AvianDD.DPR).
+(4) MP files: input files for RAMAS Metapop and [RAMAS GIS](http://ramas.com/software.htm) Software.  Three input files are created.  One includes the best estimates of all parameters of the population model.  Two other files include the lower and upper bounds of the parameters; these can be used with the R package `demgsa` [(github.com/mlammens/demgsa)](https://github.com/mlammens/demgsa) to perform a global sensitivity analysis (Aiello-Lammens & Akçakaya 2015). Note: These models use the user-defined density-dependence function [AvianDD.dll](https://github.com/Akcakaya/MAPS-to-Models/blob/master/AvianDD.dll), whose source code is [AvianDD.DPR](https://github.com/Akcakaya/MAPS-to-Models/blob/master/AvianDD.DPR).
 
 ## Getting started
 
@@ -40,5 +40,5 @@ For examples of these data files, see the [dataset folder] (https://github.com/A
 ## References
 Aiello-Lammens, M.A. and H.R. Akçakaya. 2015. New approaches to global sensitivity analysis of demographic models with applications to impact assessment (in review).
 
-Ryu, H.Y., K.T. Shoemaker, É. Kneip, A. Pidgeon, P. Heglund, B. Bateman, W. Thogmartin, H.R. Akçakaya. 2015.  Developing population models with data from marked individuals (in preparation).
+Ryu, H.Y., K.T. Shoemaker, É. Kneip, A. Pidgeon, P. Heglund, B. Bateman, W. Thogmartin, H.R. Akçakaya. 2015.  Developing population models with data from marked individuals (in review).
 
