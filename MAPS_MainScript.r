@@ -64,7 +64,7 @@ nt <- 100          # Thinning rate
 
 PUBLICDATA_DIRECTORY <- paste(BASE_DIRECTORY,"Public dataset",sep="") 
 if(is.na(file.info(PUBLICDATA_DIRECTORY)[1,"isdir"])) dir.create(PUBLICDATA_DIRECTORY,recursive=T)        
-POPMODELS_DIRECTORY <- paste(BASE_DIRECTORY,"Pop models",sep="")      # MP files are created and stored in this directory.
+POPMODELS_DIRECTORY <- paste(BASE_DIRECTORY,"Pop models",sep="")      # MP files are created and stored in this directory. NOTE: To run RAMAS, dll file should also be in this folder.
 if(is.na(file.info(POPMODELS_DIRECTORY)[1,"isdir"])) dir.create(POPMODELS_DIRECTORY,recursive=T)                      
 RESULTS_DIRECTORY <- paste(BASE_DIRECTORY,"Results",sep="")           # Population model summary, Intermediate Results text file, and MARK output and model results are stored in this directory.
 if(is.na(file.info(RESULTS_DIRECTORY)[1,"isdir"])) dir.create(RESULTS_DIRECTORY,recursive=T)
