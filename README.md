@@ -29,7 +29,8 @@ For examples of these data files, see the [dataset folder] (https://github.com/A
 
 (4) MP files: input files for RAMAS Metapop and [RAMAS GIS](http://ramas.com/software.htm) Software.  Three input files are created.  One includes the best estimates of all parameters of the population model.  Two other files include the lower and upper bounds of the parameters; these can be used with the R package `demgsa` [(github.com/mlammens/demgsa)](https://github.com/mlammens/demgsa) to perform a global sensitivity analysis (Aiello-Lammens & Akçakaya 2015). Note: These models use the user-defined density-dependence function [AvianDD.dll](https://github.com/Akcakaya/MAPS-to-Models/blob/master/AvianDD.dll), whose source code is [AvianDD.DPR](https://github.com/Akcakaya/MAPS-to-Models/blob/master/AvianDD.DPR). To run RAMAS, the dll file should be in the same working directory as the MP files.
 
-As an example, result files for White-eyed vireo (WEVI) are made available in the folder 'Example result files'.
+Fpr examples of the result files for White-eyed vireo (WEVI), see the folder [Example result files']
+(https://github.com/Akcakaya/MAPS-to-Models/tree/master/Example%20result%20files).
 
 ## Getting started
 
