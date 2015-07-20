@@ -1,13 +1,15 @@
 ########################################################################################################################
-####  R Functions used for accessing and processing MAPS data, building datafiles
-####  for RMark, estimating demographic parameteters, and assembing a population model. 
+####  R Functions used for accessing and processing MAPS data, building datafiles for RMark,
+####  estimating demographic parameteters, and assembling a population model. 
 
-####  [From Ryu et al., "Developing Population Models with Data from Marked Individuals", submitted to MEE, May 2015] 
+####  [From Ryu et al., "Developing Population Models with Data from Marked Individuals"] 
 ########################################################################################################################
 
-########################################
-## GENERIC FUNCTION FOR INSTALLING/LOADING PACKAGES FROM CRAN
-########################################
+##################################################################################
+# FUNCTION 'loadPackage'
+# 
+# CHECK FOR PACKAGES AND INSTALL/LOAD PACKAGES FROM CRAN
+##################################################################################
 
 loadPackage <- function(pkg){
 
@@ -18,7 +20,9 @@ loadPackage <- function(pkg){
 
 
 ##################################################################################
-###### FUNCTION FOR READING IN TREND DATA
+# FUNCTION 'Assign.Trend'
+#
+# READ IN TREND DATA
 ##################################################################################
 
 Assign.Trend <- function(estimate=0,lcl=0,ucl=0){
@@ -30,9 +34,10 @@ Assign.Trend <- function(estimate=0,lcl=0,ucl=0){
 }
 
 
-
 #################################################################################
-######   FUNCTION FOR CATCHING AND STORING ERRORS (but allowing the program to keep running)
+# FUNCTION 'tryCatch.W.E'
+#
+# CATCH AND STORE ERRORS WHILE ALLOWING THE PROGRAM TO KEEP RUNNING
 #################################################################################
 
 tryCatch.W.E <- function(expr){
@@ -47,9 +52,13 @@ tryCatch.W.E <- function(expr){
 
 
 ################################################################################
-######  SET UP INFORMATIVE DEBUG FILE
+# FUNCTION 'InitializeDebugFile'
+#
+# SET UP INFORMATIVE DEBUG FILE
+#
+# OUTPUT:
+#    introductory lines in 'Debug' text file in DATA_DIRECTORY
 ################################################################################
-
 
 InitializeDebugFile <- function(dir, filename){
 	   # clear file
@@ -61,7 +70,7 @@ InitializeDebugFile <- function(dir, filename){
 	----------------------------------------------------------------------
 	DEBUG MESSAGES FOR MAPS TO MODELS ANALYSIS (warnings and errors) 
 
-	Reference: Ryu et al: \"Developing Population Models with Data from Marked Individuals\" submitted to MEE, April 2015
+	Reference: Ryu et al: \"Developing Population Models with Data from Marked Individuals\" 
 
 	This document contains details about the \"MAPS to Models\" analysis- warning and error messages. Please read this
 	document carefully before running any population models.
@@ -74,8 +83,13 @@ InitializeDebugFile <- function(dir, filename){
 	sink()
 }
 
-	 ## call this function to append text to the debug file....
-		 ## NOTE: use \" for quotes. Don't use commas!
+
+################################################################################
+# FUNCTION 'ToDebugFile'
+#
+# APPEND TEXTS TO INFORMATIVE DEBUG FILE
+################################################################################
+
 ToDebugFile <- function(InText, dir, filename){
   setwd(dir)
   sink(filename,append=T)
@@ -85,7 +99,12 @@ ToDebugFile <- function(InText, dir, filename){
 
 
 ####################################################################################
-######  SET UP INTERMEDIATE RESULTS FILE
+# FUNCTION 'InitializeResultsFile'
+#
+# SET UP INTERMEDIATE RESULTS FILE
+#
+# OUTPUT:
+#    introductory lines in 'Intermediate Results' text file in RESULTS_DIRECTORY
 ####################################################################################
 
 InitializeResultsFile <- function(dir, filename){
@@ -98,7 +117,7 @@ InitializeResultsFile <- function(dir, filename){
 ----------------------------------------------------------------------
 INTERMEDIATE RESULTS FOR MAPS TO MODELS ANALYSIS
 
-Reference: Ryu et al: \"Developing Population Models with Data from Marked Individuals\" submitted to MEE, April 2015
+Reference: Ryu et al: \"Developing Population Models with Data from Marked Individuals\" 
 
 This document contains details about the \"MAPS to Models\" analysis results. Please read this
 document carefully before running any population models derived from this analysis.
@@ -113,8 +132,12 @@ The organization of the document reflects the order of operations in the workflo
 }
 
 
-     ## call this function to append text to the results file....
-         ## NOTE: use \" for quotes. Don't use commas!
+####################################################################################
+# FUNCTION 'ToResultsFile'
+#
+# APPEND TEXTS TO INTERMEDIATE RESULTS FILE
+####################################################################################
+
 ToResultsFile <- function(InText, dir, filename){
   setwd(dir)
   sink(filename,append=T)
@@ -124,7 +147,12 @@ ToResultsFile <- function(InText, dir, filename){
 
 
 ####################################################################################
-######  SET UP POPULATION MODEL SUMMARY FILE
+# FUNCTION 'InitializePopModelFile'
+#
+# SET UP POPULATION MODEL SUMMARY FILE
+#
+# OUTPUT:
+#    introductory lines in 'Population model summary' text file in RESULTS_DIRECTORY
 ####################################################################################
 
 InitializePopModelFile <- function(dir, filename){
@@ -139,7 +167,7 @@ InitializePopModelFile <- function(dir, filename){
 *****  POPULATION MODEL SUMMARY ********
 ****************************************
 
-Reference: Ryu et al: \"Developing Population Models with Data from Marked Individuals\" submitted to MEE, May 2015
+Reference: Ryu et al: \"Developing Population Models with Data from Marked Individuals\" 
 
 This file contains a summary of the population model resulting from the analysis of the mark-recapture data. \n
   In addition to this file, check the following files created from this analysis: \n
@@ -173,8 +201,12 @@ This file contains a summary of the population model resulting from the analysis
 }
 
 
-## call this function to append text to the population model summary file....
-## NOTE: use \" for quotes. Don't use commas!
+####################################################################################
+# FUNCTION 'ToPopModelFile'
+#
+# APPEND TEXTS IN POPULATION MODEL SUMMARY FILE
+####################################################################################
+
 ToPopModelFile <- function(InText, dir, filename){
   setwd(dir)
   sink(filename,append=T)
@@ -182,18 +214,17 @@ ToPopModelFile <- function(InText, dir, filename){
   sink()
 }
 
-###########################################################################
-
 
 ######################################################################################
-# Function "ReadRawData" 
-# SUMMARY: Reads the raw band data and effort data and create effort data by user-defined population
-
-### ARGUMENTS
-#			 'dir' -- project data directory
-#            'BandData' <- text string indicating name of CSV file containing raw data from banding station
-#            'EffortData' <- text string indicating name of CSV file containing raw data from banding station
-#            
+# FUNCTION 'ReadRawData'
+#
+# READ IN THE RAW BAND AND EFFORT DATA AND CREATE NEW EFFORT DATAFRAME BASED ON USER-DEFINED POPULATION
+#
+# ARGUMENTS:
+#			 'dir'          -- project data directory
+#      'BandData'     -- text string indicating name of CSV file containing raw capture data
+#      'EffortData'   -- text string indicating name of CSV file containing raw effort data 
+#      'StationToPop' -- text string indicating name of CSV file containing population information 
 ######################################################################################
 
 ReadRawData <- function(dir, BandData, EffortData, StationToPop){
@@ -242,18 +273,22 @@ ReadRawData <- function(dir, BandData, EffortData, StationToPop){
    data$effort <- effort
    data$station.pop <- StationToPop
    return(data)  
-}
+   
+} # END OF FUNCTION 'ReadRawData'
+
 
 ######################################################################################
-
-######################################################################################
-# Function 'FormatForCMR'
-# SUMMARY: Reshapes the raw data extracted from the MAPS database into a 'capture history' format useful for performing capture-recapture analysis 
-###    ARGUMENTS
-#			'MAPSData' -- results from function 'RetrieveData'- data retrieved and processed from MAPS database
-#			'dir' -- project data directory
-
-###    RETURNS 'CMR_Data', which is a data frame containing all the information necessary to run a capture-mark-recapture analysis
+# FUNCTION 'FormatForCMR'
+#
+# RESHAPE RAW DATA FROM MAPS INTO A 'CAPTURE HISTORY' FORMAT TO PERFORM CAPTURE-RECAPTURE ANALYSIS 
+#
+# ARGUMENTS:
+#			'MAPSData' -- Results from function 'ReadRawData'
+#			'dir'      -- Project data directory
+# 
+# OUTPUT:
+#     'CaptureHistory.txt' listing capture histories of all individuals in DATA_DIRECTORY
+#     lines in 'Intermediate Results' text file in RESULTS_DIRECTORY
 #######################################################################################
 
 FormatForCMR <- function(MAPSData, dir){	
@@ -532,18 +567,17 @@ FormatForCMR <- function(MAPSData, dir){
 
 	return(CMR_Data)
   
-} # end of function 'FormatForCMR'
-
-######################################################################################
+} # END OF FUNCTION 'FormatForCMR'
 
 
 ##########################################################################################
-# Function 'FormatForRMark'
-# ARGUMENTS
-#			'CMRData' -- results from function 'FormatForCMR'- data from the MAPS database, formatted in capture history format
-#			'dir' -- project data directory
-#     'AddDensity'  -- Boolean flag (T or F) indicating whether to append density results. Default is FALSE
-#   RETURNS 'CMR_Data', which is a data frame containing all the information necessary to run a capture-mark-recapture analysis
+# FUNCTION 'FormatForRMark'
+#
+# ARGUMENTS:
+#			'CMRData'     -- Results from function 'FormatForCMR': data from the MAPS database, formatted in capture history format
+#			'dir'         -- Project data directory
+#     'MAPSData'    -- Results from function 'ReadRawData'
+#     'AddDensity'  -- Boolean flag (T or F) indicating whether to append density results. Default is FALSE.
 #############################################################################################	
  
   # Generate Design data for Survival estimation - based on Robust Design model
@@ -565,10 +599,6 @@ FormatForRMark <- function(CMRData, MAPSData, dir, AddDensity){
 		time.interval=rep(c(0,0,0,1), times=rdn_year)[-(4*rdn_year)]  	#last 1 omitted
 		maps.process=process.data(file, model="RDHuggins", time.intervals=time.interval, begin.time=startyear, groups='pop') # groups by user-defined population
     maps.ddl=make.design.data(maps.process,parameters=list(S=list(pim.type="all")))
-			# Resulting maps.ddl$S has index, group (represents population), cohort, age, time, occ.cohort, cohort, Age, Time, pop
-			# same for GammaDoublePrime, GammaPrime
-			# maps.ddl$p has index, group, time, session, Time, pop, c(all 0s)
-			# same for c, but c with all 1s
 			
 		  ########### first capture year #############
 			# identify first year of capture to model transients
@@ -684,31 +714,70 @@ FormatForRMark <- function(CMRData, MAPSData, dir, AddDensity){
     
 	}
 	
-	  #[NOTE: could add weather information here!!!]
+	  #[NOTE: For later analysis, could add weather information here!!!]
 
 	return(RMarkData)
   
-} # end of function 'FormatForRMark'
+} # END OF FUNCTION 'FormatForRMark'
+
+
+
+##########################################################################################
+# FUNCTION 'FormatForRMarkTrend'
+#
+# ARGUMENTS:
+#  		'CMRData'     -- Results from function 'FormatForCMR': data from the MAPS database, formatted in capture history format
+#			'dir'         -- Project data directory
+#     'MAPSData'    -- Results from function 'ReadRawData'
+#############################################################################################	
+
+# Generate Design data for Trend estimation - based on "Robust Design Pradel Huggins model"
+
+FormatForRMarkTrend <- function(CMRData, dir){
+  
+    inputFile <- CMRData$MasterCapHist
+    rdn_year  <- CMRData$rdn_year
+    realyear  <- CMRData$realyear
+    realbout  <- CMRData$realbout
+    stratadf  <- CMRData$stratadf
+  
+    file=inputFile
+    startyear=BEGINYEAR
+    lastyear=ENDYEAR
+    
+    time.interval=rep(c(0,0,0,1), times=rdn_year)[-(4*rdn_year)]  	#last 1 omitted
+    maps.process=process.data(file, model="RDPdLHuggins", time.intervals=time.interval, begin.time=startyear) 
+    maps.ddl=make.design.data(maps.process)
+    
+    ## bundle data for return to main workspace
+    RMarkDataTrend <- list()
+    RMarkDataTrend$maps.ddl <- maps.ddl
+    RMarkDataTrend$maps.process <- maps.process    
+    
+  return(RMarkDataTrend)
+  
+} # END OF FUNCTION 'FormatForRMarkTrend'
+
 
 ###########################################################################
-
-###########################################################################
-# Function 'Run.Models'
-# SUMMARY: run several sets of models for parameter estimation - Robust design
+# FUNCTION 'Run.Models'
+#
+# RUN SEVERAL SETS OF MODELS FOR PARAMETER ESTIMATION IN MARK USING ROBUST DESIGN
+#
 # ARGUMENTS: 
-# RMarkData  --  List object with the following components:
-# maps.ddl    --    "design data layer" object. Needed for running MARK from RMark. see RMark documentation for details
-# maps.process   --   "process" object (list). Needed for running MARK from RMark. see RMark documentation for details                        
-# initial   --  set initial values for S 
-# RETURNS:
-# result    --       RMark object with all model results from program MARK (see RMark documentation for details on 'marklist' object)
-# NOTES: Effort is used as a covariate 2 different ways. When the model includes "effort", it is used from the design matrix
-#  	if model includes "eff" that refers to effort as a temporarily varying covariate which is more flexible and
-#		does not need the assumption of no movement between locations / stations / populations
-# 
+#     'RMarkData'    --  List object with the following components:
+#                         maps.ddl: "design data layer" object. Needed for running MARK from RMark (see RMark documentation for details).
+#                         maps.process: "process" object (list). Needed for running MARK from RMark (see RMark documentation for details).                        
+#     'initial'      --  Set initial values for apparent survival. 
+#     'DensityModel' --  Boolean flag (T or F) indicating whether to run density-dependent model. Default is FALSE.
+#
+# NOTE: 
+#      Effort is used as a covariate 2 different ways. When the model includes "effort", it is used from the design matrix and 
+#  	   if model includes "eff", it refers to effort as a temporarily varying covariate which is more flexible and does not need
+#		   the assumption of no movement between populations.
 ############################################################################
 
-Run.Models <- function(RMarkData, initial, DensityModel) {
+Run.Models <- function(RMarkData, initial, DensityModel, TrendModel) {
 
   process <- RMarkData$maps.process
   ddl <- RMarkData$maps.ddl
@@ -780,31 +849,55 @@ Run.Models <- function(RMarkData, initial, DensityModel) {
     cml=create.model.list("RDHuggins")
     results=suppressMessages(mark.wrapper(cml,data=process,ddl=ddl, use.initial=TRUE,silent=TRUE))  #the values from the previous model used as initial values in the later models
   }
-
+  
   return(results)
-} ### end of function 'Run.Models'
+  
+} # END OF FUNCTION 'Run.Models'
 
 
-######################################################################################
+###########################################################################
+# FUNCTION 'Run.Trend.Model'
+#
+# RUN MODEL FOR TREND (LAMBDA) ESTIMATION IN MARK USING ROBUST DESIGN PRADEL MODEL
+#
+# ARGUMENTS: 
+#     'RMarkData'    --  List object with the following components:
+#                         maps.ddl: "design data layer" object. Needed for running MARK from RMark (see RMark documentation for details).
+#                         maps.process: "process" object (list). Needed for running MARK from RMark (see RMark documentation for details).                        
+#     'initial'      --  Set initial values for apparent survival. 
+############################################################################
+
+Run.Trend.Model <- function(RMarkData, initial) {
+  
+  process <- RMarkData$maps.process
+  ddl <- RMarkData$maps.ddl
+  
+  ###################### PRADEL MODEL ############################
+  # use base model for all the parameters
+   
+    Phi.baseline = list(formula=~1)            
+    p.baseline = list(formula=~1,share=TRUE)   
+    Lambda.baseline = list(formula=~1)    
+
+    cml=create.model.list("RDPdLHuggins")
+    results=suppressMessages(mark.wrapper(cml,data=process,ddl=ddl, silent=TRUE)) 
+  
+  return(results)
+  
+} # END OF FUNCTION 'Run.Trend.Model'
+
 
 ###################################################################################
-# Function 'PCapResults'
-# SUMMARY: -estimate capture probabilities from Mark Result
-#          -calculate abundances and relative densities based on the capture probabilities
+# FUNTION 'PCapResults'
+#
+# ESTIMATE CAPTURE PROBABILITIES FROM MARK MODEL RESULTS 
+# AND CALCULATE ABUNDANCES AND RELATIVE DENSITY BASED ON THE CAPTURE PROBABILITIES
 # 
 # ARGUMENTS: 
-#          RMarkResults    --       RMark object with all model results from program MARK (see RMark documentation for details on 'marklist' object)
-#          maps.ddl        --       "design data layer" object. Needed for running MARK from RMark. see RMark documentation for details   
-#          band.data       --       Data frame object with the following fields:  
-#                                   band           -- unique band ID associated with the bird 
-#                                   captureyear    -- year of capture 
-#                                   month          -- month of capture
-#                                   birthyear      -- estimated birth year 
-#                                   actualage      -- estimated age at capture
-#                                   agegroup       -- ??
-#                                   loc            -- MAPS location where bird was captured  ## TODO: change to refer to user-defined population
-#                                   freq           -- ??
-#                                   station        -- MAPS banding station where bird was captured. Listed separately for months 5,6,7,8
+#     'RMarkResults' --   RMark object with all model results from program MARK (see RMark documentation for details on 'marklist' object).
+#     'maps.ddl'     --   "design data layer" object. Needed for running MARK from RMark (see RMark documentation for details).   
+#     'band.data'    --   Banding and capture data from MAPS 
+#     'model.no'     --   Number of the time-dependent model from previous MARK result which is used to calculate capture probabilities
 ###################################################################################
 
 PCapResults <- function (RMarkResults, maps.ddl, band.data, model.no){
@@ -932,8 +1025,7 @@ PCapResults <- function (RMarkResults, maps.ddl, band.data, model.no){
         band.data_A_breed2 <- band.data_A_breed2[-newndx,]
       }	
     }
-  }
-  
+  }  
   
   ########### calculate Njuv, Nad, Nad_breed #############
   for (i in 1:(nrow(p.table)/4)){
@@ -1047,17 +1139,18 @@ PCapResults <- function (RMarkResults, maps.ddl, band.data, model.no){
   )
   
   return (p.table)
-} # end of function 'PCapResults'
+  
+} # END OF FUNTION 'PCapResults'
+
 
 ######################################################################################
-
-
-######################################################################################
-# Function 'ApparentS'
-# SUMMARY: Estimates apparent survival rates for juveniels/adults/transients
+# FUNCTION 'ApparentS'
+#
+# ESTIMATES APPARENT SURVIVAL RATES FOR JUVENILES/ADULTS/ADULT TRANSIENTS FROM MARK TIME-CONSTANT MODEL
+#
 # ARGUMENTS:   
-#    RMarkResults    --       RMark object with all model results from program MARK (see RMark documentation for details on 'marklist' object)
-#                              								
+#     'RMarkResults' --  RMark object with all model results from program MARK (see RMark documentation for details on 'marklist' object).
+#     'model.no.'    --  Number of the time-constant model from previous MARK result which is used to calculate apparent survival rates           								
 ######################################################################################
 
 ApparentS <- function(RMarkResults, model.no){   
@@ -1124,14 +1217,21 @@ ApparentS <- function(RMarkResults, model.no){
   result<-list(Sjuv=Sjuv, Sad=Sad, Sad_trans=Sad_trans)
   return(result)
   
-} # end of function 'ApparentS'
-
-#################################################################################################
+} # END OF FUNCTION 'ApparentS'
 
 
 ##################################################################################
-# Function 'VarianceComponent'
-# to measue temporal variance in S for juveniels/adults/adult transients
+# FUNCTION 'VarianceComponent'
+#
+# ESTIMATE TEMPORAL VARIANCE IN APPARENT SURVIVAL USING VARIANCE COMPONENT ANALYSIS
+#
+# ARGUMENTS:
+#     'RMarkResults' -- RMark object with all model results from program MARK (see RMark documentation for details on 'marklist' object).
+#     'model.no'     -- Number of the time-dependent model in previous MARK results which is used to calculated temporal variance.
+#
+# OUTPUTS:
+#     lines in 'Debug' text file in DATA_DIRECTORY
+#     lines 'Intermediate Results' text file in RESULTS_DIRECTORY
 ##################################################################################
 
 VarianceComponent <- function (RMarkResults, model.no) {
@@ -1238,8 +1338,6 @@ VarianceComponent <- function (RMarkResults, model.no) {
     " , RESULTS_DIRECTORY, RESULTS_FILENAME)
   }
   
-
-
     # 2) Compute process variance for adult residents
     # if error occurs, use CV method to estimate temporal varability in juveniles based on temporal variability in adults
   varc.a.W.E<-tryCatch.W.E(
@@ -1362,7 +1460,6 @@ VarianceComponent <- function (RMarkResults, model.no) {
     filename.a_trans<-paste(SPECIES_CODE, "Sad_trans_VarComp_allyrs", "csv", sep='.')
     write.csv(S.v.a_trans.table, filename.a_trans)
   }
-
 
     ######## Check for non-convergence ##########
     # It is an indication of non-convergence if the upper, lower limits of real values are in a unreasonable range.
@@ -1493,7 +1590,6 @@ VarianceComponent <- function (RMarkResults, model.no) {
     " , RESULTS_DIRECTORY, RESULTS_FILENAME)
   }
 
-
     # 3) Compute process variance for adult transients
 
   varc.a_trans.rm.W.E<-tryCatch.W.E(
@@ -1531,7 +1627,6 @@ VarianceComponent <- function (RMarkResults, model.no) {
     Computing process variance for adult transients with only converging years worked!
     " , RESULTS_DIRECTORY, RESULTS_FILENAME)
   }
-
 
     # Time with only converging years
     # For juveniles
@@ -1673,19 +1768,24 @@ VarianceComponent <- function (RMarkResults, model.no) {
 
   return(SSummary.rm)
 
-} # end of function 'VarianceComponent'
+} # END OF FUNCTION 'VarianceComponent'
 
-#############################################################################
 
 ###################################################################################
-# Function 'EstimateFecundity'
-# SUMMARY: Run fecundity analysis using WinBUGS 1.4
+# FUNCTION 'EstimateFecundity'
+#
+# RUN FECUNDITY ANALYSIS USING WINBUGS 1.4
+#
 # ARGUMENTS:
-#         p.table   --
-#         Corrected   --
-#         MinAdults   --
-# RETURNS:
-# NOTE:
+#     'p.table'   -- Results from function 'PCapResults'. Capture probabilities and abundances are used for fecundity analysis.
+#     'MinAdults' -- The number of captured adults under which the relative density data will be discarded. 
+#                 -- If the number of captured adults are too low, it is likely to have bias in the estimate of fecundity.
+# 
+# OUTPUTS:
+#    lines in 'Debug' text file in DATA_DIRECTORY
+#    lines in 'Intermediate Results' text file in RESULTS_DIRECTORY
+#    SVG images of 2 MCMC chains separately for 'mean fecundity', 'temporal variance (SD)', and 'density effect' 
+#    for corrected and uncorrect fecundity analyses stored in RESULTS_DIRECTORY  
 ###################################################################################
 
 EstimateFecundity <- function (p.table=p.table, MinAdults = 4){
@@ -1844,7 +1944,6 @@ for (t in 1:nt) {
       beta.rD=-0.1
     )
    
-             #  nt=5;nc=2;nb=10000;ni=20000
 	    #Send information to WinBUGS
 	  Mod_full <- bugs(data=Data_full, inits=inits_full, 
 				  parameters.to.save=c("mean.fec", "env.stoch.sd", "est.mean.fec", "beta.rD", "Adultp", "Juvp"), 
@@ -1854,14 +1953,40 @@ for (t in 1:nt) {
       # read in results
 	  FecResults_full = read.bugs(Mod_full)
       # To test for convergence, use the Gelman and Rubin's convergence diagnostic
-      # Approximate convergence is diagnosed when the upper limit is close to 1. 
-    GR_full<-gelman.diag(FecResults_full, confidence = 0.95, transform=FALSE, autoburnin=TRUE,
+      # Approximate convergence is diagnosed when the upper limit is close to 1.
+      # Even if the chains are too short to allow the GR calculation, let the WinBUGS simulation run
+    GR_full.W.E<-tryCatch.W.E(
+      GR_full<-gelman.diag(FecResults_full, confidence = 0.95, transform=FALSE, autoburnin=TRUE,
               multivariate=TRUE)
+    )
+  
+      # output warning message if GR did not work
+    if ( length( grep("Error", (paste(class(GR_full.W.E$value), collapse=" ")))) >0 ) {
+      GR_full.W.E$warning <-"Computing Gelman and Rubin's convergence diagnostic for full model failed!"
+    } else {GR_full.W.E$warning<-NULL}
+  
       # print the GR convergence diagnostic in Results.txt
 	  
 	  # gelman.plot(FecResults_full)
-    ToResultsFile(
-    sprintf("
+    if ( length( grep("Error", (paste(class(GR_full.W.E$value), collapse=" ")))) >0 ) {
+      ToResultsFile("
+    ----------------------------------------------------------------------------------------
+    GELMAN AND RUBIN'S CONVERGENCE DIAGNOSTIC - FECUNDITY CORRECTED FOR CAPTURE PROBABILITY
+
+    Computing Gelman and Rubin's convergence diagnostic for full model failed!
+    " , RESULTS_DIRECTORY, RESULTS_FILENAME)
+      
+      ToDebugFile("
+    ----------------------------------------------------------------------------------------
+    GELMAN AND RUBIN'S CONVERGENCE DIAGNOSTIC - FECUNDITY CORRECTED FOR CAPTURE PROBABILITY
+    
+    Computing Gelman and Rubin's convergence diagnostic for full model failed!
+    " , DATA_DIRECTORY, DEBUG_FILENAME)
+      ToDebugFile(paste(paste("Warning",GR_full.W.E$warning, sep=": "), "\n", sep=""), DATA_DIRECTORY, DEBUG_FILENAME)
+      
+    } else {
+      ToResultsFile(
+        sprintf("
     ----------------------------------------------------------------------------------------
     GELMAN AND RUBIN'S CONVERGENCE DIAGNOSTIC - FECUNDITY CORRECTED FOR CAPTURE PROBABILITY
     
@@ -1869,8 +1994,9 @@ for (t in 1:nt) {
     Upper C.I. of Slope of DD relationship for fecundity: %s \n
     Upper C.I. of Temporal env variability (SD) in fecundity: %s \n
     *Approximate convergence is diagnosed when the upper limit is close to 1. 
-    " , GR_full$psrf["mean.fec","Upper C.I."], GR_full$psrf["beta.rD","Upper C.I."], GR_full$psrf["env.stoch.sd","Upper C.I."]
-    ),  RESULTS_DIRECTORY, RESULTS_FILENAME)
+    " , GR_full.W.E$value$psrf["mean.fec","Upper C.I."], GR_full.W.E$value$psrf["beta.rD","Upper C.I."], GR_full.W.E$value$psrf["env.stoch.sd","Upper C.I."]
+        ),  RESULTS_DIRECTORY, RESULTS_FILENAME)
+    }
 
       # read in values 	  
 	  ModResults_full <- as.data.frame(FecResults_full[[1]])
@@ -1963,11 +2089,39 @@ for (t in 1:nt) {
 	 
     # To test for convergence, use the Gelman and Rubin's convergence diagnostic
     # Approximate convergence is diagnosed when the upper limit is close to 1. 
-    GR_null<-gelman.diag(FecResults_null, confidence = 0.95, transform=FALSE, autoburnin=TRUE,
-                       multivariate=TRUE)
+    # Even if the chains are too short to allow the GR calculation, let the WinBUGS simulation run
+    GR_null.W.E<-tryCatch.W.E(
+      GR_null<-gelman.diag(FecResults_null, confidence = 0.95, transform=FALSE, autoburnin=TRUE,
+                         multivariate=TRUE)
+    )
+  
+    # output warning message if GR did not work
+    if ( length( grep("Error", (paste(class(GR_null.W.E$value), collapse=" ")))) >0 ) {
+      GR_null.W.E$warning <-"Computing Gelman and Rubin's convergence diagnostic for null model failed!"
+    } else {GR_null.W.E$warning<-NULL}
+  
     # print the GR convergence diagnostic in Results.txt
-  ToResultsFile(
-    sprintf("
+  
+    # gelman.plot(FecResults_null)
+    if ( length( grep("Error", (paste(class(GR_null.W.E$value), collapse=" ")))) >0 ) {
+      ToResultsFile("
+      ----------------------------------------------------------------------------------------
+      GELMAN AND RUBIN'S CONVERGENCE DIAGNOSTIC - FECUNDITY NOT CORRECTED FOR CAPTURE PROBABILITY
+
+      Computing Gelman and Rubin's convergence diagnostic for null model failed!
+      " , RESULTS_DIRECTORY, RESULTS_FILENAME)
+    
+      ToDebugFile("
+      ----------------------------------------------------------------------------------------
+      GELMAN AND RUBIN'S CONVERGENCE DIAGNOSTIC - FECUNDITY NOT CORRECTED FOR CAPTURE PROBABILITY
+    
+      Computing Gelman and Rubin's convergence diagnostic for null model failed!
+      " , DATA_DIRECTORY, DEBUG_FILENAME)
+      ToDebugFile(paste(paste("Warning",GR_null.W.E$warning, sep=": "), "\n", sep=""), DATA_DIRECTORY, DEBUG_FILENAME)
+    
+    } else {
+      ToResultsFile(
+        sprintf("
     ----------------------------------------------------------------------------------------
     GELMAN AND RUBIN'S CONVERGENCE DIAGNOSTIC - FECUNDITY NOT CORRECTED FOR CAPTURE PROBABILITY
             
@@ -1975,8 +2129,9 @@ for (t in 1:nt) {
     Upper C.I. of Slope of DD relationship for fecundity: %s \n
     Upper C.I. of Temporal env variability (SD) in fecundity: %s \n
     *Approximate convergence is diagnosed when the upper limit is close to 1. 
-    " , GR_null$psrf["mean.fec","Upper C.I."], GR_null$psrf["beta.rD","Upper C.I."], GR_null$psrf["env.stoch.sd","Upper C.I."]
-    ),  RESULTS_DIRECTORY, RESULTS_FILENAME)
+    " , GR_null.W.E$value$psrf["mean.fec","Upper C.I."], GR_null.W.E$value$psrf["beta.rD","Upper C.I."], GR_null.W.E$value$psrf["env.stoch.sd","Upper C.I."]
+        ),  RESULTS_DIRECTORY, RESULTS_FILENAME)
+    }
   
 	    # read in values for nc chains
     ModResults_null <- as.data.frame(FecResults_null[[1]])
@@ -2093,26 +2248,36 @@ for (t in 1:nt) {
       initial_null=inits_null,
       FResults_full=ModResults_full,
       FResults_null=ModResults_null,
-      GR_full=GR_full,
-      GR_null=GR_null,
+      GR_full.W.E=GR_full.W.E,
+      GR_null.W.E=GR_null.W.E,
       FTable_full=FTable_full,
       FTable_null=FTable_null
       )
   
       return(FecundityResults)
   
-  } # end of function 'EstimateFecundity'
-
-
-######################################################################
+  } # END OF FUNCTION 'EstimateFecundity'
 
 
 ######################################################################################
-# Function 'SummarizeForPopModel'
-# SUMMARY: Print out key results for populatio modeling (stage matrix, temporal variability, density dependence)
+# FUNCTION 'SummarizeForPopModel'
+#
+# SELECT OUT KEY RESULTS FOR CALCULATING DEMOGRAPHIC PARAMETERS USED IN POPULATION MODELING 
+#
 # ARGUMENTS:   
-#    
-#                                							
+#    'RMarkData'   -- Results from function 'FormatForRMark'
+#    'Apps'        -- Results from function 'ApparentS' to get the apparent survival estimates from time-constant model
+#    'STempVar'    -- Results from function 'VarianceComponent' to get the temporal variability in S
+#    'MarkResults' -- Final MARK fesults with density-dependence model 
+#    'Fec'         -- Results from function 'EstimateFecundity'
+#    'model.no'    -- Number of the density-dependent model in previous MARK results which is used to calculated density-dependence functions.
+#
+# OUPUT:
+#    lines in 'Intermediate Results' text file in RESULTS_DIRECTORY
+#
+# NOTE:
+#    If density relationship is negative for survival, the apparent survival estimates from density-dependent models are used,
+#    whereas, if positive, the apparent survival estimates from time-constant models (stage model) are used.
 ######################################################################################
 
 SummarizeForPopModel <- function(RMarkData, AppS, STempVar, MarkResults, Fec, model.no){ # writes text file output of all key population-level parameters, and also returns a list containing the same parameters
@@ -2300,14 +2465,21 @@ SummarizeForPopModel <- function(RMarkData, AppS, STempVar, MarkResults, Fec, mo
     
   return(MPparameters)
   
-} # end of function 'SummarizeForPopModel'
+} # END OF FUNCTION 'SummarizeForPopModel'
 
 
 #########################################################################################################
-# Function 'SummaryMP'
-# Correct for apparent survival and temporal variability of juveniles using CV method
-#  OUTPUT 
-#     -- 'Population Model Summary' text file
+# FUNCTION 'SummaryMP'
+#
+# CORRECT ALL DEMOGRAPHIC PARAMETERS FOR APPARENT SURVIVAL AND CREATE STAGE AND SD MATRIX
+#
+# ARGUMENTS:
+#     'Data'      -- Results from function 'SummarizeForPopModel'
+#     'TrendData' -- BBS trend used to correct for apparent survival
+#
+# OUTPUT: 
+#     lines in 'Intermediate Results' text file in RESULTS_DIRECTORY
+#     'Population Model Summary' text file in RESULTS_DIRECTORY
 #########################################################################################################
 
 SummaryMP <- function(Data,TrendData){
@@ -2353,7 +2525,6 @@ SummaryMP <- function(Data,TrendData){
                 ", RESULTS_DIRECTORY, RESULTS_FILENAME)			
   
 
-  
   ###  CALCULATE TRUE SURVIVAL (apparent to actual survival)
   
   ### use the upper and lower bounds of trends
@@ -2539,12 +2710,6 @@ SummaryMP <- function(Data,TrendData){
   Notes:
   The mean values are at average density and average environmental conditions.
   The standard deviations are used to model temporal environmental variability; they exclude variability due to sampling (or demographic stochasticity).
-  [if correlation.SF=1]
-  The standard deviations for F*Sj and F*Sa assume full correlation between survival and fecundity.
-  [if correlation.SF=0]
-  The standard deviations for F*Sj and F*Sa assume zero correlation between survival and fecundity.
-  [else]
-  The standard deviations for F*Sj and F*Sa assume a correlation of [correlation.SF] between survival and fecundity.
     "), round(corrected.Sad$estimate,3), round(corrected.Sad$lcl,3), round(corrected.Sad$ucl,3), round(sqrt(corrected.Var_Sad$estimate),3), round(sqrt(corrected.Var_Sad$lcl),3), round(sqrt(corrected.Var_Sad$ucl),3),
             round(corrected.Sjuv$estimate,3), round(Sjuv$lcl,3), round(Sjuv$ucl,3), round(sqrt(corrected.Var_Sjuv$estimate),3), round(sqrt(corrected.Var_Sjuv$lcl),3), round(sqrt(corrected.Var_Sjuv$ucl),3),
             round(F_mean$estimate,3), round(F_mean$lcl,3), round(F_mean$ucl,3), round(SD_F$estimate,3), round(SD_F$lcl,3), round(SD_F$ucl,3),
@@ -2553,8 +2718,28 @@ SummaryMP <- function(Data,TrendData){
     
     , dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
   
-  
-  
+  if(CORRELATION==1){
+    ToPopModelFile (
+    sprintf(("
+  Correlation between S and F = %s
+  The standard deviations for F*Sj and F*Sa assume full correlation between survival and fecundity.
+    "), CORRELATION), dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
+  } else{
+    if (CORRELATION==0){
+    ToPopModelFile (
+      sprintf(("
+  Correlation between S and F = %s
+  The standard deviations for F*Sj and F*Sa assume zero correlation between survival and fecundity.
+    "), CORRELATION), dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
+    } else {
+    ToPopModelFile (
+      sprintf(("
+  Correlation between S and F = %s
+  The standard deviations for F*Sj and F*Sa assume a correlation of [%s] between survival and fecundity.
+    "), CORRELATION, CORRELATION), dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
+    }
+  }
+    
   ## Standard deviations matrix 
   ## SD.matrix [ row, column ]
   ## stage.matrix = ( ( (F * Sj), (F *Sad) ), ( Sj, Sad ) )
@@ -2619,46 +2804,62 @@ SummaryMP <- function(Data,TrendData){
 
   When (N/K) > [%.3f], the current population size is truncated at [%.3f]*K
   or the stage matrix and stage abundances are decreased such that the expected population size in the next time step is [%.3f]*K.
-
              "), round(MaxPopDens,3), round(MaxPopDens,3), round(MaxPopDens,3))
     , dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
   
-  
   ToPopModelFile (
     sprintf(("
-  [if F_beta_rD<0 then:]
   When N/K < [%.3f], fecundity is calculated as the following function of density (N/K) at each time step:
-  F  = F_mean * exp(F_beta_rD * ( (PopDens - MeanDens) / SD_Dens ) )
-  F  = %.3f * %.3f   * ( ( (N/K)  - %.3f  ) / %.3f ) )
-             "), round(MaxPopDens,2), round(F_mean$estimate,3), round(F_beta_rD$estimate,3), round(MeanDens,3), round(SD_Dens,3) )
+  F  = F_mean * exp( F_beta_rD * ( (PopDens - MeanDens) / SD_Dens ) )
+             "), round(MaxPopDens,3))
     , dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
+  
+  if (F_beta_rD$estimate<0){
+    ToPopModelFile (
+    sprintf(("  
+  F  = %.3f * exp( (%.3f) * ( ( (N/K)  - %.3f  ) / %.3f ) )
+  Negative density-dependence is detected for F, therefore, this function is used in the population model.
+             "), round(F_mean$estimate,3), round(F_beta_rD$estimate,3), round(MeanDens,3), round(SD_Dens,3))
+    , dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
+  } else {
+    ToPopModelFile (
+      sprintf(("
+  F  = %.3f * exp( (%.3f) * ( ( (N/K)  - %.3f  ) / %.3f ) )
+  Positive density-dependence is detected for F, therefore, this function is not used in the population model.
+             "), round(F_mean$estimate,3), round(F_beta_rD$estimate,3), round(MeanDens,3), round(SD_Dens,3))
+      , dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
+  }
+  
   
   ToPopModelFile (
     sprintf(("
-  [if S_Dens<0 then:]
   When N/K < [%s], survival rates are calculated as the following functions of density (N/K) at each time step:
-  Sj = exp(S_intcpt + S_st + S_dens*PopDens)/(1 + exp(S_intcpt + S_st + S_dens*PopDens)) * Corr_factor
-  Sa = exp(S_intcpt        + S_dens*PopDens)/(1 + exp(S_intcpt        + S_dens*PopDens)) * Corr_factor
-             "), round(MaxPopDens,2))
+  Sj = [ exp(S_intcpt + S_st + S_dens*PopDens)/(1 + exp(S_intcpt + S_st + S_dens*PopDens)) ] * Corr_factor
+  Sa = [ exp(S_intcpt        + S_dens*PopDens)/(1 + exp(S_intcpt        + S_dens*PopDens)) ] * Corr_factor
+             "), round(MaxPopDens,3))
     , dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
   
-  ToPopModelFile (
-    sprintf(("
-      
-  Sj = exp(%s - %s * (N/K)) / (1 + exp(%s - %s * (N/K)))
-  Sa = exp(%s - %s * (N/K)) / (1 + exp(%s - %s * (N/K)))
-             "), round(S_intcpt$estimate+S_st$estimate,3), round(S_dens$estimate,3), round(S_intcpt$estimate+S_st$estimate,3), round(S_dens$estimate,3),
-                 round(S_intcpt$estimate,3), round(S_dens$estimate,3), round(S_intcpt$estimate,3), round(S_dens$estimate,3))
+  if (S_dens$estimate<0) {
+    ToPopModelFile (
+    sprintf(("     
+  Sj = [ exp((%s) + (%s) * (N/K)) / (1 + exp((%s) + (%s) * (N/K))) ] * %s
+  Sa = [ exp((%s) + (%s) * (N/K)) / (1 + exp((%s) + (%s) * (N/K))) ] * %s
+  Negative density-dependence is detected for S, therefore, this functions are used in the population model.
+             "), round(S_intcpt$estimate+S_st$estimate,3), round(S_dens$estimate,3), round(S_intcpt$estimate+S_st$estimate,3), round(S_dens$estimate,3), round(correction.factor$estimate,3),
+                 round(S_intcpt$estimate,3), round(S_dens$estimate,3), round(S_intcpt$estimate,3), round(S_dens$estimate,3), round(correction.factor$estimate,3))
     , dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
-  
-  ToPopModelFile (
-    sprintf(("
-  [else if S_Dens>=0 AND F_beta_rD>=0then:]
-  Neither survival rate nor fecundity are density dependent below N/K of [%s]
-             "), round(MaxPopDens,2))
-    , dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
+  } else {
+    ToPopModelFile (
+      sprintf(("     
+  Sj = [ exp((%s) + (%s) * (N/K)) / (1 + exp((%s) + (%s) * (N/K))) ] * %s
+  Sa = [ exp((%s) + (%s) * (N/K)) / (1 + exp((%s) + (%s) * (N/K))) ] * %s
+  Positive density-dependence is detected for S, therefore, this functions are not used in the population model.
+             "), round(S_intcpt$estimate+S_st$estimate,3), round(S_dens$estimate,3), round(S_intcpt$estimate+S_st$estimate,3), round(S_dens$estimate,3), round(correction.factor$estimate,3),
+      round(S_intcpt$estimate,3), round(S_dens$estimate,3), round(S_intcpt$estimate,3), round(S_dens$estimate,3), round(correction.factor$estimate,3))
+, dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
+  }
 	
-	#######################################
+	  #######################################
     # output density dependence model to 'Population Model Summary' text file
   ToPopModelFile (
     sprintf(("
@@ -2666,11 +2867,11 @@ Density dependence function values:
 --------------------------------------------------------------------------
     Param         Mean (95%% conf int)          
 --------------------------------------------------------------------------
-    S_intcpt        %.3f (%.3f - %.3f)       
-    S_st            %.3f (%.3f - %.3f)        
-    S_dens          %.3f (%.3f - %.3f)        
-    F_beta_rD       %.3f (%.3f - %.3f)
-    Corr_factor     %.3f (%.3f - %.3f)	
+    S_intcpt        %.3f ((%.3f) - (%.3f))       
+    S_st            %.3f ((%.3f) - (%.3f))       
+    S_dens          %.3f ((%.3f) - (%.3f))        
+    F_beta_rD       %.3f ((%.3f) - (%.3f))
+    Corr_factor     %.3f ((%.3f) - (%.3f))	
     MeanDens        %.3f  
     SD_Dens         %.3f 
     MaxPopDens      %.3f 	
@@ -2700,17 +2901,20 @@ Density dependence function values:
 
   return(Result)
   
-} # end of function 'SummaryMP'
+} # END OF FUNCTION 'SummaryMP'
   
-  
-  
-  
-  #########################################################################################################
-  # Function 'WriteMasterMPFile'
-  #  Build RAMAS ".MP" file on the basis of information from MAPS analysis(and BBS trend analysis)
-  #  OUTPUT 
-  #     -- writes MP file to POPMODELS_DIRECTORY
-  #########################################################################################################
+
+#########################################################################################################
+# FUNCTION 'WriteMasterMPFile'
+#
+# BUILD RAMAS ".MP" FILE BASED ON INFORMATION FROM PREVIOUS ANALYSES
+#
+# ARGUMENT:
+#     'Result'  -- Results from function 'SummaryMP': demographic parameters all corrected for apparent survival
+#
+# OUTPUT: 
+#      MP files with best, lower, and upper bound estimates in POPMODELS_DIRECTORY
+#########################################################################################################
   
   WriteMasterMPFile <- function(Result){
     
@@ -2933,7 +3137,8 @@ Density dependence function values:
   
   MP_construct()
   
-} # end of function 'WriteMasterMPFile'
+} # END OF FUNCTION 'WriteMasterMPFile'
   
-###############################################################################
-  
+
+################################# END OF 'MAPS_AllFunctions.R' ###############################
+

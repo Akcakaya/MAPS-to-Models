@@ -1,0 +1,90 @@
+Metapopulation input file (6.0) map= 
+Population model for WEVI, parameterized using lower bound estimates from MAPS data.
+
+
+
+
+1000
+50
+TRUE
+2 FALSE
+
+
+Local
+
+not spread
+0.0000
+0.0000,0.0000,0.0000,0.0000
+
+
+Local
+
+not spread
+0.0000
+0.0000,0.0000,0.0000,0.0000
+False,Zero
+all vital rates
+Lognormal,0
+0.000000
+count in total
+1 (F, S, K correlated)
+No
+AllStages
+No
+UD
+C:\Users\Chloe\Dropbox\MAPS Project\Pop models\final2\AvianDD.dll
+1
+years
+OnlyFemale
+1
+Monogamous
+2.0
+2.0
+0.0000
+0
+Pop1,0.000,0.000,1000,EX,0,10000,0,0,,0,1,0,TRUE,1,1,1,0,1,0,1,0,0,0,1.0,1,1, -0.2420489,-2.1128302,-0.1100366,1.88535976304706,-0.145754051466848,1.55952252135248,1.2971600526728,7.84711726548853,1.18902635785893
+Migration
+FALSE
+0.000,0.00000,0.00000,0.00000
+ 0,
+Correlation
+FALSE
+0.000,0.00000,0.00000
+ 1,
+1 type(s) of stage matrix
+default
+1.000000
+1.000000
+0
+0.240523878582278 1.03542572245864
+0.127574526250391 0.549192648932539
+1 type(s) of st.dev. matrix
+default
+0.0481112499558632 0.204070908617063
+0.00964226440215817 0.0398952208940535
+Constraints Matrix
+0.000000 0.000000
+1.000000 1.000000
+1.000000 1.000000
+1.000000 1.000000
+1.000000 1.000000
+1.000000 1.000000
+1.000000 1.000000
+1.000000 1.000000
+1.000000 1.000000
+-1 -1
+Juvenile
+1.00000000
+FALSE
+TRUE
+         1
+Adult
+1.00000000
+FALSE
+TRUE
+         1
+0 (pop mgmnt)
+0.0
+0.0
+10
+-End of file-

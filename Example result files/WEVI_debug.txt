@@ -1,0 +1,14 @@
+ 
+	----------------------------------------------------------------------
+	DEBUG MESSAGES FOR MAPS TO MODELS ANALYSIS (warnings and errors) 
+
+	Reference: Ryu et al: "Developing Population Models with Data from Marked Individuals" 
+
+	This document contains details about the "MAPS to Models" analysis- warning and error messages. Please read this
+	document carefully before running any population models.
+
+	The organization of the document reflects the order of operations in the workflow: 
+		DATA EXTRACTION >> SURVIVAL ESTIMATION (Program MARK) >> FECUNDITY ESTIMATION (WinBUGS) >> POPULATION MODEL ASSEMBLY (Ramas Metapop)
+
+    Please notify the authors to suggest improvements to this document! 		
+	
