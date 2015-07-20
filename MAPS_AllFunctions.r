@@ -721,6 +721,44 @@ FormatForRMark <- function(CMRData, MAPSData, dir, AddDensity){
 } # END OF FUNCTION 'FormatForRMark'
 
 
+
+##########################################################################################
+# FUNCTION 'FormatForRMarkTrend'
+#
+# ARGUMENTS:
+#  		'CMRData'     -- Results from function 'FormatForCMR': data from the MAPS database, formatted in capture history format
+#			'dir'         -- Project data directory
+#     'MAPSData'    -- Results from function 'ReadRawData'
+#############################################################################################	
+
+# Generate Design data for Trend estimation - based on "Robust Design Pradel Huggins model"
+
+FormatForRMarkTrend <- function(CMRData, dir){
+  
+    inputFile <- CMRData$MasterCapHist
+    rdn_year  <- CMRData$rdn_year
+    realyear  <- CMRData$realyear
+    realbout  <- CMRData$realbout
+    stratadf  <- CMRData$stratadf
+  
+    file=inputFile
+    startyear=BEGINYEAR
+    lastyear=ENDYEAR
+    
+    time.interval=rep(c(0,0,0,1), times=rdn_year)[-(4*rdn_year)]  	#last 1 omitted
+    maps.process=process.data(file, model="RDPdLHuggins", time.intervals=time.interval, begin.time=startyear) 
+    maps.ddl=make.design.data(maps.process)
+    
+    ## bundle data for return to main workspace
+    RMarkDataTrend <- list()
+    RMarkDataTrend$maps.ddl <- maps.ddl
+    RMarkDataTrend$maps.process <- maps.process    
+    
+  return(RMarkDataTrend)
+  
+} # END OF FUNCTION 'FormatForRMarkTrend'
+
+
 ###########################################################################
 # FUNCTION 'Run.Models'
 #
@@ -739,7 +777,7 @@ FormatForRMark <- function(CMRData, MAPSData, dir, AddDensity){
 #		   the assumption of no movement between populations.
 ############################################################################
 
-Run.Models <- function(RMarkData, initial, DensityModel) {
+Run.Models <- function(RMarkData, initial, DensityModel, TrendModel) {
 
   process <- RMarkData$maps.process
   ddl <- RMarkData$maps.ddl
@@ -811,10 +849,42 @@ Run.Models <- function(RMarkData, initial, DensityModel) {
     cml=create.model.list("RDHuggins")
     results=suppressMessages(mark.wrapper(cml,data=process,ddl=ddl, use.initial=TRUE,silent=TRUE))  #the values from the previous model used as initial values in the later models
   }
-
+  
   return(results)
   
 } # END OF FUNCTION 'Run.Models'
+
+
+###########################################################################
+# FUNCTION 'Run.Trend.Model'
+#
+# RUN MODEL FOR TREND (LAMBDA) ESTIMATION IN MARK USING ROBUST DESIGN PRADEL MODEL
+#
+# ARGUMENTS: 
+#     'RMarkData'    --  List object with the following components:
+#                         maps.ddl: "design data layer" object. Needed for running MARK from RMark (see RMark documentation for details).
+#                         maps.process: "process" object (list). Needed for running MARK from RMark (see RMark documentation for details).                        
+#     'initial'      --  Set initial values for apparent survival. 
+############################################################################
+
+Run.Trend.Model <- function(RMarkData, initial) {
+  
+  process <- RMarkData$maps.process
+  ddl <- RMarkData$maps.ddl
+  
+  ###################### PRADEL MODEL ############################
+  # use base model for all the parameters
+   
+    Phi.baseline = list(formula=~1)            
+    p.baseline = list(formula=~1,share=TRUE)   
+    Lambda.baseline = list(formula=~1)    
+
+    cml=create.model.list("RDPdLHuggins")
+    results=suppressMessages(mark.wrapper(cml,data=process,ddl=ddl, silent=TRUE)) 
+  
+  return(results)
+  
+} # END OF FUNCTION 'Run.Trend.Model'
 
 
 ###################################################################################

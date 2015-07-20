@@ -181,6 +181,16 @@ setwd(DATA_DIRECTORY)
 filename <- paste(SPECIES_CODE, "RMarkData.RData", sep="_")
 save(RMarkData, file=filename)
 
+#######################################################################################################
+# CREATE DATA STRUCTURES FOR RMARK FOR TREND ESTIMATION (LAMBDA)
+#######################################################################################################
+
+RMarkDataTrend <- FormatForRMarkTrend(CMRData=CMRData, dir=DATA_DIRECTORY)
+
+# Save output in DATA_DIRECTORY
+setwd(DATA_DIRECTORY)
+filename <- paste(SPECIES_CODE, "RMarkDataTrend.RData", sep="_")
+save(RMarkDataTrend, file=filename)
 
 ######################################################################################################
 # RUN MARK MODELS TO COMPUTE SURVIVAL RATE 
@@ -195,6 +205,24 @@ setwd(RESULTS_DIRECTORY)
 filename <- paste(SPECIES_CODE, "MarkResults_Time.RData", sep="_")
 save(MarkResults_Time, file=filename)
 
+######################################################################################################
+# RUN MARK MODEL TO COMPUTE TREND 
+######################################################################################################
+setwd(RESULTS_DIRECTORY) # save all MARK output files (.inp, .out, .res) in RESULTS_DIRECTORY
+
+# Here, only run the Pradel model with RMarkData formatted for the analysis
+MarkResults_Trend <- Run.Trend.Model(RMarkData=RMarkDataTrend) 
+
+# Save output in RESULTS_DIRECTORY
+setwd(RESULTS_DIRECTORY)
+filename <- paste(SPECIES_CODE, "MarkResults_Trend.RData", sep="_")
+save(MarkResults_Trend, file=filename)
+
+# Assign trend for correction for all demographic parameters
+Estimated.Trend <- Assign.Trend(estimate=MarkResults_Trend[[1]]$results$real$estimate[2], 
+                               lcl=MarkResults_Trend[[1]]$results$real$lcl[2], 
+                               ucl=MarkResults_Trend[[1]]$results$real$ucl[2])
+Estimated.Trend
 
 ######################################################################################################
 # EXTRACT CAPTURE PROBABILITIES FROM MARK RESULTS
@@ -295,7 +323,9 @@ save(PopModelData, file=filename)
 # CORRECT ALL DEMOGRAPHIC PARAMETERS FOR APPARENT SURVIVAL AND CREATE STAGE AND SD MATRIX
 ######################################################################################################
 
-SummaryMP<-SummaryMP(Data=PopModelData, TrendData=BBS.Trend)   
+SummaryMP<-SummaryMP(Data=PopModelData, TrendData=BBS.Trend)   # correction using BBS Trend
+
+SummaryMP<-SummaryMP(Data=PopModelData, TrendData=Estimated.Trend) # correction using Estimated Trend
 
 # Save output in RESULTS_DIRECTORY.
 setwd(RESULTS_DIRECTORY)
