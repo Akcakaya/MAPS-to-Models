@@ -58,15 +58,15 @@ nt <- 100          # Thinning rate
 #################################################################################################################
 
 PUBLICDATA_DIRECTORY <- paste(BASE_DIRECTORY,"Public dataset",sep="")
-if(is.na(file.info(PUBLICDATA_DIRECTORY)[1,"isdir"])) dir.create(PUBLICDATA_DIRECTORY,recursive=T)        
+if(is.na(file.info(PUBLICDATA_DIRECTORY)[1,"isdir"])) dir.create(PUBLICDATA_DIRECTORY)        
 POPMODELS_DIRECTORY <- paste(BASE_DIRECTORY,"Pop models",sep="")
-if(is.na(file.info(POPMODELS_DIRECTORY)[1,"isdir"])) dir.create(POPMODELS_DIRECTORY,recursive=T)                      # create new directory if it doesn't exist already
+if(is.na(file.info(POPMODELS_DIRECTORY)[1,"isdir"])) dir.create(POPMODELS_DIRECTORY)                      # create new directory if it doesn't exist already
 RESULTS_DIRECTORY <- paste(BASE_DIRECTORY,"Results",sep="")  # for now, put the results in a separate folder
-if(is.na(file.info(RESULTS_DIRECTORY)[1,"isdir"])) dir.create(RESULTS_DIRECTORY,recursive=T)
+if(is.na(file.info(RESULTS_DIRECTORY)[1,"isdir"])) dir.create(RESULTS_DIRECTORY)
 DATA_DIRECTORY <- paste(BASE_DIRECTORY,"Datasets",sep="")  # for now, put the results in a separate folder
-if(is.na(file.info(DATA_DIRECTORY)[1,"isdir"])) dir.create(DATA_DIRECTORY,recursive=T)
+if(is.na(file.info(DATA_DIRECTORY)[1,"isdir"])) dir.create(DATA_DIRECTORY)
 CODE_DIRECTORY <- paste(BASE_DIRECTORY,"Code",sep="")  # for storing WinBUGS code and other code for the project
-if(is.na(file.info(CODE_DIRECTORY)[1,"isdir"])) dir.create(CODE_DIRECTORY,recursive=T)
+if(is.na(file.info(CODE_DIRECTORY)[1,"isdir"])) dir.create(CODE_DIRECTORY)
 
 #################################################################################################################
 # LOAD FUNCTIONS AND PACKAGES
