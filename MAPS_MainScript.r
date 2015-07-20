@@ -72,7 +72,6 @@ DATA_DIRECTORY <- paste(BASE_DIRECTORY,"Datasets",sep="")             # Debug te
 if(is.na(file.info(DATA_DIRECTORY)[1,"isdir"])) dir.create(DATA_DIRECTORY,recursive=T)
 CODE_DIRECTORY <- paste(BASE_DIRECTORY,"Code",sep="")                 # WinBUGS code are stored in this directory.
 if(is.na(file.info(CODE_DIRECTORY)[1,"isdir"])) dir.create(CODE_DIRECTORY,recursive=T)
->>>>>>> origin/master
 
 #################################################################################################################
 # LOAD FUNCTIONS AND PACKAGES
