@@ -34,6 +34,44 @@ Assign.Trend <- function(estimate=0,lcl=0,ucl=0){
 }
 
 
+##################################################################################
+# FUNCTION 'ConvertTrend'
+#
+# CONVERT BBS TREND (% CHANGE IN LAMBDA) INTO REAL LAMBDA VALUES
+##################################################################################
+
+ConvertTrend <- function(estimate, lcl, ucl){
+    
+  Real.BBSTrend.estimate <- 1.0 + estimate /100.0
+  Real.BBSTrend.lcl <- 1.0 + lcl /100.0
+  Real.BBSTrend.ucl <- 1.0 + ucl /100.0
+  
+  Real.BBSTrend <- Assign.Trend(estimate=Real.BBSTrend.estimate, lcl=Real.BBSTrend.lcl, ucl=Real.BBSTrend.ucl) 
+  
+  return(Real.BBSTrend)
+} # END OF FUNCTION 'ConvertTrend'
+
+
+##################################################################################
+# FUNCTION 'ExtractTrend'
+#
+# READ IN THE RESULT OF TREND ESTIMATE FROM MARK PRADEL MODEL
+##################################################################################
+
+ExtractTrend <- function(MarkResults_Trend, model.no){
+    
+  real<-MarkResults_Trend[[model.no]]$results$real
+  
+  MAPSTrend.estimate<-real[grep("Lambda",rownames(real)), "estimate"]
+  MAPSTrend.lcl<-real[grep("Lambda",rownames(real)), "lcl"]
+  MAPSTrend.ucl<-real[grep("Lambda",rownames(real)), "ucl"]
+  
+  MAPSTrend <- Assign.Trend(estimate=MAPSTrend.estimate, lcl=MAPSTrend.lcl, ucl=MAPSTrend.ucl) 
+  
+  return(MAPSTrend)
+} # END OF FUNCTION 'ExtractTrend'
+
+
 #################################################################################
 # FUNCTION 'tryCatch.W.E'
 #
@@ -564,7 +602,7 @@ FormatForCMR <- function(MAPSData, dir){
 	CMR_Data$realyear <- realyear
 	CMR_Data$realbout <- realbout
 	CMR_Data$stratadf <- stratadf
-
+  
 	return(CMR_Data)
   
 } # END OF FUNCTION 'FormatForCMR'
@@ -578,11 +616,15 @@ FormatForCMR <- function(MAPSData, dir){
 #			'dir'         -- Project data directory
 #     'MAPSData'    -- Results from function 'ReadRawData'
 #     'AddDensity'  -- Boolean flag (T or F) indicating whether to append density results. Default is FALSE.
+
+#     NOTE: if AddDesity=TRUE, must have an object in workspace named "RMarkData", which contains the results from running "FormatForRMark" with AddDensity=FALSE 
 #############################################################################################	
  
   # Generate Design data for Survival estimation - based on Robust Design model
 
-FormatForRMark <- function(CMRData, MAPSData, dir, AddDensity){
+FormatForRMark <- function(CMRData, MAPSData, dir, AddDensity, TrendModel){
+
+    if(AddDensity&!exists("RMarkData"))  cat("WARNING: RMarkData not defined! Please run FormatForRMark with AddDensity=FALSE")
 
     if(!AddDensity){
 		inputFile <- CMRData$MasterCapHist
@@ -596,20 +638,37 @@ FormatForRMark <- function(CMRData, MAPSData, dir, AddDensity){
 		startyear=BEGINYEAR
 		lastyear=ENDYEAR
 
-		time.interval=rep(c(0,0,0,1), times=rdn_year)[-(4*rdn_year)]  	#last 1 omitted
-		maps.process=process.data(file, model="RDHuggins", time.intervals=time.interval, begin.time=startyear, groups='pop') # groups by user-defined population
-    maps.ddl=make.design.data(maps.process,parameters=list(S=list(pim.type="all")))
-			
-		  ########### first capture year #############
-			# identify first year of capture to model transients
-			# 'age' in MARK is the year after first capture, not the real age
-		maps.ddl=add.design.data(maps.process,maps.ddl,parameter="S",type="age",bins=c(0,0.5,lastyear-startyear+1),name="first_cap" )
+		time.interval=rep(c(0,0,0,1), times=rdn_year)[-(4*rdn_year)]  	#last 1 omitted      
 
-			#make first_cap binary (0 or 1)
-		maps.ddl$S$first_cap_bin=numeric(nrow(maps.ddl$S))
-		for(i in 1:nrow(maps.ddl$S)){
-			maps.ddl$S$first_cap_bin[i] = ifelse(maps.ddl$S$first_cap[i]=="[0,0.5]",1,0)
-		} 
+		  if(!TrendModel){ 
+			  maps.process=process.data(file, model="RDHuggins", time.intervals=time.interval, begin.time=startyear, groups='pop')
+			  maps.ddl=make.design.data(maps.process,parameters=list(S=list(pim.type="all")))   
+			
+			  ########### first capture year #############
+			  # identify first year of capture to model transients
+				# 'age' in MARK is the year after first capture, not the real age
+			  maps.ddl=add.design.data(maps.process,maps.ddl,parameter="S",type="age",bins=c(0,0.5,lastyear-startyear+1),name="first_cap" )   
+
+				#make first_cap binary (0 or 1)
+		  	maps.ddl$S$first_cap_bin=numeric(nrow(maps.ddl$S))
+			  for(i in 1:nrow(maps.ddl$S)){
+				  maps.ddl$S$first_cap_bin[i] = ifelse(maps.ddl$S$first_cap[i]=="[0,0.5]",1,0)
+			  } 
+		  }else{
+			  maps.process=process.data(file, model="RDPdLHuggins", time.intervals=time.interval, begin.time=startyear, groups='pop') # groups by user-defined population
+			  maps.ddl=make.design.data(maps.process,parameters=list(Phi=list(pim.type="all")))   
+						
+		    ########### first capture year #############
+			  # identify first year of capture to model transients
+				# 'age' in MARK is the year after first capture, not the real age
+			  maps.ddl=add.design.data(maps.process,maps.ddl,parameter="Phi",type="age",bins=c(0,0.5,lastyear-startyear+1),name="first_cap" )   
+
+				#make first_cap binary (0 or 1)
+			  maps.ddl$Phi$first_cap_bin=numeric(nrow(maps.ddl$Phi))
+			  for(i in 1:nrow(maps.ddl$Phi)){
+				  maps.ddl$Phi$first_cap_bin[i] = ifelse(maps.ddl$Phi$first_cap[i]=="[0,0.5]",1,0)
+			  } 
+		  }
 
 			######################ADD DUMMY VARIABLES FOR YEAR (SESSION)
 			# add dummy variables for the "p" design data representing the "year" identity of each bout. 	
@@ -664,8 +723,8 @@ FormatForRMark <- function(CMRData, MAPSData, dir, AddDensity){
     if(AddDensity){
 	    
 		setwd(dir)      # load up the previous RMarkData
-    filename<-paste(SPECIES_CODE, "RMarkData.RData", sep="_")    
-    load(filename)
+		filename<-paste(SPECIES_CODE, "RMarkData.RData", sep="_")    
+		load(filename)
     
 		maps.ddl=RMarkData$maps.ddl
 		maps.process=RMarkData$maps.process
@@ -695,22 +754,35 @@ FormatForRMark <- function(CMRData, MAPSData, dir, AddDensity){
 		  # BEGINYEAR removed
 		maps_density_frame<-maps_density_frame[!is.na(maps_density_frame$maps_prev.rD),] # removes year 1994 since there is no prev.rD
 
-		  # add real maps previous density for each population and time step into maps.ddl$S
-		maps.ddl$S$maps_density=numeric(nrow(maps.ddl$S))
-	
-		maps_density_frame$year <- as.character(maps_density_frame$year)    # added because factors weren't aligning.
-		maps.ddl$S$time <- as.character(maps.ddl$S$time)    # added because factors weren't aligning.
+		  if(!TrendModel){
+			  # add real maps previous density for each population and time step into maps.ddl$S
+			  maps.ddl$S$maps_density=numeric(nrow(maps.ddl$S))
 		
-		for(i in 1:nrow(maps.ddl$S)){
-		  index = which((maps_density_frame$year==maps.ddl$S$time[i])&(maps_density_frame$pop==maps.ddl$S$pop[i])) 
-		  maps.ddl$S$maps_density[i] = ifelse(length(index>0),maps_density_frame$maps_prev.rD[index],0.001)
-		}
+			  maps_density_frame$year <- as.character(maps_density_frame$year)    # added because factors weren't aligning.
+			  maps.ddl$S$time <- as.character(maps.ddl$S$time)    # added because factors weren't aligning.
+			
+			  for(i in 1:nrow(maps.ddl$S)){
+			    index = which((maps_density_frame$year==maps.ddl$S$time[i])&(maps_density_frame$pop==maps.ddl$S$pop[i])) 
+			    maps.ddl$S$maps_density[i] = ifelse(length(index>0),maps_density_frame$maps_prev.rD[index],0.001)
+			  }
+		  }else{
+			  # add real maps previous density for each population and time step into maps.ddl$S
+			  maps.ddl$Phi$maps_density=numeric(nrow(maps.ddl$Phi))
+		
+			  maps_density_frame$year <- as.character(maps_density_frame$year)    # added because factors weren't aligning.
+			  maps.ddl$Phi$time <- as.character(maps.ddl$Phi$time)    # added because factors weren't aligning.
+			
+			  for(i in 1:nrow(maps.ddl$Phi)){
+			    index = which((maps_density_frame$year==maps.ddl$Phi$time[i])&(maps_density_frame$pop==maps.ddl$Phi$pop[i])) 
+			    maps.ddl$Phi$maps_density[i] = ifelse(length(index>0),maps_density_frame$maps_prev.rD[index],0.001)
+			  }
+		  }
 
 		## bundle data for return to main workspace
 		RMarkData <- list()
 		RMarkData$maps.ddl <- maps.ddl
 		RMarkData$maps.process <- maps.process    
-    RMarkData$max.rD <- mean_max.maps_prev.rD
+		RMarkData$max.rD <- mean_max.maps_prev.rD
     
 	}
 	
@@ -739,7 +811,7 @@ FormatForRMark <- function(CMRData, MAPSData, dir, AddDensity){
 #		   the assumption of no movement between populations.
 ############################################################################
 
-Run.Models <- function(RMarkData, initial, DensityModel) {
+Run.Models <- function(RMarkData, initial, DensityModel, TrendModel) {
 
   process <- RMarkData$maps.process
   ddl <- RMarkData$maps.ddl
@@ -747,71 +819,131 @@ Run.Models <- function(RMarkData, initial, DensityModel) {
   ###################### TIME MODELS ############################
   # contains only Time related models
   # the resulting estimates of capture probabilities for juveniles/adults will later be used to calculated relative density
-      
-  if (!DensityModel) {
-    
-    #################### Survival ########################
-    # effect of transients included
-    # trans - a temporarily varying individual covariate
-    # first_cap_bin - first capture year  
-    
-    # Stage model - estimates apparent survival for juveniles/adults
-    S.st.plus.trans=list(formula=~st+first_cap_bin:trans)
-    
-    # Time model - estimates temporal variability in S for juveniles/adults
-    S.st.plus.time.plus.st.time.time.plus.trans=list(formula=~st+time+st:time+first_cap_bin:trans) # with st:time
-                  
-    #################### Capture probability ########################
-    
-    p.stage.plus.effort=list(formula=~st+effort,share=TRUE)
 
-    #################### Gamma parameters ########################
-    
-    # Gamma prime - the probability of being off the study area, unavailable for capture during primary trapping session (i) 
-    #      given that the animal was not present on the study area during primary trapping session (i ??? 1), and survives to trapping session (i).
-    # Gamma double prime - the probability of being off the study area, unavailable for capture during the primary trapping session (i) 
-    #      given that the animal was present during primary trapping session (i ??? 1), and survives to trapping session (i)
-    # in a 'no movement' model, ??' is fixed to 1 and ??" is fixed to 0. 
-    
-    GammaPrime.fixed=list(formula=~1, fixed=1)
-    GammaDoublePrime.fixed=list(formula=~1, fixed=0)
-
-    cml=create.model.list("RDHuggins")
-    results=suppressMessages(mark.wrapper(cml,data=process,ddl=ddl, use.initial=TRUE,silent=TRUE)) # takes a long time to run! the values from the previous model used as initial values in the later models
-  }
+    ###################################################
+    #    If trend is not estimated here (use BBS instead)
   
+    if ((!DensityModel) & (!TrendModel)) {
+    
+      #################### Survival ########################
+      # effect of transients included
+      # trans - a temporarily varying individual covariate
+      # first_cap_bin - first capture year  
+    
+      # Stage model - estimates apparent survival for juveniles/adults
+      S.st.plus.trans=list(formula=~st+first_cap_bin:trans)
+      
+      # Time model - estimates temporal variability in S for juveniles/adults
+      S.st.plus.time.plus.st.time.time.plus.trans=list(formula=~st+time+st:time+first_cap_bin:trans) # with st:time
+      
+      #################### Capture probability ########################
+      # st - individual covariate for stage (1: juvenile, 0: adult)
+      # effort - total number of hours of mistnetting in a given month
+      p.st.plus.effort=list(formula=~st+effort,share=TRUE)
+      
+      #################### Gamma parameters ########################
+      # Gamma prime - the probability of being off the study area, unavailable for capture during primary trapping session (i) 
+      #      given that the animal was not present on the study area during primary trapping session (i ??? 1), and survives to trapping session (i).
+      # Gamma double prime - the probability of being off the study area, unavailable for capture during the primary trapping session (i) 
+      #      given that the animal was present during primary trapping session (i ??? 1), and survives to trapping session (i)
+      # in a 'no movement' model, ??' is fixed to 1 and ??" is fixed to 0. 
+      
+      GammaPrime.fixed=list(formula=~1, fixed=1)
+      GammaDoublePrime.fixed=list(formula=~1, fixed=0)
+  	
+      cml=create.model.list("RDHuggins")        
+      results=suppressMessages(mark.wrapper(cml,data=process,ddl=ddl, use.initial=TRUE,silent=TRUE)) # takes a long time to run! the values from the previous model used as initial values in the later models
+  	
+    }
+
+    ################################################
+    #    If trend is estimated here (using MAPS data)
+    
+    if ((!DensityModel) & (TrendModel)) {
+      
+      #################### Survival ########################
+      # Modeled as constant
+      # The mark-recapture dataset here only contains adults, therefore, 'st' will not be modeled as covariate
+      # Baseline model - estimates apparent survival for adults 
+      Phi.baseline=list(formula=~1)
+      
+      #################### Capture probability ########################
+      # The mark-recapture dataset here only contains adults, therefore, 'st' will not be modeled as covariate
+      # effort - total number of hours of mistnetting in a given month
+      
+      p.effort=list(formula=~effort,share=TRUE)
+      #p.baseline=list(formula=~1,share=TRUE)
+      
+      #################### Trend / Lambda ########################  
+      # Trend model - estimates regional trend, for correcting survival
+      Lambda.regional.trend = list(formula=~1) 
+  
+      cml=create.model.list("RDPdLHuggins")       
+      results=suppressMessages(mark.wrapper(cml,data=process,ddl=ddl, use.initial=TRUE,silent=TRUE)) # takes a long time to run! the values from the previous model used as initial values in the later models
+    }
+
+
   ###################### DENSITY MODELS ############################
   # contains 'density' as covariate which is calculated based on capture probabilities from MODEL 1
   
-  if (DensityModel) {   
-    
-    ###################  Survival #############################
-    # effect of transients included
-    # trans - a temporarily varying individual covariate
-    # first_cap_bin - first capture year
-    
-    # Density model - measures density-dependence in S for juveniles/adults/adult transients
-    S.st.plus.maps_density.plus.trans=list(formula=~st+maps_density+first_cap_bin:trans)
-    
-    #################### Capture probability ########################
-    
-    p.stage.plus.effort=list(formula=~st+effort,share=TRUE)
-    
-    #################### Gamma parameters ########################
-    
-    # Gamma prime - the probability of being off the study area, unavailable for capture during primary trapping session (i) 
-    #      given that the animal was not present on the study area during primary trapping session (i ??? 1), and survives to trapping session (i).
-    # Gamma double prime - the probability of being off the study area, unavailable for capture during the primary trapping session (i) 
-    #      given that the animal was present during primary trapping session (i ??? 1), and survives to trapping session (i)
-    # in a 'no movement' model, ??' is fixed to 1 and ??" is fixed to 0. 
-    
-    GammaPrime.fixed=list(formula=~1, fixed=1)
-    GammaDoublePrime.fixed=list(formula=~1, fixed=0)
-     
-    cml=create.model.list("RDHuggins")
-    results=suppressMessages(mark.wrapper(cml,data=process,ddl=ddl, use.initial=TRUE,silent=TRUE))  #the values from the previous model used as initial values in the later models
-  }
+    ###################################################
+    #    If trend is not estimated here (use BBS instead)
+  
+    if ((DensityModel) & (!TrendModel)) {   
+      
+      ###################  Survival #############################
+      # effect of transients included
+      # trans - a temporarily varying individual covariate
+      # first_cap_bin - first capture year
+      
+      # Density model - measures density-dependence in S for juveniles/adults/adult transients
+      S.st.plus.maps_density.plus.trans=list(formula=~st+maps_density+first_cap_bin:trans)
+      
+      #################### Capture probability ########################
+      # st - individual covariate for stage (1: juvenile, 0: adult)
+      # effort - total number of hours of mistnetting in a given month
+      p.st.plus.effort=list(formula=~st+effort,share=TRUE)
+      
+      #################### Gamma parameters ########################
+      # Gamma prime - the probability of being off the study area, unavailable for capture during primary trapping session (i) 
+      #      given that the animal was not present on the study area during primary trapping session (i ??? 1), and survives to trapping session (i).
+      # Gamma double prime - the probability of being off the study area, unavailable for capture during the primary trapping session (i) 
+      #      given that the animal was present during primary trapping session (i ??? 1), and survives to trapping session (i)
+      # in a 'no movement' model, ??' is fixed to 1 and ??" is fixed to 0. 
+      
+      GammaPrime.fixed=list(formula=~1, fixed=1)
+      GammaDoublePrime.fixed=list(formula=~1, fixed=0)
+       
+      cml=create.model.list("RDHuggins")        
+      results=suppressMessages(mark.wrapper(cml,data=process,ddl=ddl, use.initial=TRUE,silent=TRUE))  #the values from the previous model used as initial values in the later models
+    }
+  
 
+    ################################################
+    #    If trend is estimated here (using MAPS data)
+  
+    if ((DensityModel) & (TrendModel)) {   
+      
+      ###################  Survival #############################
+      # the mark-recapture dataset here only contains adults, therefore, 'st' will not be modeled as covariate
+      # Density model - measures density-dependence in Phi
+      Phi.maps_density=list(formula=~maps_density)
+            
+      #################### Capture probability ########################
+      # The mark-recapture dataset here only contains adults, therefore, 'st' will not be modeled as covariate
+      # effort - total number of hours of mistnetting in a given month
+      
+      p.effort=list(formula=~effort,share=TRUE)
+      #p.baseline=list(formula=~1,share=TRUE)
+      
+      #################### Trend / Lambda ########################  
+      # Trend model - estimates regional trend, for correcting survival
+      Lambda.regional.trend = list(formula=~1) 
+      
+      cml=create.model.list("RDPdLHuggins")        
+      results=suppressMessages(mark.wrapper(cml,data=process,ddl=ddl, use.initial=TRUE,silent=TRUE))  #the values from the previous model used as initial values in the later models
+    }
+  
   return(results)
   
 } # END OF FUNCTION 'Run.Models'
@@ -1116,7 +1248,7 @@ ApparentS <- function(RMarkResults, model.no){
   fc[(c(1:nrow(fc)) %in% grep("S g",fc$rnames)) & (c(1:nrow(fc)) %in% grep("trans",fc$var)), c("value")] <-1
     # Fill design matrix with values for adult transients
   design.a_trans=fill.covariates(RMarkResults[[model.no]],fc)
-  
+
   
     ########### Compute and output real S and p values ################
     # For each row in design matrix, compute real value of S and p
@@ -2412,7 +2544,9 @@ SummarizeForPopModel <- function(RMarkData, AppS, STempVar, MarkResults, Fec, mo
 #     'Population Model Summary' text file in RESULTS_DIRECTORY
 #########################################################################################################
 
-SummaryMP <- function(Data,TrendData){
+SummaryMP <- function(Data, TrendData){
+    
+  if(!exists("MAPSTrend"))  cat("WARNING: MAPSTrend not defined! Please run ExtractTrend")
   
   # READ IN RESULTS FROM MAPS ANALYSIS
   
@@ -2460,10 +2594,9 @@ SummaryMP <- function(Data,TrendData){
   ### use the upper and lower bounds of trends
   
   real.lambda <- list()
-  real.lambda$estimate <- 1.0 + TrendData$estimate /100.0
-  real.lambda$lcl <- 1.0 + TrendData$lcl /100.0
-  real.lambda$ucl <- 1.0 + TrendData$ucl /100.0
-  
+  real.lambda$estimate <- TrendData$estimate
+  real.lambda$lcl <- TrendData$lcl
+  real.lambda$ucl <- TrendData$ucl
  
   allcombs <- expand.grid(real.lambda=c(real.lambda$lcl,real.lambda$estimate,real.lambda$ucl),Sad=c(Sad$lcl,Sad$estimate,Sad$ucl),Sjuv=c(Sjuv$lcl,Sjuv$estimate,Sjuv$ucl),F_mean=c(F_mean$lcl,F_mean$estimate,F_mean$ucl))
   allcombs_ndx <- expand.grid(real.lambda.ndx=c(1,2,3),Sad.ndx=c(1,2,3),Sjuv.ndx=c(1,2,3),F_mean.ndx=c(1,2,3))
@@ -2730,7 +2863,7 @@ SummaryMP <- function(Data,TrendData){
   # output Density-dependence functions to 'Population Model Summary' text file
   ToPopModelFile (
     sprintf(("
-  D. Density Dependence:
+  E. Density Dependence:
 
   When (N/K) > [%.3f], the current population size is truncated at [%.3f]*K
   or the stage matrix and stage abundances are decreased such that the expected population size in the next time step is [%.3f]*K.

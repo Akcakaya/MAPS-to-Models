@@ -36,7 +36,7 @@ BUGSdir <- "C:\\xxxxxxx\\"
 ## For reference: for MAPS dataset in GitHub, data are available for the period 1994-2012 
 ##               (exception is BCCH, for which data are available until 2010)
 
-SPECIES_CODE <- "YBCH"           # Focal Species
+SPECIES_CODE <- "NOCA"           # Focal Species
 BEGINYEAR    <- 1994             # First year of study period
 ENDYEAR      <- 2012             # Final year of study period
 
@@ -103,28 +103,6 @@ population_map = read.csv("station_pop.csv",header=T)      # A user-defined csv 
                                                            # In the manuscript, we chose to treat each MAPS location (comprised of multiple stations) as its own biological population.
 
 #################################################################################################################
-# LOAD REGIONAL TREND DATA  (we used estimates derived from BBS data- see http://www.mbr-pwrc.usgs.gov/bbs/trend/tf13.html)
-#################################################################################################################
-
-### For reference:  BBS trend for focal species from Ryu et al.2015 ###
-# spec,trend,lcl,ucl
-# NOCA,0.30,0.16,0.43
-# WEVI,0.51,0.19,0.84
-# GRCA,0.46,0.28,0.64
-# COYE,-0.85,-1.08,-0.62
-# WOTH,-2.16,-2.42,-1.89
-# HOWA,1.85,1.11,2.64
-# YBCH,-0.27,-0.58,0.04
-# CACH,-0.37,-0.72,-0.02
-# BCCH,0.29,-0.20,0.80
-
-# estimate = central point estimate   (default is zero)
-# lcl = lower confidence limit
-# ucl = upper confidence limit
-
-BBS.Trend <- Assign.Trend(estimate=0.29, lcl=-0.20, ucl=0.80) # Assign trend (point estimate, lcl, and ucl) for each species based on BBS Trend. 
-
-#################################################################################################################
 # SET UP INFORMATIVE 'DEBUG' FILE
 #################################################################################################################
 
@@ -145,6 +123,31 @@ InitializeResultsFile(dir=RESULTS_DIRECTORY,filename=RESULTS_FILENAME)
 METAPOP_FILENAME <- paste(SPECIES_CODE, ".mp", sep="")   
 POPMODELSUMMARY_FILENAME <- paste(SPECIES_CODE,"_popmodelsummary.txt",sep="")
 InitializePopModelFile(dir=RESULTS_DIRECTORY,filename=POPMODELSUMMARY_FILENAME)
+
+
+#################################################################################################################
+# LOAD REGIONAL BBS TREND DATA  
+#################################################################################################################
+# If trend estimated from MAPS data is not used, use BBS regional trend data instead
+# BBS data - see http://www.mbr-pwrc.usgs.gov/bbs/trend/tf13.html
+
+### For reference:  BBS trend for 9 focal species from Ryu et al.2015 ###
+# estimate = central point estimate   (unit: change in %)
+# lcl = lower confidence limit
+# ucl = upper confidence limit
+
+# spec,trend,lcl,ucl 
+# NOCA,0.30,0.16,0.43
+# WEVI,0.51,0.19,0.84
+# GRCA,0.46,0.28,0.64
+# COYE,-0.85,-1.08,-0.62
+# WOTH,-2.16,-2.42,-1.89
+# HOWA,1.85,1.11,2.64
+# YBCH,-0.27,-0.58,0.04
+# CACH,-0.37,-0.72,-0.02
+# BCCH,0.29,-0.20,0.80
+
+BBSTrend <- ConvertTrend(estimate=-0.27, lcl=-0.58, ucl=0.04) # Convert % change in lambda to real lambda values 
 
 #################################################################################################################
 # READ IN RAW DATA FROM CSV FILES
@@ -170,11 +173,48 @@ setwd(DATA_DIRECTORY)
 filename <- paste(SPECIES_CODE, "CMRData.RData", sep="_")
 save(CMRData, file=filename)
 
+
 #######################################################################################################
-# CREATE DATA STRUCTURES FOR RMARK FROM THE CAPTURE MARK RECAPTURE DATA
+# CREATE DATA STRUCTURE FOR RMARK FROM THE CAPTURE MARK RECAPTURE DATA TO ESTIMATE REGIONAL TREND 
+#######################################################################################################
+# Regional trend is estimated based on MAPS dataset including all adults and juveniles.
+
+RMarkData_AllTrend <- FormatForRMark(CMRData=CMRData, MAPSData=MAPSData, dir=DATA_DIRECTORY, AddDensity=FALSE, TrendModel=TRUE)  # Creates data structure to estimate trend (TrendModel=TRUE)
+                                                                                                                                 # No density covariate for trend model (AddDensity=FALSO)
+
+# Save output in DATA_DIRECTORY
+setwd(DATA_DIRECTORY)
+filename <- paste(SPECIES_CODE, "RMarkData_AllTrend.RData", sep="_")
+save(RMarkData_AllTrend, file=filename)
+
+
+######################################################################################################
+# RUN MARK MODEL TO COMPUTE TREND BASED ON MAPS DATA
+######################################################################################################
+setwd(RESULTS_DIRECTORY) # save all MARK output files (.inp, .out, .res) in RESULTS_DIRECTORY
+
+MarkResults_AllTrend <- Run.Models(RMarkData=RMarkData_AllTrend, initial=0, DensityModel = FALSE, TrendModel=TRUE)    # Runs trend model (TrendModel=TRUE)
+                                                                                                                      # No density in trend model (DensityModel=FALSE)
+# Save output in RESULTS_DIRECTORY
+setwd(RESULTS_DIRECTORY)
+filename <- paste(SPECIES_CODE, "MarkResults_AllTrend.RData", sep="_")
+save(MarkResults_AllTrend, file=filename)
+
+
+######################################################################################################
+# EXTRACT TREND ESTIMATE (WITH LCL, UCL) FROM MARK TREND MODEL
+######################################################################################################
+# Only 1 model used to estimate regional trend (model.no=1) : Phi(~1) Lambda(~1) p(~effort) c()
+
+MAPSTrend <- ExtractTrend(MarkResults_Trend=MarkResults_AllTrend, model.no=1)
+
+
+#######################################################################################################
+# CREATE DATA STRUCTURE FOR RMARK FROM THE CAPTURE MARK RECAPTURE DATA FOR SURVIVAL ANALYSIS
 #######################################################################################################
 
-RMarkData <- FormatForRMark(CMRData=CMRData, MAPSData=MAPSData, dir=DATA_DIRECTORY, AddDensity=FALSE)
+RMarkData <- FormatForRMark(CMRData=CMRData, MAPSData=MAPSData, dir=DATA_DIRECTORY, AddDensity=FALSE, TrendModel=FALSE) # Creates data structure for Survival analysis (TrendModel=FALSE)
+                                                                                                                        # Density will be added later using capture probability resulting from Time model (AddDensity=FALSE)
 
 # Save output in DATA_DIRECTORY
 setwd(DATA_DIRECTORY)
@@ -187,8 +227,8 @@ save(RMarkData, file=filename)
 ######################################################################################################
 setwd(RESULTS_DIRECTORY) # save all MARK output files (.inp, .out, .res) in RESULTS_DIRECTORY
 
-# Here, only run the initial MARK models. No density, just time-dependent models.
-MarkResults_Time <- Run.Models(RMarkData=RMarkData, initial=0, DensityModel = FALSE) # NOTE: With a 2.4GHz processor, this code takes about 10 minutes to run.   
+# Here, only run the initial MARK models. No density, just time-constant and time-dependent models.
+MarkResults_Time <- Run.Models(RMarkData=RMarkData, initial=0, DensityModel = FALSE, TrendModel=FALSE) # NOTE: With a 2.4GHz processor, this code takes about 10 minutes to run.   
 
 # Save output in RESULTS_DIRECTORY
 setwd(RESULTS_DIRECTORY)
@@ -209,11 +249,13 @@ setwd(DATA_DIRECTORY)
 filename <- paste(SPECIES_CODE, "PTable.RData", sep="_")
 save(p.table, file=filename)
 
+
 #######################################################################################################
 # ADD DENSITY COVARIATE TO THE RMARK DATA --- FOR ESTIMATING DENSITY-DEPENDENCE IN FINAL SURVIVAL ANALYSIS 
 ######################################################################################################
+# This function adds density covariate to RMarkData created previously. If RMarkData does not exist, please run 'FormatForRMark' with AddDensity=FALSE
 
-finalRMarkData <- FormatForRMark(CMRData=CMRData, MAPSData=MAPSData, dir=DATA_DIRECTORY, AddDensity=TRUE) 
+finalRMarkData <- FormatForRMark(CMRData=CMRData, MAPSData=MAPSData, dir=DATA_DIRECTORY, AddDensity=TRUE, TrendModel=FALSE) 
 
 # Save output in DATA_DIRECTORY.
 setwd(DATA_DIRECTORY)
@@ -227,7 +269,7 @@ save(finalRMarkData, file=filename)
 setwd(RESULTS_DIRECTORY) # Save all MARK output files (.inp, .out, .res) in RESULTS_DIRECTORY.
 
 # Here, run the density-dependent MARK models. 
-MarkResults_Density <- Run.Models(RMarkData=finalRMarkData, initial=0, DensityModel = TRUE)    # NOTE: With a 2.4 GHz processor, this code takes about 5 minutes to run.
+MarkResults_Density <- Run.Models(RMarkData=finalRMarkData, initial=0, DensityModel = TRUE, TrendModel=FALSE)    # NOTE: With a 2.4 GHz processor, this code takes about 5 minutes to run.
 
 # Save output in RESULTS_DIRECTORY.
 setwd(RESULTS_DIRECTORY)
@@ -292,10 +334,10 @@ save(PopModelData, file=filename)
 
 
 ######################################################################################################
-# CORRECT ALL DEMOGRAPHIC PARAMETERS FOR APPARENT SURVIVAL AND CREATE STAGE AND SD MATRIX
+# CORRECT ALL DEMOGRAPHIC PARAMETERS FOR APPARENT SURVIVAL USING TREND AND CREATE STAGE AND SD MATRIX
 ######################################################################################################
 
-SummaryMP<-SummaryMP(Data=PopModelData, TrendData=BBS.Trend)   
+SummaryMP<-SummaryMP(Data=PopModelData, TrendData=MAPSTrend)  # here, use either MAPSTrend or BBSTrend
 
 # Save output in RESULTS_DIRECTORY.
 setwd(RESULTS_DIRECTORY)
