@@ -33,7 +33,7 @@ For examples of these data files, see the [dataset folder] (https://github.com/A
 
 (1) Get all the files to your computer (click on "Download ZIP" or "Clone in Desktop").
 
-(2) In 'MAPS_MainScript.r', specify the folder where you saved the files as the 'BASE_DIRECTORY'.
+(2) In `MAPS_MainScript.r`, specify the folder where you saved the files as the `BASE_DIRECTORY`.
 
 (3) Follow other instructions in MAPS_MainScript.r, modify the settings as needed, and run this script in R.
 
