@@ -1,4 +1,4 @@
-# MAPS-to-Models: Developing Population Models with Mark-Recapture Data from the MAPS Program
+# MAPS-to-Models: Developing Population Models with Mark-Recapture Data
 
 `MAPS-to-Models` is an R script that provides functions to analyze data from marked individuals (mark-recapture data) to develop a stage-structured, stochastic, density dependent population model.
 
