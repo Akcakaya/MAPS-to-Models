@@ -147,7 +147,7 @@ InitializePopModelFile(dir=RESULTS_DIRECTORY,filename=POPMODELSUMMARY_FILENAME)
 # CACH,-0.37,-0.72,-0.02
 # BCCH,0.29,-0.20,0.80
 
-BBSTrend <- ConvertTrend(estimate=-0.27, lcl=-0.58, ucl=0.04) # Convert % change in lambda to real lambda values 
+BBSTrend <- ConvertTrend(estimate=-0.27, lcl=-0.58, ucl=0.) # Convert % change in lambda to real lambda values 
 
 #################################################################################################################
 # READ IN RAW DATA FROM CSV FILES
@@ -349,6 +349,7 @@ save(SummaryMP, file=filename)
 # BUILD RAMAS ".MP" FILE WITH PARAMETERS FROM THE ABOVE ANALYSES 
 ######################################################################################################
 
+# Create 3 .mp files - with upper bound, lower bound, and point estimates
 WriteMasterMPFile(Result=SummaryMP)  
 
 ################################### END OF CODE ################################################

@@ -14,7 +14,8 @@ The organization of the document reflects the order of operations in the workflo
 	
 	To view the capture history, go to file location: C:\Users\Chloe\Dropbox\MAPS Project\Data\final2 and 
  look for file:  WEVI_CaptureHistory.txt
-    -------------------------------------------------------------------------------
+      
+-------------------------------------------------------------------------------
     RESULTS FOR VARIANCE COMPONENT ANALYSIS - JUVENILES WITH ALL YEARS
                   
     Computing process variance for juveniles with all years worked!
@@ -71,19 +72,20 @@ The organization of the document reflects the order of operations in the workflo
     Upper C.I. of Temporal env variability (SD) in fecundity: 1.0009388071173 
 
     *Approximate convergence is diagnosed when the upper limit is close to 1. 
-    
-      ----------------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------------------
       PARAMETER VALUES FOR POPULATION MODEL BEFORE CORRECTING FOR APPARENT SURVIVAL 
  
  1. Apparent survival rate of juveniles from time-constant model: 0.110290746409625 
  2. Apparent survival rate of adults from time-constant model: 0.455059012658939 
- 3. Apparent survival rate of juveniles from Density model: 0.111154373873386 
- 4. Apparent survival rate of adults from Density model: 0.459905278891378 
+ 3. Apparent survival rate of juveniles from Density model: 0.112795736168809 
+ 4. Apparent survival rate of adults from Density model: 0.461018393555515 
  5. Temporal variability in survival of juveniles: 0.000237051100855235 
  6. Temporal variability in survival for adults: 0.00344645640340423 
- 7. Intercept of density-dependence relationship for survival in logit scale: -0.1101239 
- 8. Juvenile effect in the density-dependence function for survival in logit scale: -1.9182796 
- 9. Slope of density-dependence relationship for survival in logit scale: -0.043079 
+ 7. Intercept of density-dependence relationship for survival in logit scale: -0.1108509 
+ 8. Juvenile effect in the density-dependence function for survival in logit scale: -1.9062532 
+ 9. Slope of density-dependence relationship for survival in logit scale: -0.0402717 
  10. Mean fecundity: 2.3389852 
  11. Temporal variability in fecundity: 0.157969634421524 
  12. Slope of density-dependence relationship for fecundity in log scale: -0.048282856928 
@@ -107,4 +109,3 @@ The organization of the document reflects the order of operations in the workflo
                 S_dens            Slope of DD relationship for survival, logit space
                 S_st              Juvenile effect in the DD function for survival          
                 
- 

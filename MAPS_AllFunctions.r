@@ -737,25 +737,24 @@ FormatForRMark <- function(CMRData, MAPSData, dir, AddDensity, TrendModel){
 		  # leave only rows with values for maps_rD - one row for each year
 		maps_density_frame2<-maps_density_frame[!is.na(maps_density_frame$maps_rD),] 
 
-		  # determine the value of MAPS previous density above which ceiling-type density-dependence will be used
-		  # This value will be calculated as the mean of max(maps_prev.rD) for each population
+		  # determine the value of MAPS density above which ceiling-type density-dependence will be used
+		  # This value will be calculated as the mean of max(maps_rD) for each population
 		unique.pop<-sort(unique(maps_density_frame2$pop))
 		  # first, get maximum for each population across all time periods
-		max.maps_prev.rD<-data.frame(pop=unique.pop, max.maps_prev.rD=NA)
-		for (i in 1:nrow(max.maps_prev.rD)){
-		  index<-which(maps_density_frame2$pop==max.maps_prev.rD$pop[i])
-		  max.maps_prev.rD$max.maps_prev.rD[i]<-max(maps_density_frame2$maps_prev.rD[index],na.rm=T)
+		max.maps_rD<-data.frame(pop=unique.pop, max.maps_rD=NA)
+		for (i in 1:nrow(max.maps_rD)){
+		  index<-which(maps_density_frame2$pop==max.maps_rD$pop[i])
+		  max.maps_rD$max.maps_rD[i]<-max(maps_density_frame2$maps_rD[index],na.rm=T)
 		}
 
 	    # get the mean of maximums of each population 
-		mean_max.maps_prev.rD<-mean(max.maps_prev.rD$max.maps_prev.rD)
+		mean_max.maps_rD<-mean(max.maps_rD$max.maps_rD)
 
-		  # leave only rows with values for maps_prev.rD - one row for each year
-		  # BEGINYEAR removed
-		maps_density_frame<-maps_density_frame[!is.na(maps_density_frame$maps_prev.rD),] # removes year 1994 since there is no prev.rD
+		  # leave only rows with values for maps_rD - one row for each year
+		maps_density_frame<-maps_density_frame[!is.na(maps_density_frame$maps_rD),] 
 
 		  if(!TrendModel){
-			  # add real maps previous density for each population and time step into maps.ddl$S
+			  # add real maps density for each population and time step into maps.ddl$S
 			  maps.ddl$S$maps_density=numeric(nrow(maps.ddl$S))
 		
 			  maps_density_frame$year <- as.character(maps_density_frame$year)    # added because factors weren't aligning.
@@ -763,10 +762,10 @@ FormatForRMark <- function(CMRData, MAPSData, dir, AddDensity, TrendModel){
 			
 			  for(i in 1:nrow(maps.ddl$S)){
 			    index = which((maps_density_frame$year==maps.ddl$S$time[i])&(maps_density_frame$pop==maps.ddl$S$pop[i])) 
-			    maps.ddl$S$maps_density[i] = ifelse(length(index>0),maps_density_frame$maps_prev.rD[index],0.001)
+			    maps.ddl$S$maps_density[i] = ifelse(length(index>0),maps_density_frame$maps_rD[index],NA)
 			  }
 		  }else{
-			  # add real maps previous density for each population and time step into maps.ddl$S
+			  # add real maps density for each population and time step into maps.ddl$S
 			  maps.ddl$Phi$maps_density=numeric(nrow(maps.ddl$Phi))
 		
 			  maps_density_frame$year <- as.character(maps_density_frame$year)    # added because factors weren't aligning.
@@ -774,7 +773,7 @@ FormatForRMark <- function(CMRData, MAPSData, dir, AddDensity, TrendModel){
 			
 			  for(i in 1:nrow(maps.ddl$Phi)){
 			    index = which((maps_density_frame$year==maps.ddl$Phi$time[i])&(maps_density_frame$pop==maps.ddl$Phi$pop[i])) 
-			    maps.ddl$Phi$maps_density[i] = ifelse(length(index>0),maps_density_frame$maps_prev.rD[index],0.001)
+			    maps.ddl$Phi$maps_density[i] = ifelse(length(index>0),maps_density_frame$maps_rD[index],NA)
 			  }
 		  }
 
@@ -782,7 +781,7 @@ FormatForRMark <- function(CMRData, MAPSData, dir, AddDensity, TrendModel){
 		RMarkData <- list()
 		RMarkData$maps.ddl <- maps.ddl
 		RMarkData$maps.process <- maps.process    
-		RMarkData$max.rD <- mean_max.maps_prev.rD
+		RMarkData$max.rD <- mean_max.maps_rD
     
 	}
 	
