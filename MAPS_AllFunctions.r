@@ -1160,7 +1160,7 @@ PCapResults <- function (RMarkResults, maps.ddl, band.data, model.no){
     p.table$maps_rD[4*i]<-p.table$corr.N[4*i]/mean.abund$K[index]
   }
   
-  # Use MAPS previous year's density (maps_prev.rD) to model effect of density on the vital rates
+  # Use the following code, if previous year's density is used to model effect of density on the vital rates
   # put maps_prev.rD into corresponding year and population
   suppressWarnings(
     for (i in 1:(nrow(p.table)/4)){
@@ -1189,7 +1189,7 @@ PCapResults <- function (RMarkResults, maps.ddl, band.data, model.no){
     p.table$maps_rD_ad[4*i]<-p.table$corr.Nad[4*i]/mean.abund_ad$K_ad[index]
   }
   
-  # Use MAPS previous year's density (maps_prev.rD_ad) to model effect of density on the vital rates
+  # Use the following code, if previous year's density is used to model effect of density on the vital rates
   # put maps_prev.rD_ad into corresponding year and location
   suppressWarnings(
     for (i in 1:(nrow(p.table)/4)){

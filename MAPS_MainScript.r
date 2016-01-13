@@ -76,6 +76,7 @@ if(is.na(file.info(CODE_DIRECTORY)[1,"isdir"])) dir.create(CODE_DIRECTORY,recurs
 #################################################################################################################
 # LOAD FUNCTIONS AND PACKAGES
 #################################################################################################################
+
 # Load functions from GitHub
 setwd(BASE_DIRECTORY)
 source("MAPS_AllFunctions.r")     
