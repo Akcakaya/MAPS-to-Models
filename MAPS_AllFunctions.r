@@ -1955,8 +1955,10 @@ beta.rD ~ dnorm(0,0.01)            # precision=1/variance=0.001
 
 # Derived terms
 
-env.stoch.sd <- sqrt(1/env.stoch.tau)
 log.mean.fec <- log(mean.fec)
+env.stoch.sd <- sqrt(1/env.stoch.tau)
+env.stoch.var <- pow(env.stoch.sd,2)
+env.stoch.sd.real <- sqrt((exp(env.stoch.var)-1)*exp(2*log.mean.fec + env.stoch.var))  # estimate standard deviation on real scale
 
 # Estimated mean fecundity each year
 
@@ -2007,7 +2009,7 @@ for (t in 1:nt) {
    
 	    #Send information to WinBUGS
 	  Mod_full <- bugs(data=Data_full, inits=inits_full, 
-				  parameters.to.save=c("mean.fec", "env.stoch.sd", "est.mean.fec", "beta.rD", "Adultp", "Juvp"), 
+				  parameters.to.save=c("mean.fec", "env.stoch.sd.real", "est.mean.fec", "beta.rD", "Adultp", "Juvp"), 
 				  model.file="fecundity_MAPS_full.bug", n.thin=nt, n.chains=nc, n.burnin=nb, n.iter=ni, 
           bugs.directory=BUGSdir, codaPkg=TRUE, over.relax=T, debug=FALSE)   
 	  
@@ -2055,7 +2057,7 @@ for (t in 1:nt) {
     Upper C.I. of Slope of DD relationship for fecundity: %s \n
     Upper C.I. of Temporal env variability (SD) in fecundity: %s \n
     *Approximate convergence is diagnosed when the upper limit is close to 1. 
-    " , GR_full.W.E$value$psrf["mean.fec","Upper C.I."], GR_full.W.E$value$psrf["beta.rD","Upper C.I."], GR_full.W.E$value$psrf["env.stoch.sd","Upper C.I."]
+    " , GR_full.W.E$value$psrf["mean.fec","Upper C.I."], GR_full.W.E$value$psrf["beta.rD","Upper C.I."], GR_full.W.E$value$psrf["env.stoch.sd.real","Upper C.I."]
         ),  RESULTS_DIRECTORY, RESULTS_FILENAME)
     }
 
@@ -2099,8 +2101,10 @@ beta.rD ~ dnorm(0,0.01)            # precision=1/variance=0.001
 
 # Derived terms
 
-env.stoch.sd <- sqrt(1/env.stoch.tau)
 log.mean.fec <- log(mean.fec)
+env.stoch.sd <- sqrt(1/env.stoch.tau)
+env.stoch.var <- pow(env.stoch.sd,2)
+env.stoch.sd.real <- sqrt((exp(env.stoch.var)-1)*exp(2*log.mean.fec + env.stoch.var))  # estimate standard deviation on real scale
 
 # Estimated mean fecundity each year
 
@@ -2141,7 +2145,7 @@ for (t in 1:nt) {
 		  
 	    #Send information to WinBUGS
 	  Mod_null <- bugs(data=Data_null, inits=inits_null, 
-				  parameters.to.save=c("mean.fec", "env.stoch.sd", "Juvs.pred","beta.rD", "est.mean.fec"), 
+				  parameters.to.save=c("mean.fec", "env.stoch.sd.real", "Juvs.pred","beta.rD", "est.mean.fec"), 
 				  model.file="fecundity_MAPS_null.bug", n.thin=nt, n.chains=nc, n.burnin=nb,	n.iter=ni, 
           bugs.directory=BUGSdir, codaPkg=TRUE, over.relax=T, debug=FALSE)
 	  
@@ -2190,7 +2194,7 @@ for (t in 1:nt) {
     Upper C.I. of Slope of DD relationship for fecundity: %s \n
     Upper C.I. of Temporal env variability (SD) in fecundity: %s \n
     *Approximate convergence is diagnosed when the upper limit is close to 1. 
-    " , GR_null.W.E$value$psrf["mean.fec","Upper C.I."], GR_null.W.E$value$psrf["beta.rD","Upper C.I."], GR_null.W.E$value$psrf["env.stoch.sd","Upper C.I."]
+    " , GR_null.W.E$value$psrf["mean.fec","Upper C.I."], GR_null.W.E$value$psrf["beta.rD","Upper C.I."], GR_null.W.E$value$psrf["env.stoch.sd.real","Upper C.I."]
         ),  RESULTS_DIRECTORY, RESULTS_FILENAME)
     }
   
@@ -2775,8 +2779,8 @@ SummaryMP <- function(Data, TrendData){
     "), round(corrected.Sad$estimate,3), round(corrected.Sad$lcl,3), round(corrected.Sad$ucl,3), round(sqrt(corrected.Var_Sad$estimate),3), round(sqrt(corrected.Var_Sad$lcl),3), round(sqrt(corrected.Var_Sad$ucl),3),
             round(corrected.Sjuv$estimate,3), round(Sjuv$lcl,3), round(Sjuv$ucl,3), round(sqrt(corrected.Var_Sjuv$estimate),3), round(sqrt(corrected.Var_Sjuv$lcl),3), round(sqrt(corrected.Var_Sjuv$ucl),3),
             round(F_mean$estimate,3), round(F_mean$lcl,3), round(F_mean$ucl,3), round(SD_F$estimate,3), round(SD_F$lcl,3), round(SD_F$ucl,3),
-            round(FSj$estimate,3),round(FSj$lcl,3),round(FSj$ucl,3),round(FSj_variance$estimate,3),round(FSj_variance$lcl,3),round(FSj_variance$ucl,3),
-            round(FSa$estimate,3),round(FSa$lcl,3),round(FSa$ucl,3),round(FSa_variance$estimate,3),round(FSa_variance$lcl,3),round(FSa_variance$ucl),3)      
+            round(FSj$estimate,3),round(FSj$lcl,3),round(FSj$ucl,3),round(sqrt(FSj_variance$estimate),3),round(sqrt(FSj_variance$lcl),3),round(sqrt(FSj_variance$ucl),3),
+            round(FSa$estimate,3),round(FSa$lcl,3),round(FSa$ucl,3),round(sqrt(FSa_variance$estimate),3),round(sqrt(FSa_variance$lcl),3),round(sqrt(FSa_variance$ucl),3)      
     
     , dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
   
