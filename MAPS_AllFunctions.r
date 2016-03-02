@@ -2220,8 +2220,8 @@ for (t in 1:nt) {
     if(nc>1) lines(as.data.frame(FecResults_full[[2]])$mean.fec,col="red")
     plot(as.data.frame(FecResults_full[[1]])$beta.rD,type="l",xlab="iterations",ylab="beta.rD")
     if(nc>1)lines(as.data.frame(FecResults_full[[2]])$beta.rD,col="red")
-    plot(as.data.frame(FecResults_full[[1]])$env.stoch.sd,type="l",xlab="iterations",ylab="env.stoch.sd")
-    if(nc>1)lines(as.data.frame(FecResults_full[[2]])$env.stoch.sd,col="red")
+    plot(as.data.frame(FecResults_full[[1]])$env.stoch.sd.real,type="l",xlab="iterations",ylab="env.stoch.sd")
+    if(nc>1)lines(as.data.frame(FecResults_full[[2]])$env.stoch.sd.real,col="red")
     dev.off()
 
     filename <- paste(SPECIES_CODE,"BUGStrace_uncorrected.svg", sep="_")
@@ -2231,18 +2231,18 @@ for (t in 1:nt) {
     if(nc>1) lines(as.data.frame(FecResults_null[[2]])$mean.fec,col="red")
     plot(as.data.frame(FecResults_null[[1]])$beta.rD,type="l",xlab="iterations",ylab="beta.rD")
     if(nc>1)lines(as.data.frame(FecResults_null[[2]])$beta.rD,col="red")
-    plot(as.data.frame(FecResults_null[[1]])$env.stoch.sd,type="l",xlab="iterations",ylab="env.stoch.sd")
-    if(nc>1)lines(as.data.frame(FecResults_null[[2]])$env.stoch.sd,col="red")
+    plot(as.data.frame(FecResults_null[[1]])$env.stoch.sd.real,type="l",xlab="iterations",ylab="env.stoch.sd")
+    if(nc>1)lines(as.data.frame(FecResults_null[[2]])$env.stoch.sd.real,col="red")
     dev.off()
   
 
 	    # MCMC
 	  mean.fec.mcmc_full<-as.mcmc(ModResults_full$mean.fec)
 	  beta.rD.mcmc_full<-as.mcmc(ModResults_full$beta.rD)
-	  env.stoch.sd.mcmc_full<-as.mcmc(ModResults_full$env.stoch.sd)
+	  env.stoch.sd.mcmc_full<-as.mcmc(ModResults_full$env.stoch.sd.real)
     mean.fec.mcmc_null<-as.mcmc(ModResults_null$mean.fec)
     beta.rD.mcmc_null<-as.mcmc(ModResults_null$beta.rD)
-    env.stoch.sd.mcmc_null<-as.mcmc(ModResults_null$env.stoch.sd)
+    env.stoch.sd.mcmc_null<-as.mcmc(ModResults_null$env.stoch.sd.real)
   
     filename <- paste(SPECIES_CODE,"meanFec_BUGS_corrected.svg", sep="_")
 	  svg(file=filename,width=5,height=5)
@@ -2281,14 +2281,14 @@ for (t in 1:nt) {
 	  
 	  res_mean.fec_full<-c(min(ModResults_full$mean.fec), mean(ModResults_full$mean.fec)-1.96*sd(ModResults_full$mean.fec), median(ModResults_full$mean.fec), mean(ModResults_full$mean.fec), mean(ModResults_full$mean.fec)+1.96*sd(ModResults_full$mean.fec), max(ModResults_full$mean.fec))
     res_beta.rD_full<-c(min(ModResults_full$beta.rD), mean(ModResults_full$beta.rD)-1.96*sd(ModResults_full$beta.rD), median(ModResults_full$beta.rD), mean(ModResults_full$beta.rD), mean(ModResults_full$beta.rD)+1.96*sd(ModResults_full$beta.rD), max(ModResults_full$beta.rD))
-	  res_env.stoch.sd_full<-c(min(ModResults_full$env.stoch.sd), mean(ModResults_full$env.stoch.sd)-1.96*sd(ModResults_full$env.stoch.sd), median(ModResults_full$env.stoch.sd), mean(ModResults_full$env.stoch.sd), mean(ModResults_full$env.stoch.sd)+1.96*sd(ModResults_full$env.stoch.sd), max(ModResults_full$env.stoch.sd))
+	  res_env.stoch.sd_full<-c(min(ModResults_full$env.stoch.sd.real), mean(ModResults_full$env.stoch.sd.real)-1.96*sd(ModResults_full$env.stoch.sd.real), median(ModResults_full$env.stoch.sd.real), mean(ModResults_full$env.stoch.sd.real), mean(ModResults_full$env.stoch.sd.real)+1.96*sd(ModResults_full$env.stoch.sd.real), max(ModResults_full$env.stoch.sd.real))
     FTable_full<-data.frame(res_mean.fec_full, res_beta.rD_full, res_env.stoch.sd_full)
 	  row.names(FTable_full)<-c("min.","li(2.5% Qu.)","median","mean","ui(97.5% Qu.)","max.")
 	  colnames(FTable_full)<-c("mean_fec","beta.rD","env.stoch.sd")
   
     res_mean.fec_null<-c(min(ModResults_null$mean.fec), mean(ModResults_null$mean.fec)-1.96*sd(ModResults_null$mean.fec), median(ModResults_null$mean.fec), mean(ModResults_null$mean.fec), mean(ModResults_null$mean.fec)+1.96*sd(ModResults_null$mean.fec), max(ModResults_null$mean.fec))
     res_beta.rD_null<-c(min(ModResults_null$beta.rD), mean(ModResults_null$beta.rD)-1.96*sd(ModResults_null$beta.rD), median(ModResults_null$beta.rD), mean(ModResults_null$beta.rD), mean(ModResults_null$beta.rD)+1.96*sd(ModResults_null$beta.rD), max(ModResults_null$beta.rD))
-    res_env.stoch.sd_null<-c(min(ModResults_null$env.stoch.sd), mean(ModResults_null$env.stoch.sd)-1.96*sd(ModResults_null$env.stoch.sd), median(ModResults_null$env.stoch.sd), mean(ModResults_null$env.stoch.sd), mean(ModResults_null$env.stoch.sd)+1.96*sd(ModResults_null$env.stoch.sd), max(ModResults_null$env.stoch.sd))
+    res_env.stoch.sd_null<-c(min(ModResults_null$env.stoch.sd.real), mean(ModResults_null$env.stoch.sd.real)-1.96*sd(ModResults_null$env.stoch.sd.real), median(ModResults_null$env.stoch.sd.real), mean(ModResults_null$env.stoch.sd.real), mean(ModResults_null$env.stoch.sd.real)+1.96*sd(ModResults_null$env.stoch.sd.real), max(ModResults_null$env.stoch.sd.real))
     FTable_null<-data.frame(res_mean.fec_null, res_beta.rD_null, res_env.stoch.sd_null)
     row.names(FTable_null)<-c("min.","li(2.5% Qu.)","median","mean","ui(97.5% Qu.)","max.")
     colnames(FTable_null)<-c("mean_fec","beta.rD","env.stoch.sd")
