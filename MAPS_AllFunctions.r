@@ -2780,9 +2780,9 @@ SummaryMP <- function(Data, TrendData){
             round(corrected.Sjuv$estimate,3), round(Sjuv$lcl,3), round(Sjuv$ucl,3), round(sqrt(corrected.Var_Sjuv$estimate),3), round(sqrt(corrected.Var_Sjuv$lcl),3), round(sqrt(corrected.Var_Sjuv$ucl),3),
             round(F_mean$estimate,3), round(F_mean$lcl,3), round(F_mean$ucl,3), round(SD_F$estimate,3), round(SD_F$lcl,3), round(SD_F$ucl,3),
             round(FSj$estimate,3),round(FSj$lcl,3),round(FSj$ucl,3),round(sqrt(FSj_variance$estimate),3),round(sqrt(FSj_variance$lcl),3),round(sqrt(FSj_variance$ucl),3),
-            round(FSa$estimate,3),round(FSa$lcl,3),round(FSa$ucl,3),round(sqrt(FSa_variance$estimate),3),round(sqrt(FSa_variance$lcl),3),round(sqrt(FSa_variance$ucl),3)      
+            round(FSa$estimate,3),round(FSa$lcl,3),round(FSa$ucl,3),round(sqrt(FSa_variance$estimate),3),round(sqrt(FSa_variance$lcl),3),round(sqrt(FSa_variance$ucl),3))      
     
-    , dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME))
+    , dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
   
   if(CORRELATION==1){
     ToPopModelFile (
@@ -2895,7 +2895,6 @@ SummaryMP <- function(Data, TrendData){
              "), round(F_mean$estimate,3), round(F_beta_rD$estimate,3), round(MeanDens,3), round(SD_Dens,3))
       , dir=RESULTS_DIRECTORY, filename=POPMODELSUMMARY_FILENAME)
   }
-  
   
   ToPopModelFile (
     sprintf(("
