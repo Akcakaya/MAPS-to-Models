@@ -54,22 +54,22 @@ The organization of the document reflects the order of operations in the workflo
     ----------------------------------------------------------------------------------------
     GELMAN AND RUBIN'S CONVERGENCE DIAGNOSTIC - FECUNDITY CORRECTED FOR CAPTURE PROBABILITY
     
-    Upper C.I. of Mean fecundity: 1.0006138496015 
+    Upper C.I. of Mean fecundity: 1.0012125150395 
 
-    Upper C.I. of Slope of DD relationship for fecundity: 1.00070503889563 
+    Upper C.I. of Slope of DD relationship for fecundity: 1.00078660094394 
 
-    Upper C.I. of Temporal env variability (SD) in fecundity: 1.00076127251099 
+    Upper C.I. of Temporal env variability (SD) in fecundity: 1.00050628647217 
 
     *Approximate convergence is diagnosed when the upper limit is close to 1. 
     
     ----------------------------------------------------------------------------------------
     GELMAN AND RUBIN'S CONVERGENCE DIAGNOSTIC - FECUNDITY NOT CORRECTED FOR CAPTURE PROBABILITY
             
-    Upper C.I. of Mean fecundity: 1.00025577257503 
+    Upper C.I. of Mean fecundity: 1.00006402035779 
 
-    Upper C.I. of Slope of DD relationship for fecundity: 1.00126079340759 
+    Upper C.I. of Slope of DD relationship for fecundity: 1.00066546820646 
 
-    Upper C.I. of Temporal env variability (SD) in fecundity: 1.0009388071173 
+    Upper C.I. of Temporal env variability (SD) in fecundity: 1.00071068208563 
 
     *Approximate convergence is diagnosed when the upper limit is close to 1. 
 
@@ -86,9 +86,9 @@ The organization of the document reflects the order of operations in the workflo
  7. Intercept of density-dependence relationship for survival in logit scale: -0.1108509 
  8. Juvenile effect in the density-dependence function for survival in logit scale: -1.9062532 
  9. Slope of density-dependence relationship for survival in logit scale: -0.0402717 
- 10. Mean fecundity: 2.3389852 
- 11. Temporal variability in fecundity: 0.157969634421524 
- 12. Slope of density-dependence relationship for fecundity in log scale: -0.048282856928 
+ 10. Mean fecundity: 2.3383796 
+ 11. Temporal variability in fecundity: 1.14009326575225 
+ 12. Slope of density-dependence relationship for fecundity in log scale: -0.048783680182 
  13. Mean of MAPS density: 1.55952252135248 
  14. SD of MAPS density: 1.2971600526728 
  15. Maximum MAPS density above which ceiling-type density-dependence will be assumed: 7.84711726548853 
