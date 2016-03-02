@@ -2011,7 +2011,7 @@ for (t in 1:nt) {
 	  Mod_full <- bugs(data=Data_full, inits=inits_full, 
 				  parameters.to.save=c("mean.fec", "env.stoch.sd.real", "est.mean.fec", "beta.rD", "Adultp", "Juvp"), 
 				  model.file="fecundity_MAPS_full.bug", n.thin=nt, n.chains=nc, n.burnin=nb, n.iter=ni, 
-          bugs.directory=BUGSdir, codaPkg=TRUE, over.relax=T, debug=TRUE)   
+          bugs.directory=BUGSdir, codaPkg=TRUE, over.relax=T, debug=FALSE)   
 	  
       # read in results
 	  FecResults_full = read.bugs(Mod_full)
@@ -2147,7 +2147,7 @@ for (t in 1:nt) {
 	  Mod_null <- bugs(data=Data_null, inits=inits_null, 
 				  parameters.to.save=c("mean.fec", "env.stoch.sd.real", "Juvs.pred","beta.rD", "est.mean.fec"), 
 				  model.file="fecundity_MAPS_null.bug", n.thin=nt, n.chains=nc, n.burnin=nb,	n.iter=ni, 
-          bugs.directory=BUGSdir, codaPkg=TRUE, over.relax=T, debug=TRUE)
+          bugs.directory=BUGSdir, codaPkg=TRUE, over.relax=T, debug=FALSE)
 	  
 	    # Read the results back to R
 	  FecResults_null = read.bugs(Mod_null)
