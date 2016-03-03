@@ -224,7 +224,8 @@ This file contains a summary of the population model resulting from the analysis
   * Survival rate does not depend on age after the first year.
   * Average fecundity is the same for juveniles (1 year olds) and adults (2+ year olds).
   * Only females are modeled.
-  * Fecundity (F) is the number of daughters per female.
+  * Fecundity (F) is the number of daughters per female, estimated from juvenile:adult ratio assuming 1:1 sex ratio.
+  * All populations have the same stage matrix, the same standard deviations, and the same density dependence function (thus a single model is created).
   * The stage matrix has the following structure:
 
  \t\t\t|------|-------| 
