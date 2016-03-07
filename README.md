@@ -26,7 +26,7 @@ For examples of these data files, see the [dataset folder] (https://github.com/A
 
 (3) Intermediate results file: a text file that contains all output and intermediate results created during the analysis.
 
-(4) MP files: input files for RAMAS Metapop and [RAMAS GIS](http://ramas.com/software.htm) Software.  Three input files are created.  One includes the best estimates of all parameters of the population model.  Two other files include the lower and upper bounds of the parameters; these can be used with the R package `demgsa` [(github.com/mlammens/demgsa)](https://github.com/mlammens/demgsa) to perform a global sensitivity analysis (Aiello-Lammens & Akçakaya 2015). Note: These models use the user-defined density-dependence function [AvianDD.dll](https://github.com/Akcakaya/MAPS-to-Models/blob/master/AvianDD.dll), whose source code is [AvianDD.DPR](https://github.com/Akcakaya/MAPS-to-Models/blob/master/AvianDD.DPR).
+(4) MP files: input files for RAMAS Metapop and [RAMAS GIS](http://ramas.com/software.htm) Software.  Three input files are created.  One includes the best estimates of all parameters of the population model.  Two other files include the lower and upper bounds of the parameters; these can be used with the R package `demgsa` [(github.com/mlammens/demgsa)](https://github.com/mlammens/demgsa) to perform a global sensitivity analysis (Aiello-Lammens & Akçakaya 2016). Note: These models use the user-defined density-dependence function [AvianDD.dll](https://github.com/Akcakaya/MAPS-to-Models/blob/master/AvianDD.dll), whose source code is [AvianDD.DPR](https://github.com/Akcakaya/MAPS-to-Models/blob/master/AvianDD.DPR).
 
 ## Getting started
 
@@ -37,7 +37,7 @@ For examples of these data files, see the [dataset folder] (https://github.com/A
 (3) Follow other instructions in `MAPS_MainScript.r`, modify the settings as needed, and run this script in R.
 
 ## References
-Aiello-Lammens, M.A. and H.R. Akçakaya. 2016. Using global sensitivity analysis of demographic models for ecological impact assessment (in review).
+Aiello-Lammens, M.A. and H.R. Akçakaya. 2016. Using global sensitivity analysis of demographic models for ecological impact assessment. *Conservation Biology* (in review).
 
-Ryu, H.Y., K.T. Shoemaker, É. Kneip, A. Pidgeon, P. Heglund, B. Bateman, W. Thogmartin, and H.R. Akçakaya. 2016.  Developing population models with data from marked individuals. *Biological Conservation* (in press).
+Ryu, H.Y., K.T. Shoemaker, É. Kneip, A.M. Pidgeon, P.J. Heglund, B.L. Bateman, W.E. Thogmartin, and H.R. Akçakaya. 2016.  Developing population models with data from marked individuals. *Biological Conservation* (in press).
 
