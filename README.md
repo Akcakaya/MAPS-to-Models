@@ -2,7 +2,7 @@
 
 `MAPS-to-Models` is an R script that provides functions to analyze data from marked individuals (mark-recapture data) to develop a stage-structured, stochastic, density dependent population model.
 
-For more information, please see Ryu et al. (2015), who describe the methods and demonstrate their use with data from the MAPS [(Monitoring Avian Productivity and Survivorship)] (http://www.birdpop.org/pages/maps.php) program (hence the "MAPS" in `MAPS-to-Models`).
+For more information, please see Ryu et al. (2016), who describe the methods and demonstrate their use with data from the MAPS [(Monitoring Avian Productivity and Survivorship)] (http://www.birdpop.org/pages/maps.php) program (hence the "MAPS" in `MAPS-to-Models`).
 
 The program allows estimating survival rates; fecundities; density dependence in survival rate; density dependence in fecundity; temporal variability in survival rate; temporal variability in fecundity.  Main features include (1) estimating true survival based on apparent survival estimates and population trend estimates; (2) fecundity as an unbiased estimate of juvenile:adult ratio by using the relative capture probabilities of juveniles and adults; (3) estimating density dependence in survival and fecundity; (4) estimating natural temporal variability in survival and fecundity (excluding sampling variability); (5) creating ready-to-run demographic model files; (6) incorporating uncertainties and preparing the files necessary for a global sensitivity analysis.
 
@@ -15,7 +15,7 @@ The program allows estimating survival rates; fecundities; density dependence in
 
 (3) A file that shows the correspondance between stations and populations. Often, there would be multiple banding stations within each biological population (or subpopulation) of the species.  This file allows the user to group stations into populations.
 
-For examples of these data files, see the [dataset folder] (https://github.com/Akcakaya/MAPS-to-Models/tree/master/Public%20dataset), which include the data used in Ryu et al. (2015).
+For examples of these data files, see the [dataset folder] (https://github.com/Akcakaya/MAPS-to-Models/tree/master/Public%20dataset), which include the data used in Ryu et al. (2016).
 
 ## Program output
 `MAPS-to-Models` creates the following files that include the results of the analysis:
@@ -37,7 +37,7 @@ For examples of these data files, see the [dataset folder] (https://github.com/A
 (3) Follow other instructions in `MAPS_MainScript.r`, modify the settings as needed, and run this script in R.
 
 ## References
-Aiello-Lammens, M.A. and H.R. Akçakaya. 2015. New approaches to global sensitivity analysis of demographic models with applications to impact assessment (in review).
+Aiello-Lammens, M.A. and H.R. Akçakaya. 2016. Using global sensitivity analysis of demographic models for ecological impact assessment (in review).
 
-Ryu, H.Y., K.T. Shoemaker, É. Kneip, A. Pidgeon, P. Heglund, B. Bateman, W. Thogmartin, H.R. Akçakaya. 2015.  Developing population models with data from marked individuals (in review).
+Ryu, H.Y., K.T. Shoemaker, É. Kneip, A. Pidgeon, P. Heglund, B. Bateman, W. Thogmartin, and H.R. Akçakaya. 2016.  Developing population models with data from marked individuals. *Biological Conservation* (in press).
 
