@@ -37,7 +37,7 @@ For examples of these data files, see the [dataset folder] (https://github.com/A
 (3) Follow other instructions in `MAPS_MainScript.r`, modify the settings as needed, and run this script in R.
 
 ## References
-Aiello-Lammens, M.A. and H.R. Akçakaya. 2016. Using global sensitivity analysis of demographic models for ecological impact assessment. *Conservation Biology* (in press).
+Aiello-Lammens, M.A. and H.R. Akçakaya. 2016. [Using global sensitivity analysis of demographic models for ecological impact assessment](http://onlinelibrary.wiley.com/doi/10.1111/cobi.12726/abstract). *Conservation Biology*  31: 116–125.
 
-Ryu, H.Y., K.T. Shoemaker, É. Kneip, A.M. Pidgeon, P.J. Heglund, B.L. Bateman, W.E. Thogmartin, and H.R. Akçakaya. 2016.  [Developing population models with data from marked individuals](http://authors.elsevier.com/a/1Sm4n_9CgPwpw). *Biological Conservation* 197: 190–199.
+Ryu, H.Y., K.T. Shoemaker, É. Kneip, A.M. Pidgeon, P.J. Heglund, B.L. Bateman, W.E. Thogmartin, and H.R. Akçakaya. 2016.  [Developing population models with data from marked individuals](http://www.sciencedirect.com/science/article/pii/S000632071630074X). *Biological Conservation* 197: 190–199.
 
